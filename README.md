@@ -1,2 +1,2 @@
-# drmng
+# DRMng
 DotD Raids Manager next gen

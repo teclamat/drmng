@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.15
+// @version        	2.0.16
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -17,8 +17,9 @@
 if(window.location.host == "www.kongregate.com") {
     if(window.top == window.self) {
         function main() {
+            window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '15', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '16', name: 'DotD Raids Manager Next Gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -239,7 +240,11 @@ if(window.location.host == "www.kongregate.com") {
                         }
                     },
                     Poke: {
-                        pokeBodyPlace: ['on the cheek','on the navel','in the nose','in the belly button','in the rib cage','in a really ticklish spot','square on the forehead','with a wet willy in the ear','on the arm','on the shoulder','on the chest','on the leg','in the face','on the neck','in the stomach','up the butt'],
+                        pokeBodyPlace:    ['on the cheek', 'on the navel', 'in the nose', 'in the belly button',
+                                           'in the rib cage', 'in a really ticklish spot', 'square on the forehead',
+                                           'with a wet willy in the ear', 'on the arm', 'on the shoulder',
+                                           'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
+                                           'up the butt'],
                         getPokeBodyPlace: function() { return this.pokeBodyPlace[DRMng.Util.getRand(14)]; },
                         generate: function() {
                             let txt = '';
@@ -256,18 +261,45 @@ if(window.location.host == "www.kongregate.com") {
                         }
                     },
                     Hit: {
-                        strikeAction: ['clobber','subdue','hit','bash','pound','pelt','hammer','wallop','swat','punish','pummel','strike','beat'],
-                        leapingAction: ['vaults','surges','hurdles','bounds','pounces','storms','leaps','bolts','stampedes','sprints','dashes','charges','lunges'],
-                        aimModifier: ['a well placed','a pin-point accurate','a targeted','an aimed','a','a','a','a','a','a','a'],
-                        wrestlingMove: [' haymaker punch',' kitchen sink to the midsection',' jumping DDT',' cross body attack',' flying forearm',' low dropkick',' jumping thigh kick',' roundhouse',' left and right hook combo',' jab and middle kick combo',' spinning backfist and shin kick combo',' delayed backbrain wheel kick',' somersault kick to an uppercut combo',' jab to the face',' stomping hook punch',' palm thrust to the solar plexus',' shin kick',' side headbutt',' fast lowerbody roundhouse kick',' fast upperbody roundhouse kick','n uppercut palm strike','n uppercut to midsection jab combo',' downward chop'],
-                        meal: ['midmorning snack','midnight snack','supper','breakfast','brunch','2 o\'clock tea time','midafternoon snack','lunch'],
-                        throwAction: ['tosses','propels','throws','catapults','hurls','launches'],
-                        crying: ['shouting','screaming','hollering','yelling','crying out'],
-                        sportsWeapon: ['cricket paddle','lacrosse stick','hockey stick','croquet mallet','baseball bat','yoga ball','barbell','folding lawn chair','caber','shot put','bowling ball','lantern','tennis racket'],
-                        midsectionStrikePlace: ['midsection','solar plexus','chest','abdomen','sternum'],
-                        randomItemWeapon: ['a giant frozen trout','an inflatable duck','a waffle iron','a sponge brick','a board of education','an unidentified implement of mayhem and destruction','a rubber ducky *SQUEAK*','a rolling pin','a tire iron','a sock full of oranges','a slinky, a slink [fun for a girl or a boy]','a chinese finger puzzle','a whip of wet noodles','a humungous spicey italian meatstick','a giant garlic dill','an ACME hammer of pain'],
-                        withDescriptors: ['with lightning reflexes, ','with finesse and poise, ','with mediocre skill, ','with half-cocked attitude, ','with fervor and oomph, ','with vitality and gusto, ','with ambition and enthusiasm, ','','','',''],
-                        strikeActionVerb: ['clobbers','subdues','hits','bashes','pounds','pelts','hammers','wallops','swats','punishes','pummels','strikes','assaults','beats'],
+                        strikeAction:          ['clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop',
+                                                'swat', 'punish', 'pummel', 'strike', 'beat'],
+                        leapingAction:         ['vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps',
+                                                'bolts', 'stampedes', 'sprints', 'dashes', 'charges', 'lunges'],
+                        aimModifier:           ['a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a',
+                                                'a', 'a', 'a', 'a', 'a', 'a'],
+                        wrestlingMove:         [' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT',
+                                                ' cross body attack', ' flying forearm', ' low dropkick',
+                                                ' jumping thigh kick', ' roundhouse', ' left and right hook combo',
+                                                ' jab and middle kick combo', ' spinning backfist and shin kick combo',
+                                                ' delayed backbrain wheel kick',
+                                                ' somersault kick to an uppercut combo', ' jab to the face',
+                                                ' stomping hook punch', ' palm thrust to the solar plexus',
+                                                ' shin kick', ' side headbutt', ' fast lowerbody roundhouse kick',
+                                                ' fast upperbody roundhouse kick', 'n uppercut palm strike',
+                                                'n uppercut to midsection jab combo', ' downward chop'],
+                        meal:                  ['midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch',
+                                                '2 o\'clock tea time', 'midafternoon snack', 'lunch'],
+                        throwAction:           ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'],
+                        crying:                ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'],
+                        sportsWeapon:          ['cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet',
+                                                'baseball bat', 'yoga ball', 'barbell', 'folding lawn chair', 'caber',
+                                                'shot put', 'bowling ball', 'lantern', 'tennis racket'],
+                        midsectionStrikePlace: ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'],
+                        randomItemWeapon:      ['a giant frozen trout', 'an inflatable duck', 'a waffle iron',
+                                                'a sponge brick', 'a board of education',
+                                                'an unidentified implement of mayhem and destruction',
+                                                'a rubber ducky *SQUEAK*', 'a rolling pin', 'a tire iron',
+                                                'a sock full of oranges', 'a slinky, a slink [fun for a girl or a boy]',
+                                                'a chinese finger puzzle', 'a whip of wet noodles',
+                                                'a humungous spicey italian meatstick', 'a giant garlic dill',
+                                                'an ACME hammer of pain'],
+                        withDescriptors:       ['with lightning reflexes, ', 'with finesse and poise, ',
+                                                'with mediocre skill, ', 'with half-cocked attitude, ',
+                                                'with fervor and oomph, ', 'with vitality and gusto, ',
+                                                'with ambition and enthusiasm, ', '', '', '', ''],
+                        strikeActionVerb:      ['clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers',
+                                                'wallops', 'swats', 'punishes', 'pummels', 'strikes', 'assaults',
+                                                'beats'],
                         generate: function() {
                             let txt = '';
                             switch(DRMng.Util.getRand(7)) {
@@ -283,12 +315,20 @@ if(window.location.host == "www.kongregate.com") {
                         }
                     },
                     Slap: {
-                        slapWeapon: ['white glove','rubber chicken','well placed backhand','failing Euryino','piece of moldy pizza','big dildo','loaf of french bread','smile of devious pleasure','dead >0))>-<','left over chicken drumstick','limp and slightly dirty french fry','brick of moldy cheese','tickle me Elmo','grilled cheese'],
-                        targetAction: ['deals','aims','inflicts','releases','dispatches','discharges','delivers','unleashes'],
-                        sassySynonym: ['an audacious','an impudent','a bold','an overbold','an arrant','a brassy','a sassy'],
-                        place: [['side','\'s head.'],['face','.'],['cheek','.']],
-                        leapingAction: ['vaults','surges','hurdles','bounds','pounces','storms','leaps','bolts','stampedes','sprints','dashes','charges','lunges'],
-                        leadSpeed: [' sudden',' spry','n abrupt','n energetic',' hasty','n agile','n accelerated',' quick'],
+                        slapWeapon:    ['white glove', 'rubber chicken', 'well placed backhand', 'failing Euryino',
+                                        'piece of moldy pizza', 'big dildo', 'loaf of french bread',
+                                        'smile of devious pleasure', 'dead >0))>-<', 'left over chicken drumstick',
+                                        'limp and slightly dirty french fry', 'brick of moldy cheese', 'tickle me Elmo',
+                                        'grilled cheese'],
+                        targetAction:  ['deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers',
+                                        'unleashes'],
+                        sassySynonym:  ['an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy',
+                                        'a sassy'],
+                        place:         [['side', '\'s head.'], ['face', '.'], ['cheek', '.']],
+                        leapingAction: ['vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts',
+                                        'stampedes', 'sprints', 'dashes', 'charges', 'lunges'],
+                        leadSpeed:     [' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile',
+                                        'n accelerated', ' quick'],
                         generate: function() {
                             let txt = '';
                             switch(DRMng.Util.getRand(2)) {
@@ -334,6 +374,9 @@ if(window.location.host == "www.kongregate.com") {
                             let keys = Object.keys(this.local);
                             for (let i = 0; i < keys.length; ++i)
                                 if (data.hasOwnProperty(keys[i])) this.local[keys[i]] = data[keys[i]];
+                            keys = Object.keys(data);
+                            for (let i = 0; i < keys.length; ++i)
+                                if (!this.local.hasOwnProperty(keys[i])) this.local[keys[i]] = data[keys[i]];
                         }
                         else this.saveLocal();
                         this.local.raidKeys = Object.keys(this.local.raidData);
@@ -343,7 +386,7 @@ if(window.location.host == "www.kongregate.com") {
                         this.saveLocal();
                     },
                     saveLocal: function() {
-                        localStorage['DRMng'] = JSON.stringify(DRMng.Config.local);
+                        localStorage['DRMng'] = JSON.stringify(this.local);
                     }
                 },
                 Kong: {
@@ -497,9 +540,9 @@ if(window.location.host == "www.kongregate.com") {
                                     d.formatted_timestamp = new Date(d.timestamp).format("mmm d, HH:MM");
 
                                     let raid = /(^.*?)(https?...www.kongregate.com.+?kv_action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(b);
+                                    let rData = null, cData = {};
                                     if (raid) {
-                                        let rData = DRMng.Util.getRaidFromUrl(raid[2], a);
-                                        let cData = {};
+                                        rData = DRMng.Util.getRaidFromUrl(raid[2], a);
                                         if (rData) {
                                             let server = DRMng.Config.local.server.toLowerCase();
                                             b = raid[1] + raid[3];
@@ -843,6 +886,40 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         else setTimeout(DRMng.Kong.forceGameLoad, 250);
                     },
+                    CSS: {
+                        rules: {},
+                        elem: null,
+                        add: function(alias, name, value) {
+                            this.rules[alias] = {name: name, value: value};
+                            this.compile(this.rules[alias]);
+                        },
+                        del: function(alias) {
+                            if (this.rules[alias] !== undefined) delete this.rules[alias];
+                            this.compile();
+                        },
+                        rpl: function(alias, name, value) {
+                            if (this.rules[alias] !== undefined) delete this.rules[alias];
+                            this.rules[alias] = {name: name, value: value};
+                            this.compile();
+                        },
+                        compile: function(obj) {
+                            if (this.elem === null) {
+                                this.elem = document.createElement('style');
+                                this.elem.setAttribute('type', 'text/css');
+                                document.head.appendChild(this.elem);
+                            }
+                            if (obj) this.elem.innerHTML += obj.name + " { " + obj.value + " }\n";
+                            else {
+                                let content = "";
+                                let k = Object.keys(this.rules);
+                                for (let i = 0, l = k.length; i < l; ++i) {
+                                    if (this.rules.hasOwnProperty(k[i]))
+                                        content += this.rules[k[i]].name + " { " + this.rules[k[i]].value + " }\n";
+                                }
+                                this.elem.innerHTML = content;
+                            }
+                        },
+                    },
                     init: function() {
                         if (document.body.className.indexOf('premium_user') === -1)
                             document.body.className += ' premium_user';
@@ -891,7 +968,6 @@ if(window.location.host == "www.kongregate.com") {
 					div#maingamecontent table.game_table { position: inherit; }\
 					/* TO RESIZER! td#gameholder, div#game { width: 760px !important; overflow: hidden; }*/\
 					div#headerwrap {\
-						position: fixed;\
 						width: 100%;\
 						z-index: 10000;\
 						background-color: rgba(0,0,0,0.75);\
@@ -1523,8 +1599,6 @@ if(window.location.host == "www.kongregate.com") {
 					div.chat_message_window table.raidinfo td:first-child,\
 					div.chat_message_window table.raidinfo tr:first-child td { font-weight: bold }\
 					\
-					/* Temporary disable lower body (forum etc) */\
-					div.game_page_wrap { display: none }\
 					";
 
                         DRMng.Util.cssStyle('DRMng_kongCSS',kongCSS);
@@ -1550,7 +1624,8 @@ if(window.location.host == "www.kongregate.com") {
                     checkAndSend: function() {
                         let link = document.getElementById('DRMng_submitRaidLink');
                         let r = DRMng.Util.getRaidFromUrl(link.innerHTML, DRMng.UserManager.user.name);
-                        if (r && !isNaN(+r.id) && r.hash.length === 10 && ['Kasan','Elyssa'][r.pid] === DRMng.Config.local.server) {
+                        if (r && !isNaN(+r.id) && r.hash.length === 10 && ['Kasan','Elyssa'][r.pid] === DRMng.Config.local.server)
+                        {
                             let delay = parseInt(document.getElementById('DRMng_submitDelay').value);
                             let delayBase = document.querySelector('[group=DRMng_submitDelay].crimson').innerHTML;
                             //noinspection FallThroughInSwitchStatementJS
@@ -1661,22 +1736,37 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     processJoin: function(id, text) {
                         let status = 0;
-                        if (/successfully (re-)?joined/i.test(text)) { setTimeout(this.setVisited.bind(this,id),1); status = 1; }
-                        else if (/already completed/i.test(text)) { setTimeout(this.remove.bind(this, id, true), 1); status = 2; }
-                        else if (/already a member/i.test(text)) { setTimeout(this.setVisited.bind(this, id), 1); status = 3; }
-                        else if (/not a member of the guild/i.test(text)) { setTimeout(this.remove.bind(this, id), 1); status = 4; }
-                        else if (/(invalid|find) raid (hash|ID)/i.test(text)) { setTimeout(this.remove.bind(this, id), 1); status = 5; }
+                        if (/successfully (re-)?joined/i.test(text)) {
+                            setTimeout(this.setVisited.bind(this, id), 1);
+                            status = 1;
+                        }
+                        else if (/already completed/i.test(text)) {
+                            setTimeout(this.remove.bind(this, id, true), 1);
+                            status = 2;
+                        }
+                        else if (/already a member/i.test(text)) {
+                            setTimeout(this.setVisited.bind(this, id), 1);
+                            status = 3;
+                        }
+                        else if (/not a member of the guild/i.test(text)) {
+                            setTimeout(this.remove.bind(this, id), 1);
+                            status = 4;
+                        }
+                        else if (/(invalid|find) raid (hash|ID)/i.test(text)) {
+                            setTimeout(this.remove.bind(this, id), 1);
+                            status = 5;
+                        }
                         return status;
                     },
                     joinResponse: function(e) {
                         let data = JSON.parse(e.data);
                         if (data && data.status === 200 && data.responseText && data.url) {
                             let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
-                            status = ['Unknown','Success','Dead','Already in','Wrong Guild','Invalid'][status];
                             let name = DRMng.Config.local.raidData[data.ext.boss];
+                            status = ['Unknown','Success','Dead','Already in','Wrong Guild','Invalid'][status];
                             name = name ? name.sName : data.ext.boss;
                             DRMng.Raids.joinMsg('Joining ' + name + ': ' + status);
-                            setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids),1);
+                            setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
                         }
                     },
                     joinMultiResponse: function(e) {
@@ -1702,13 +1792,14 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     getDiff: function(d) {
                         let diff = d ? d.slice(1) : 0;
-                        diff = isNaN(parseInt(diff)) ? ({'n': 1, 'h': 2, 'l': 3, 'nm': 4, 'nnm': 5})[diff.toLowerCase()] || 0 : parseInt(diff);
+                        diff = isNaN(parseInt(diff)) ?
+                            ({'n': 1, 'h': 2, 'l': 3, 'nm': 4, 'nnm': 5})[diff.toLowerCase()] || 0 : parseInt(diff);
                         return diff;
                     },
                     processFilter: function(filterTxt, loading) {
-                        console.info('[DRMng] Raw filter data:',filterTxt);
-                        if (DRMng.Raids.isAuto) DRMng.Raids.switchAutoJoin();
+                        window.DEBUG && console.info('[DRMng] Raw filter data:', filterTxt);
                         let server = DRMng.Config.local.server.toLowerCase();
+                        if (DRMng.Raids.isAuto) DRMng.Raids.switchAutoJoin();
                         if (loading) filterTxt = DRMng.Config.local.filterString[server];
                         else {
                             DRMng.Config.local.filterString[server] = filterTxt;
@@ -1732,7 +1823,8 @@ if(window.location.host == "www.kongregate.com") {
                                         d = DRMng.Config.local.filterData['z' + i];
                                         if (d) raids = raids.concat(d);
                                     }
-                                    else raids = p[2] === 'all' ? Object.keys(DRMng.Config.local.raidData) : DRMng.Config.local.filterData[p[2]];
+                                    else raids = p[2] === 'all' ?
+                                        Object.keys(DRMng.Config.local.raidData) : DRMng.Config.local.filterData[p[2]];
 
                                     if (raids) {
                                         diff = this.getDiff(p[3]);
@@ -1778,12 +1870,13 @@ if(window.location.host == "www.kongregate.com") {
                                 }
                             }
 
-
-                        console.info("Add magic filters:", filters.add.magic.join(', '));
-                        console.info("Remove magic filters:", filters.rem.magic.join(', '));
-                        console.info("Add raid filters:", filters.add.raid.join(', '));
-                        console.info("Remove raid filters:", filters.rem.raid.join(', '));
-                        //console.info("Merged raid filters:", result.join(', .'));
+                        if (window.DEBUG) {
+                            console.info("Add magic filters:", filters.add.magic.join(', '));
+                            console.info("Remove magic filters:", filters.rem.magic.join(', '));
+                            console.info("Add raid filters:", filters.add.raid.join(', '));
+                            console.info("Remove raid filters:", filters.rem.raid.join(', '));
+                            //console.info("Merged raid filters:", result.join(', .'));
+                        }
 
                         // joining filter
                         this.filter = '@' + result.join('@');
@@ -1796,7 +1889,7 @@ if(window.location.host == "www.kongregate.com") {
                     setChat: function(id,cls) {
                         let els = document.getElementsByClassName(id);
                         for (let i = 0; i < els.length; ++i)
-                            if (els[i].className.indexOf(cls) === -1) els[i].className += ' '+cls;
+                            if (els[i].className.indexOf(cls) === -1) els[i].className += ' ' + cls;
                     },
                     setVisited: function(id, drop) {
                         let server = DRMng.Config.local.server.toLowerCase();
@@ -1811,21 +1904,17 @@ if(window.location.host == "www.kongregate.com") {
                                 if (el) el.className += ' visited';
                             }
                         }
-                        if (!drop) this.setChat(id,'visited');
+                        if (!drop) this.setChat(id, 'visited');
                         DRMng.Config.saveLocal();
                     },
                     comp: function(a, b) { return a.hp - b.hp; },
                     _setComp: function(field) {
                         switch(field) {
                             case 'id':
-                                this.comp = function (a, b) {
-                                    return parseInt(a.id) - parseInt(b.id)
-                                };
+                                this.comp = function (a, b) { return parseInt(a.id) - parseInt(b.id) };
                                 break;
                             case 'health':
-                                this.comp = function (a, b) {
-                                    return a.hp - b.hp;
-                                };
+                                this.comp = function (a, b) { return a.hp - b.hp; };
                                 break;
                             case 'name': /* by name then by hp */
                                 this.comp = function (a, b) {
@@ -1833,20 +1922,17 @@ if(window.location.host == "www.kongregate.com") {
                                     let bn = b.sname || b.boss;
                                     if (an < bn) return -1;
                                     if (an > bn) return 1;
-                                    return a.hp-b.hp;
+                                    return a.hp - b.hp;
                                 };
                                 break;
                             case 'time':
-                                this.comp = function (a, b) {
-                                    return  a.createtime - b.createtime;
-                                };
+                                this.comp = function (a, b) { return  a.createtime - b.createtime; };
                                 break;
                             default:
                                 field = 'health';
-                                this.comp = function (a, b) {
-                                    return a.hp - b.hp;
-                                };
+                                this.comp = function (a, b) { return a.hp - b.hp; };
                                 DRMng.Config.local.sortBy = field;
+                                DRMng.Config.saveLocal();
                         }
                     },
                     setComp: function(field) {
@@ -1870,8 +1956,7 @@ if(window.location.host == "www.kongregate.com") {
                         return i !== -1 ? this.all[i] : null;
                     },
                     getIdx: function(id) {
-                        for (let i = 0, len = this.all.length; i < len; ++i)
-                            if (this.all[i].id == id) return i;
+                        for (let i = 0, len = this.all.length; i < len; ++i) if (this.all[i].id == id) return i;
                         return -1;
                     },
                     sort: function() {
@@ -1884,23 +1969,27 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         this.bootstrap = true;
                         this.server = DRMng.Config.local.server.toLowerCase();
-                        let newVisited = [], rd, hFilter;
                         this.all = [];
+                        let newVisited = [], rd, hFilter;
+
                         for (let i = 0, l = val.length; i < l; ++i)
                         {
                             hFilter = DRMng.Config.local.filterRaids[this.server][val[i].boss] || null;
-                            if (hFilter === null || !hFilter[val[i].diff-1]) {
+                            if (hFilter === null || !hFilter[val[i].diff-1])
+                            {
                                 val[i].createtime = new Date(val[i].createtime).getTime();
-                                if (DRMng.Config.local.visited[this.server].indexOf(val[i].id) !== -1) {
+                                if (DRMng.Config.local.visited[this.server].indexOf(val[i].id) !== -1)
+                                {
                                     newVisited.push(val[i].id);
                                     val[i].visited = true;
                                     this.setChat(val[i].id, 'visited');
                                 }
                                 rd = DRMng.Config.local.raidData[val[i].boss];
-                                val[i].isFull = !!(rd && val[i].participants && rd.maxPlayers == val[i].participants);
+                                val[i].isFull = rd && val[i].participants && rd.maxPlayers == val[i].participants;
                                 this.all.push(val[i]);
                             }
                         }
+
                         DRMng.Config.local.visited[this.server] = newVisited;
 
                         this._setComp(DRMng.Config.local.sortBy);
@@ -1911,7 +2000,7 @@ if(window.location.host == "www.kongregate.com") {
                         for (let i = 0, l = this.all.length; i < l; ++i) DRMng.UI.addRaidField(this.all[i]);
 
                         DRMng.UI.displayStatus();
-                        setTimeout(this.prepareJoining.bind(this),100);
+                        setTimeout(this.prepareJoining.bind(this), 100);
                         this.bootstrap = false;
                     },
                     insert: function(raid) {
@@ -1932,7 +2021,9 @@ if(window.location.host == "www.kongregate.com") {
                                 DRMng.UI.addRaidField(raid, idx);
                                 this.count++;
                                 DRMng.UI.displayStatus();
-                                if (!raid.visited && !raid.isFull && this.filter.indexOf('@' + raid.boss + '_' + raid.diff) !== -1) {
+                                if (!raid.visited && !raid.isFull &&
+                                    this.filter.indexOf('@' + raid.boss + '_' + raid.diff) !== -1)
+                                {
                                     if (this.isJoining) setTimeout(this.pushToQueue.bind(this, raid), 1);
                                     else setTimeout(this.prepareJoining.bind(this), 1);
                                 }
@@ -1958,6 +2049,7 @@ if(window.location.host == "www.kongregate.com") {
                                 setTimeout(this.prepareJoining.bind(this), 10);
                         }
                         DRMng.UI.removeRaidField(id);
+
                         // visited strip
                         let server = DRMng.Config.local.server.toLowerCase();
                         i = DRMng.Config.local.visited[server].indexOf(id);
@@ -1965,6 +2057,7 @@ if(window.location.host == "www.kongregate.com") {
                         this.setChat(id, 'dead');
                         this.setVisited(id, true);
                         DRMng.UI.displayStatus();
+
                         if (serverNuke) DRMng.Engine.client.emit('service', { action: 'raidNuke', data: id });
 
                         this.locked = false;
@@ -1975,28 +2068,26 @@ if(window.location.host == "www.kongregate.com") {
                             return;
                         }
                         this.locked = true;
+
                         let r = this.get(raid.id);
-                        let doLog = false;
-                        if (r && r.isFull) {
-                            console.log("Updating:",raid,r);
-                            doLog = true;
-                        }
-                        if (r && !this.deadCache.hasOwnProperty(raid.id)) {
+                        if (r && !this.deadCache.hasOwnProperty(raid.id))
+                        {
                             let keys = ['hp','participants','m1','m2','m3','m4','m5','m6'];
+                            let rd = DRMng.Config.local.raidData[raid.boss], markFull = false;
                             if (full) keys = keys.concat(['mnum','size']);
                             r = DRMng.Util.copyFields(raid,r,keys);
-                            let rd = DRMng.Config.local.raidData[raid.boss];
-                            let markFull = false;
-                            if (!r.isFull) {
-                                r.isFull = !!(rd && r.participants && rd.maxPlayers == r.participants);
-                                if (r.isFull) markFull = true;
+
+                            if (!r.isFull)
+                            {
+                                r.isFull = rd && r.participants && rd.maxPlayers == r.participants;
+                                markFull = r.isFull;
                             }
 
-                            if (doLog) console.log("Updated:",r);
                             // remove
                             let i = this.getIdx(raid.id);
                             if (i !== -1) this.all.splice(i, 1);
                             DRMng.UI.removeRaidField(raid.id);
+
                             // insert
                             i = this.location(r) + 1;
                             this.all.splice(i, 0, r);
@@ -2024,74 +2115,56 @@ if(window.location.host == "www.kongregate.com") {
                         if (c === 0) return p;
                         if (c > 0) return this.location(val, p, e);
                     },
-                    init: function() {
-                        setTimeout(this.cleanDeadCache, 180000);
-
-                    }
+                    init: function() { setTimeout(this.cleanDeadCache, 180000); }
                 },
                 UserManager: {
                     numTries: 0,
                     knownUsers: {},
-                    user: {
-                        qualified: false,
-                        ID: null,
-                        name: null,
-                        IGN: null,
-                        authToken: null,
-                        guild: null
+                    user: { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null },
+                    getCrucialUserData: function () {
+                        if (typeof active_user === 'object' && active_user.username().toLowerCase() !== 'guest') {
+                            DRMng.UserManager.user.ID = active_user.id();
+                            DRMng.UserManager.user.name = active_user.username();
+                            DRMng.UserManager.user.authToken = active_user.gameAuthToken();
+                            let usr = DRMng.UserManager.user;
+                            if (usr.ID && usr.name && usr.authToken) {
+                                DRMng.UserManager.user.qualified = true;
+                                return
+                            }
+                        }
+                        console.warn("[DRMng] Missing active user data, retrying in .25 sec...");
+                        setTimeout(DRMng.UserManager.getCrucialUserData, 250);
                     },
-                    getCrucialUserData: function()
-                              {
-                                  if (typeof active_user === 'object' && active_user.username().toLowerCase() !== 'guest') {
-                                      DRMng.UserManager.user.ID = active_user.id();
-                                      DRMng.UserManager.user.name = active_user.username();
-                                      DRMng.UserManager.user.authToken = active_user.gameAuthToken();
-                                      let usr = DRMng.UserManager.user;
-                                      if(usr.ID && usr.name && usr.authToken) {
-                                          DRMng.UserManager.user.qualified = true;
-                                          return
-                                      }
-                                  }
-                                  console.warn("[DRMng] Missing active user data, retrying in .25 sec...");
-                                  setTimeout(DRMng.UserManager.getCrucialUserData,250);
-                              },
-                    getUserNode: function()
-                              {
-                                  DRMng.UserManager.user.guild = holodeck._chat_window._rooms_by_type.guild._room.name;
-                                  let usrNode = holodeck._chat_window._rooms_by_type.guild.users();
+                    getUserNode: function () {
+                        DRMng.UserManager.user.guild = holodeck._chat_window._rooms_by_type.guild._room.name;
+                        let usrNode = holodeck._chat_window._rooms_by_type.guild.users();
 
-                                  if(usrNode.length === 0) {
-                                      setTimeout(DRMng.UserManager.getUserNode,100);
-                                      return
-                                  }
+                        if (usrNode.length === 0) { setTimeout(DRMng.UserManager.getUserNode, 100); return; }
 
-                                  for(let i = 0; i < usrNode.length; ++i)
-                                      if (usrNode[i].username === DRMng.UserManager.user.name) {
-                                          DRMng.UserManager.user.IGN = usrNode[i]._game_character_name;
-                                          break;
-                                      }
-                              },
-                    getExtendedUserData: function()
-                              {
-                                  if(holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
-                                      if(holodeck._chat_window._rooms_by_type.guild) DRMng.UserManager.getUserNode();
-                                      else if(DRMng.UserManager.numTries++ < 10) {
-                                          console.warn("[DRMng] Missing game guild data, retrying in 2 sec... (%d)",DRMng.UserManager.numTries);
-                                          setTimeout(DRMng.UserManager.getExtendedUserData,2000);
-                                      }
-                                      else console.info("[DRMng] No guild information found! Guild info omitted.");
+                        for (let i = 0; i < usrNode.length; ++i)
+                            if (usrNode[i].username === DRMng.UserManager.user.name) {
+                                DRMng.UserManager.user.IGN = usrNode[i]._game_character_name;
+                                break;
+                            }
+                    },
+                    getExtendedUserData: function () {
+                        if (holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
+                            if (holodeck._chat_window._rooms_by_type.guild) DRMng.UserManager.getUserNode();
+                            else if (DRMng.UserManager.numTries++ < 10) {
+                                console.warn("[DRMng] Missing game guild data, retrying in 2 sec... (%d)", DRMng.UserManager.numTries);
+                                setTimeout(DRMng.UserManager.getExtendedUserData, 2000);
+                            }
+                            else console.warn("[DRMng] No guild information found! Guild info omitted.");
 
-                                  }
-                                  else setTimeout(DRMng.UserManager.getExtendedUserData,500);
-                              },
-                    getUserData: function()
-                              {
-                                  // Needed to log into raids Engine
-                                  DRMng.UserManager.getCrucialUserData();
-
-                                  // Assures validity of IGN/Guild information
-                                  DRMng.UserManager.getExtendedUserData();
-                              }
+                        }
+                        else setTimeout(DRMng.UserManager.getExtendedUserData, 500);
+                    },
+                    getUserData: function () {
+                        // Needed to log into raids Engine
+                        DRMng.UserManager.getCrucialUserData();
+                        // Assures validity of IGN/Guild information
+                        DRMng.UserManager.getExtendedUserData();
+                    }
                 },
                 Engine: {
                     client: null,
@@ -2111,45 +2184,35 @@ if(window.location.host == "www.kongregate.com") {
                         this.client.disconnect();
                         setTimeout(this.client.connect.bind(this.client),1000);
                     },
-                    init: function()
-                            {
-                                if(typeof io === 'function' && DRMng.UserManager.user.qualified) {
-                                    let user = DRMng.UserManager.user;
-                                    DRMng.Engine.client = io
-                                        .connect('http://remote.erley.org:3000/' + DRMng.Config.local.server, {multiplex: false})
-                                        .on('error', function (data) {
-                                            console.warn(data)
-                                        })
-                                        .on('msg', DRMng.Engine.handleMessage)
-                                        .on('service', DRMng.Engine.handleService)
-                                        .on('disconnect', function () {
-                                            console.warn('[DRMng] Socket client disconnected!')
-                                        })
-                                        .on('connect', function () {
-                                            console.info('[DRMng] Chat socket connection established, joining...');
-                                            DRMng.Engine.client.emit('join', {
-                                                usr: user.name,
-                                                ign: user.IGN,
-                                                gld: user.guild,
-                                                chk: DRMng.Config.local.checkSums});
-                                        });
-                                }
-                                else {
-                                    console.warn("[DRMng] Missing data to start engine, retrying in 1 sec...");
-                                    setTimeout(DRMng.Engine.init,1000);
-                                }
-                            },
-                    handleMessage: function(d) {
-                        console.log(d)
+                    init: function() {
+                        if (typeof io === 'function' && DRMng.UserManager.user.qualified) {
+                            let user = DRMng.UserManager.user;
+                            DRMng.Engine.client = io
+                                .connect('http://remote.erley.org:3000/' + DRMng.Config.local.server, {multiplex: false})
+                                .on('error', function (data) { console.warn(data) })
+                                .on('msg', DRMng.Engine.handleMessage)
+                                .on('service', DRMng.Engine.handleService)
+                                .on('disconnect', function () { console.warn('[DRMng] Socket client disconnected!') })
+                                .on('connect', function () {
+                                    console.info('[DRMng] Chat socket connection established, joining...');
+                                    DRMng.Engine.client.emit('join', {
+                                        usr: user.name, ign: user.IGN, gld: user.guild,
+                                        chk: DRMng.Config.local.checkSums });
+                                });
+                        }
+                        else {
+                            console.warn("[DRMng] Missing data to start engine, retrying in 1 sec...");
+                            setTimeout(DRMng.Engine.init, 1000);
+                        }
                     },
+                    handleMessage: function(d) { console.log(d) },
                     handleService: function(d) {
                         switch(d.action) {
                             case 'raidData':
                                 if (DRMng.Config.local.checkSums.raidData !== d.data.raidDataHash &&
                                     d.data.raidDataHash.length > 6) {
                                     console.info("[DRMng] New raids data! Old hash: %s, new hash: %s",
-                                        DRMng.Config.local.checkSums.raidData,
-                                        d.data.raidDataHash);
+                                        DRMng.Config.local.checkSums.raidData, d.data.raidDataHash);
                                     setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI, d.data.raidData), 1);
                                     DRMng.Config.local.raidData = d.data.raidData;
                                     DRMng.Config.local.checkSums.raidData = d.data.raidDataHash;
@@ -2162,8 +2225,7 @@ if(window.location.host == "www.kongregate.com") {
                                 if (DRMng.Config.local.checkSums.filterData !== d.data.filterDataHash &&
                                     d.data.filterDataHash.length > 6) {
                                     console.info("[DRMng] New keywords data! Old hash: %s, new hash: %s",
-                                        DRMng.Config.local.checkSums.filterData,
-                                        d.data.filterDataHash);
+                                        DRMng.Config.local.checkSums.filterData, d.data.filterDataHash);
                                     DRMng.Config.local.filterData = d.data.filterData;
                                     DRMng.Config.local.checkSums.filterData = d.data.filterDataHash;
                                     DRMng.Config.saveLocal();
@@ -2174,8 +2236,7 @@ if(window.location.host == "www.kongregate.com") {
                                 if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
                                     d.data.tiersDataHash.length > 6) {
                                     console.info("[DRMng] New tiers data! Old hash: %s, new hash: %s",
-                                        DRMng.Config.local.checkSums.tiersData,
-                                        d.data.tiersDataHash);
+                                        DRMng.Config.local.checkSums.tiersData, d.data.tiersDataHash);
                                     DRMng.Config.local.tiersData = JSON.parse(d.data.tiersData);
                                     DRMng.Config.local.checkSums.tiersData = d.data.tiersDataHash;
                                     DRMng.Config.saveLocal();
@@ -2199,6 +2260,116 @@ if(window.location.host == "www.kongregate.com") {
                     }
                 },
                 UI: {
+                    Groups: {},
+                    Group: function(alias, title) {
+                        this.fields = [];
+                        this.html = null;
+                        this.cont = null;
+                        this.setup = function(alias, title) {
+                            if (alias && title) {
+                                let groupDiv = document.createElement('div');
+                                groupDiv.setAttribute('class', 'group flex');
+                                let titleDiv = document.createElement('div');
+                                titleDiv.setAttribute('class', 'title');
+                                titleDiv.innerHTML = "" + title;
+                                let contentDiv = document.createElement('div');
+                                groupDiv.appendChild(titleDiv);
+                                groupDiv.appendChild(contentDiv);
+                                this.cont = contentDiv;
+                                this.html = groupDiv;
+                                DRMng.UI.Groups[alias] = this;
+                                document.getElementById('DRMng_Options').appendChild(this.html);
+                            }
+                            return this;
+                        };
+                        this.add = function(option) {
+                            if (option && option instanceof DRMng.UI.Option) {
+                                this.fields.push(option);
+                                if (this.cont) this.cont.appendChild(option.html);
+                            }
+                            return this;
+                        };
+                        return this.setup(alias, title);
+                    },
+                    /*
+                    * var opt = new DRMng.UI.Option().setup("kongui_hideForum","Hide forum area",true).desc("Hides kongregate forum part located below game window.").make();
+                    * */
+                    Option: function(props) {
+                        this.html = null;
+                        this.conf = null;
+                        this.cbFn = null;
+                        this.group = "";
+                        this.field = "";
+                        let _title = "", _desc = "";
+                        this.setup = function(alias, title, value) {
+                            if (alias !== null) {
+                                let name = alias.split('_');
+                                this.group = name[0] || "other";
+                                this.field = name[1] || alias;
+                                _title = title || this.field;
+                                if (DRMng.Config.local[this.group] === undefined) DRMng.Config.local[this.group] = {};
+                                this.conf = DRMng.Config.local[this.group];
+                                if (this.conf[this.field] === undefined) this.conf[this.field] = value || false;
+                            }
+                            return this;
+                        };
+                        this.getConf = function() { return this.conf[this.field]; };
+                        this.flipConf = function() {
+                            this.conf[this.field] = !this.conf[this.field];
+                            DRMng.Config.saveLocal();
+                        };
+                        this.desc = function(desc) {
+                            if (desc) _desc = desc;
+                            return this;
+                        };
+                        this.event = function(callback) {
+                            if (callback && typeof callback === 'function') this.cbFn = callback;
+                            return this;
+                        };
+                        this.make = function(group) {
+                            let optionDiv = document.createElement('div');
+                            optionDiv.setAttribute('class', 'buttonStripe');
+                            optionDiv.setAttribute('style', 'flex-wrap: wrap; overflow: hidden; max-height: 74px;');
+
+                            let titleField = document.createElement('span');
+                            titleField.setAttribute('style', 'background-color: #444; font-size: 9pt;');
+                            titleField.innerHTML = "" + _title;
+
+                            let button = document.createElement('button');
+                            button.setAttribute('class', this.getConf() ? "n" : "l");
+                            button.setAttribute('style', 'border-left-color: #3a3a3a;');
+                            button.addEventListener('click', function(e) {
+                                this.flipConf();
+                                e.target.setAttribute('class', this.getConf() ? "n" : "l");
+                                e.target.innerHTML = this.getConf() ? "On" : "Off";
+
+                                console.info("Options button hit:", this);
+                                console.info("And its event target:", e.target);
+
+                                if (typeof this.cbFn === 'function') this.cbFn.call(this, e);
+
+                            }.bind(this));
+                            button.innerHTML = this.getConf() ? "On" : "Off";
+
+                            optionDiv.appendChild(titleField);
+                            optionDiv.appendChild(button);
+
+                            if (typeof this.cbFn === 'function') this.cbFn.call(this, {target: button});
+
+                            if (_desc) {
+                                let descField = document.createElement('div');
+                                descField.setAttribute('style', 'border-top: 1px solid #404040; background-color: #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style: italic; max-height: 45px; overflow: hidden; color: #eaeaea;');
+                                descField.innerHTML = "" + _desc;
+                                optionDiv.appendChild(descField);
+                            }
+
+                            this.html = optionDiv;
+
+                            if (group && group instanceof DRMng.UI.Group) group.add(this);
+
+                            return this;
+                        };
+                    },
                     addRaidField: function(r, idx) {
                         //console.log("UI adding elem %f, %d", r.hp, idx);
                         let div = document.createElement('div');
@@ -2231,9 +2402,7 @@ if(window.location.host == "www.kongregate.com") {
                         let r = document.getElementById('DRMng_' + id);
                         if (r) r.parentNode.removeChild(r);
                     },
-                    clearRaidList: function() {
-                        document.getElementById('DRMng_RaidList').innerHTML = '';
-                    },
+                    clearRaidList: function() { document.getElementById('DRMng_RaidList').innerHTML = ''; },
                     statusTimer: null,
                     displayStatus: function(msg) {
                         let server = DRMng.Config.local.server;
@@ -2327,6 +2496,7 @@ if(window.location.host == "www.kongregate.com") {
 						white-space: nowrap;\
 						overflow: hidden;\
 						text-overflow: ellipsis;\
+						text-shadow: 0 0 8px #000;\
 					}\
 					#DRMng_main.active #DRMng_status { text-align: center; }\
 					#DRMng_wrapper { height: 100%; }\
@@ -2396,15 +2566,19 @@ if(window.location.host == "www.kongregate.com") {
 						box-shadow: 0 0 10px -4px #000;\
 						border: 1px solid #151515 !important;\
 						background-color: #4a4a4a;\
-						transition: max-height .5s linear .1s;\
 						overflow: hidden;\
 						flex-grow: 0;\
 						flex-shrink: 0;\
 						max-height: 110%;\
 					}\
+					#DRMng_content div.group.flex {\
+					    flex-shrink: 1;\
+					    display: flex;\
+					    flex-direction: column;\
+					}\
 					#DRMng_content div.group.hide {\
 						max-height: 23px;\
-						transition: max-height .2s;\
+						flex-shrink: 0;\
 					}\
 					#DRMng_content div.group.flexible {\
 						flex-grow: 1;\
@@ -2412,6 +2586,9 @@ if(window.location.host == "www.kongregate.com") {
 					}\
 					#DRMng_content div.group:first-of-type {\
 						margin-top: 6px\
+					}\
+					#DRMng_content div.group.flex > div:last-child {\
+					    overflow-y: auto;\
 					}\
 					#DRMng_content > div.active {\
 						flex-grow: 1;\
@@ -2479,6 +2656,7 @@ if(window.location.host == "www.kongregate.com") {
 						background-color: #333;\
 						white-space: nowrap;\
 						cursor: pointer;\
+						height: 15px;\
 					}\
 					#DRMng_main div.group.hide > div.title {\
 						background-color: #3a3a3a;\
@@ -2523,7 +2701,7 @@ if(window.location.host == "www.kongregate.com") {
 						flex-grow: 2;\
 						width: 50%;\
 						color: #eee;\
-						margin: 3px 5px;\
+						padding: 3px 5px;\
 						white-space: nowrap;\
 						overflow: hidden;\
 						text-overflow: ellipsis;\
@@ -2817,8 +2995,7 @@ if(window.location.host == "www.kongregate.com") {
                         }
                     },
                     applyFilter: function(e) {
-                        let el = e.target;
-                        if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
+                        let el = e.target; if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
                         let server = DRMng.Config.local.server.toLowerCase();
                         let btns = el.parentNode.getElementsByTagName('BUTTON');
                         let id = el.parentNode.id.substr(13);
@@ -2945,7 +3122,7 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     loadDefaults: function() {
                         // Chat width
-                        var el = document.getElementById('chat_container');
+                        let el = document.getElementById('chat_container');
                         if (el) el.style.width = DRMng.Config.local.kong.chatWidth + 'px';
 
                         // Script width
@@ -2962,6 +3139,42 @@ if(window.location.host == "www.kongregate.com") {
                             if (el[i].innerHTML.toLowerCase() === DRMng.Config.local.sortBy)
                                 el[i].className = 'active';
 
+                    },
+                    loadOptions: function() {
+                        let group, opt;
+
+                        group = new this.Group('kongui', 'Kongregate UI');
+
+                        opt = new this.Option();
+                        opt.setup('kongui_stickyHeader', 'Sticky header', true)
+                           .desc('Makes top header always visible on screen.')
+                           .event(function () {
+                               let mode = this.conf[this.field] ? 'fixed' : 'absolute';
+                               DRMng.Kong.CSS.rpl(this.field, 'div#headerwrap', 'position: ' + mode);
+                           })
+                           .make(group);
+
+                        opt = new this.Option();
+                        opt.setup('kongui_hideGameDetails', 'Hide game details', false)
+                           .desc('Hides game details part located just below game window.')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, 'div.game_details_outer', 'display: none');
+                               else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        opt = new this.Option();
+                        opt.setup('kongui_hideForum', 'Hide forum area', true)
+                           .desc('Hides forum part located below game window.')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
+                               else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        DRMng.Config.saveLocal();
                     },
                     raidInfo: function(boss) {
                         let txt = '';
@@ -3247,17 +3460,25 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     roll: function(elem) {
                         let gr = elem ? elem.parentNode : null;
-                        if (gr && gr.getAttribute('group')) {
-                            let divs = gr.parentNode.children;
-                            let group = gr.getAttribute('group');
-                            for (let i=0; i<divs.length; ++i) if (divs[i] !== gr && divs[i].getAttribute('group') && divs[i].getAttribute('group') === group) {
-                                divs[i].className = 'group hide';
-                                divs[i].children[1].style.display = '';
+                        if (gr) {
+                            if (gr.getAttribute('group')) {
+                                let divs = gr.parentNode.children;
+                                let group = gr.getAttribute('group');
+                                for (let i=0; i<divs.length; ++i) if (divs[i] !== gr && divs[i].getAttribute('group') && divs[i].getAttribute('group') === group) {
+                                    if (divs[i].className.indexOf('hide') === -1) divs[i].className += ' hide';
+                                    divs[i].children[1].style.display = 'none';
+                                }
                             }
-                        }
-                        if (gr && gr.className.indexOf('group') === 0) {
-                            gr.className = gr.className.indexOf('hide') !== -1 ? 'group' : 'group hide';
-                            if (gr.className.indexOf('hide') == -1) gr.children[1].style.display = '';
+                            if (gr.className.indexOf('group') === 0) {
+                                if (gr.className.indexOf('hide') !== -1) {
+                                    gr.children[1].removeAttribute('style');
+                                    gr.className = gr.className.replace(' hide', '');
+                                }
+                                else {
+                                    gr.className += ' hide';
+                                    gr.children[1].style.display = 'none';
+                                }
+                            }
                         }
                     },
                     init: function() {
@@ -3274,7 +3495,7 @@ if(window.location.host == "www.kongregate.com") {
 					</div>\
 					<div id="DRMng_wrapper">\
 						<div id="DRMng_nav">\
-							<div class="active">Raids</div><div>Filters</div><div>Tasks</div><div>Options</div>\
+							<div class="active">Raids</div><div>Filters</div><div>Tools</div><div>Options</div>\
 						</div>\
 						<div id="DRMng_spacer"></div>\
 						<div id="DRMng_content">\
@@ -3326,32 +3547,32 @@ if(window.location.host == "www.kongregate.com") {
 										<button id="DRMngFilter_1_4" onclick="DRMng.UI.applyDiffFilter(this.id)">NM</button>\
 									</div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Small Raids</div>\
 									<div id="DRMng_filterSmall" style="display: none;"></div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Medium Raids</div>\
 									<div id="DRMng_filterMedium" style="display: none;"></div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Large Raids</div>\
 									<div id="DRMng_filterLarge" style="display: none;"></div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Epic Raids</div>\
 									<div id="DRMng_filterEpic" style="display: none;"></div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Colossal Raids</div>\
 									<div id="DRMng_filterColossal" style="display: none;"></div>\
 								</div>\
-								<div class="group hide" group="filter">\
+								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Gigantic Raids</div>\
 									<div id="DRMng_filterGigantic" style="display: none;"></div>\
 								</div>\
 							</div>\
-							<div class="" id="DRMng_Tasks">\
+							<div class="" id="DRMng_Tools">\
 								<div class="group">\
 									<div class="title">Delayed submission</div>\
 									<div class="txtInputStripe">\
@@ -3385,6 +3606,9 @@ if(window.location.host == "www.kongregate.com") {
 
                         // attach listeners to created elements
                         this.attachListeners();
+
+                        // load options
+                        this.loadOptions();
                     }
                 },
 
@@ -3658,7 +3882,7 @@ else if(window.location.host === '50.18.191.15') {
                     this.config.version.chat = /^.+\/(\d+?)\/.+$/.exec(chatDiv.data)[1];
                     if (this.config.version.game === '13525') this.config.version.game = '13524';
                     if (kongregateAPI) {
-                        var data = kongregateAPI._flashVarsObject;
+                        let data = kongregateAPI._flashVarsObject;
                         this.config.user.name = data.kongregate_username;
                         this.config.user.id = data.kongregate_user_id;
                         this.config.user.auth = data.kongregate_game_auth_token;

@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.17
+// @version        	2.0.18
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -19,7 +19,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '17', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '18', name: 'DotD Raids Manager Next Gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -190,7 +190,9 @@ if(window.location.host == "www.kongregate.com") {
                                 let p = DRMng.Util.hResize.pane;
                                 switch(p.id) {
                                     case 'chat_container':
-                                        DRMng.Config.local.kong.chatWidth = parseInt(p.style.width.replace('px',''));
+                                        let w = parseInt(p.style.width.replace('px',''));
+                                        DRMng.Config.local.kong.chatWidth =
+                                            DRMng.Config.local.alliance.sbs ? parseInt((w-7)/2) : w;
                                         DRMng.Config.saveLocal();
                                         DRMng.Kong.setHeaderWidth();
                                         break;
@@ -377,7 +379,8 @@ if(window.location.host == "www.kongregate.com") {
                         alliance: {
                             enabled: false,
                             channel: '',
-                            pass: ''
+                            pass: '',
+                            sbs: false
                         }
                     },
                     remote: {},
@@ -491,6 +494,16 @@ if(window.location.host == "www.kongregate.com") {
                         // append new button to nav
                         li.appendChild(a);
                         document.getElementById('nav_welcome_box').appendChild(li);
+                    },
+                    addSbsChatContainer: function() {
+                        let chat = document.getElementById('chat_window');
+                        if (chat) {
+                            let sbs = document.createElement('div');
+                            sbs.setAttribute('id', 'alliance_chat_sbs');
+                            sbs.setAttribute('style', 'display: none');
+                            document.getElementById('chat_tab_pane').appendChild(sbs);
+                        }
+                        else setTimeout(this.addSbsChatContainer.bind(this), 10);
                     },
                     modifyElement: function() {
                         if (Element && Element.Methods && Element._insertionTranslations) {
@@ -947,6 +960,7 @@ if(window.location.host == "www.kongregate.com") {
                         //this.killIframes();
                         this.addSlimButton();
                         this.addReloadButton();
+                        this.addSbsChatContainer();
                         this.modifyKongEngine();
                         //this.forceGameLoad();
                         setTimeout(this.killIframes, 2000);
@@ -964,8 +978,8 @@ if(window.location.host == "www.kongregate.com") {
 					#play div#primarywrap { min-height: 100%; }\
 					div#subwrap { display: none; }\
 					#global, #ad_skip_controls, #ima_bumper, #ima_bumper_html5_api, #bumper_premium_header, #ima-ad-container, div.gamepage_categories_outer, div.ad, div.tracking_pixel_ad, #play #gamespotlight,\
-					div#kong_bumper_preroll_600x400-ad-slot, #kong_game_ui div.room_description_rollover_container\
-					{ display: none !important; }\
+					div#kong_bumper_preroll_600x400-ad-slot, #kong_game_ui div.room_description_rollover_container,\
+					#kong_game_ui div#chat_default_content { display: none !important; }\
 					div.gamepage_title_block h1 { height: 0 !important; overflow: hidden; }\
 					#play.premium_user .gamepage_header_outer {\
 						min-height: initial !important;\
@@ -1130,6 +1144,12 @@ if(window.location.host == "www.kongregate.com") {
 						margin: 7px;\
 						height: 646px !important;\
 						width: calc(100% - 14px);\
+					}\
+					div#kong_game_ui div#chat_tab_pane.tabpane { display: flex; overflow: visible; }\
+					div#kong_game_ui div#chat_tab_pane > div {\
+					    flex-grow: 1;\
+					    flex-shrink: 1;\
+					    width: 1px;\
 					}\
 					div#kong_game_ui span.spinner_big {\
 						width: 16px;\
@@ -1529,7 +1549,7 @@ if(window.location.host == "www.kongregate.com") {
 					}\
 					div#kong_game_ui div.chat_message_window span.timestamp,\
 					div#kong_game_ui div.chat_message_window span.extraid {\
-						color: #bbb;\
+						color: #ccc;\
 						font-family: 'Open Sans', sans-serif;\
 						font-weight: 300;\
 					}\
@@ -2493,7 +2513,7 @@ if(window.location.host == "www.kongregate.com") {
 
                             // modify kong function to include new Alliance tab
                             ChatRoom.prototype.show = function() {
-                                if (DRMng.Alliance) {
+                                if (DRMng.Alliance && !DRMng.Alliance.conf.sbs) {
                                     DRMng.Alliance.active = false;
                                     if (DRMng.Alliance.tab) {
                                         DRMng.Alliance.tab.setAttribute('class', 'chat_room_tab');
@@ -2510,7 +2530,7 @@ if(window.location.host == "www.kongregate.com") {
                                 this.scrollToBottom();
                             };
                             ChatRoom.prototype.isActive = function() {
-                                let drm = DRMng ? DRMng.Alliance.active : false;
+                                let drm = DRMng ? (DRMng.Alliance.active && !DRMng.Alliance.conf.sbs) : false;
                                 return !drm && this == this._chat_window.activeRoom()
                             };
 
@@ -2525,85 +2545,104 @@ if(window.location.host == "www.kongregate.com") {
                         else setTimeout(this.initTab.bind(this), 100);
                     },
                     initBody: function() {
-                        let container = document.getElementById('chat_rooms_container');
+                        let container = document.getElementById(this.conf.sbs ? 'alliance_chat_sbs' : 'chat_rooms_container');
                         if (container) {
-                            this.body = document.createElement('div');
-                            this.body.style.setProperty('display', 'none');
+                            if (this.body === null) {
+                                this.body = document.createElement('div');
 
-                            let usr = document.createElement('div');
-                            usr.setAttribute('class', 'chat_tabpane users_in_room clear');
-                            this.users.html = usr;
+                                if (!this.conf.sbs) this.body.style.setProperty('display', 'none');
 
-                            let chat = document.createElement('div');
-                            chat.setAttribute('class', 'chat_message_window');
-                            this.chat = chat;
+                                let usr = document.createElement('div');
+                                usr.setAttribute('class', 'chat_tabpane users_in_room clear');
+                                this.users.html = usr;
 
-                            let inputDiv = document.createElement('div');
-                            inputDiv.setAttribute('class', 'chat_controls');
+                                let chat = document.createElement('div');
+                                chat.setAttribute('class', 'chat_message_window');
+                                this.chat = chat;
 
-                            let inputArea = document.createElement('textarea');
-                            inputArea.setAttribute('class', 'chat_input');
-                            inputArea.value = 'Enter text for chat here';
-                            this.input = inputArea;
+                                let inputDiv = document.createElement('div');
+                                inputDiv.setAttribute('class', 'chat_controls');
 
-                            this.input.addEventListener('focus', function() {
-                                if (this.input.value === 'Enter text for chat here') {
-                                    this.input.value = '';
-                                    this.input.style.removeProperty('font-style');
-                                }
-                            }.bind(this));
-                            this.input.addEventListener('blur', function() {
-                                if (this.input.value === '') {
-                                    this.input.value = 'Enter text for chat here';
-                                    this.input.style.setProperty('font-style', 'italic');
-                                }
-                            }.bind(this));
-                            this.input.addEventListener('keydown', function(e) {
-                                //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
-                                switch (e.key) {
-                                    case 'Enter':
-                                        if (!e.shiftKey) {
-                                            this.send();
-                                            e.preventDefault();
-                                        }
-                                        break;
-                                }
-                            }.bind(this));
-                            this.input.addEventListener('keyup', function() {
-                                if (this.input.value !== 'Enter text for chat here') {
-                                    let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
-                                    txt = txt[2] || "";
-                                    if (this.inputCnt) this.inputCnt.textContent = txt.length;
-                                }
-                            }.bind(this));
+                                let inputArea = document.createElement('textarea');
+                                inputArea.setAttribute('class', 'chat_input');
+                                inputArea.value = 'Enter text for chat here';
+                                this.input = inputArea;
 
-                            let cnt = document.createElement('span');
-                            cnt.setAttribute('class', 'chat_chars_remaining');
-                            cnt.textContent = '0';
-                            this.inputCnt = cnt;
+                                this.input.addEventListener('focus', function () {
+                                    if (this.input.value === 'Enter text for chat here') {
+                                        this.input.value = '';
+                                        this.input.style.removeProperty('font-style');
+                                    }
+                                }.bind(this));
+                                this.input.addEventListener('blur', function () {
+                                    if (this.input.value === '') {
+                                        this.input.value = 'Enter text for chat here';
+                                        this.input.style.setProperty('font-style', 'italic');
+                                    }
+                                }.bind(this));
+                                this.input.addEventListener('keydown', function (e) {
+                                    //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
+                                    switch (e.key) {
+                                        case 'Enter':
+                                            if (!e.shiftKey) {
+                                                this.send();
+                                                e.preventDefault();
+                                            }
+                                            break;
+                                    }
+                                }.bind(this));
+                                this.input.addEventListener('keyup', function () {
+                                    if (this.input.value !== 'Enter text for chat here') {
+                                        let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
+                                        txt = txt[2] || "";
+                                        if (this.inputCnt) this.inputCnt.textContent = txt.length;
+                                    }
+                                }.bind(this));
 
-                            let cntCont = document.createElement('span');
-                            cntCont.setAttribute('class', 'chat_char_countdown');
-                            cntCont.appendChild(this.inputCnt);
-                            cntCont.appendChild(document.createTextNode('/Inf'));
+                                let cnt = document.createElement('span');
+                                cnt.setAttribute('class', 'chat_chars_remaining');
+                                cnt.textContent = '0';
+                                this.inputCnt = cnt;
 
-                            inputDiv.appendChild(this.input);
-                            inputDiv.appendChild(cntCont);
-                            this.body.appendChild(this.users.html);
-                            this.body.appendChild(this.chat);
-                            this.body.appendChild(inputDiv);
+                                let cntCont = document.createElement('span');
+                                cntCont.setAttribute('class', 'chat_char_countdown');
+                                cntCont.appendChild(this.inputCnt);
+                                cntCont.appendChild(document.createTextNode('/Inf'));
+
+                                inputDiv.appendChild(this.input);
+                                inputDiv.appendChild(cntCont);
+                                this.body.appendChild(this.users.html);
+                                this.body.appendChild(this.chat);
+                                this.body.appendChild(inputDiv);
+
+                                console.info("[DRMng] {Alliance} Chat body created.");
+                            }
+
+                            let sbs = document.getElementById('alliance_chat_sbs');
+                            sbs.style.setProperty('display', 'none');
+                            this.tab.style.setProperty('display', 'none');
+
+                            if (this.client && this.client.connected) {
+                                if (this.conf.sbs) sbs.style.removeProperty('display');
+                                else this.tab.style.removeProperty('display');
+                            }
+                            else setTimeout(this.setup.bind(this), 1);
+
                             container.appendChild(this.body);
+                            this.scrollToBottom();
 
-                            console.info("[DRMng] {Alliance} Chat body created.");
-
-                            setTimeout(this.setup.bind(this), 1);
+                            console.info("[DRMng] {Alliance} Chat body attached to DOM.");
                         }
                         else setTimeout(this.initBody.bind(this), 100);
                     },
                     setup: function(channel, password) {
                         if (this.conf.enabled) {
                             if (typeof io === 'function' && this.tab && this.chat && DRMng.UM.user.qualified) {
-                                this.tab.style.removeProperty('display');
+
+                                if (DRMng.Alliance.conf.sbs)
+                                    document.getElementById('alliance_chat_sbs').style.removeProperty('display');
+                                else
+                                    this.tab.style.removeProperty('display');
 
                                 let usr = DRMng.UM.user;
                                 let user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
@@ -2817,7 +2856,7 @@ if(window.location.host == "www.kongregate.com") {
                             msg.setAttribute('class', 'chat-message');
                             msg.innerHTML = content;
                             this.chat.appendChild(msg);
-                            if (this.active) this.scrollToBottom();
+                            if (this.active || this.conf.sbs) this.scrollToBottom();
                             else this.setUnread();
                         }
                         else this.messageBuffer.push(data);
@@ -2843,12 +2882,15 @@ if(window.location.host == "www.kongregate.com") {
                             a.conf.enabled = false;
                             if (a.client.connected) a.client.disconnect();
                             holodeck._chat_window.showActiveRoom();
-                            this.tab.style.setProperty('display', 'none');
+                            if (DRMng.Alliance.conf.sbs)
+                                document.getElementById('alliance_chat_sbs').style.setProperty('display', 'none');
+                            else
+                                this.tab.style.setProperty('display', 'none');
                         }
                         else {
                             let ch = document.getElementById('DRMng_allianceChnl'),
                                 ps = document.getElementById('DRMng_alliancePass');
-                            if (ch.getAttribute('class') === null && ps.getAttribute('class') === null) {
+                            if (!ch.getAttribute('class') && !ps.getAttribute('class')) {
                                 a.conf.enabled = true;
                                 setTimeout(a.setup.bind(a, ch.value, ps.value), 1);
                             }
@@ -3525,6 +3567,14 @@ if(window.location.host == "www.kongregate.com") {
 						margin-top: auto;\
 						border-top: 1px solid #111;\
 					}\
+					#alliance_chat_sbs {\
+					    border: 1px solid #222;\
+                        display: flex;\
+                        align-items: flex-end;\
+                        margin-left: 7px;\
+                        box-shadow: 0 0 10px -4px #000;\
+					}\
+					#alliance_chat_sbs div.users_in_room { height: 145px; }\
 					";
 
                         DRMng.Util.cssStyle('DRMng_CSS',content);
@@ -3544,7 +3594,6 @@ if(window.location.host == "www.kongregate.com") {
                             el.innerHTML = 'Filter raids here';
                             el.className = 'default';
                         }
-
                     },
                     setupFilterTab: function(raidData) {
                         let server = DRMng.Config.local.server.toLowerCase();
@@ -3727,13 +3776,17 @@ if(window.location.host == "www.kongregate.com") {
                         if (sbLen > 690) sb.className = 'flex';
                     },
                     loadDefaults: function() {
+                        let lc = DRMng.Config.local;
                         // Chat width
                         let el = document.getElementById('chat_container');
-                        if (el) el.style.width = DRMng.Config.local.kong.chatWidth + 'px';
+                        if (el) {
+                            let w = lc.kong.chatWidth;
+                            el.style.width = `${lc.alliance.sbs ? (w*2+7) : w}px`;
+                        }
 
                         // Script width
                         el = document.getElementById('DRMng_main');
-                        if (el) el.style.width = DRMng.Config.local.scriptWidth + 'px';
+                        if (el) el.style.width = lc.scriptWidth + 'px';
 
                         // Filtering
                         this.setupFilterBox();
@@ -3742,20 +3795,20 @@ if(window.location.host == "www.kongregate.com") {
                         // Sorting
                         el = document.getElementById('DRMng_sortOrderBy').children;
                         for (let i = 0; i < el.length; ++i)
-                            if (el[i].innerHTML.toLowerCase() === DRMng.Config.local.sortBy)
+                            if (el[i].innerHTML.toLowerCase() === lc.sortBy)
                                 el[i].className = 'active';
 
                         // Alliance
                         el = document.getElementById('DRMng_allianceChnl');
-                        if (DRMng.Config.local.alliance.channel) {
+                        if (lc.alliance.channel) {
                             el.removeAttribute('class');
-                            el.value = DRMng.Config.local.alliance.channel;
+                            el.value = lc.alliance.channel;
                         }
                         el = document.getElementById('DRMng_alliancePass');
-                        if (DRMng.Config.local.alliance.pass) {
+                        if (lc.alliance.pass) {
                             el.removeAttribute('class');
                             el.setAttribute('type', 'password');
-                            el.value = DRMng.Config.local.alliance.pass;
+                            el.value = lc.alliance.pass;
                         }
                     },
                     loadOptions: function() {
@@ -3841,6 +3894,37 @@ if(window.location.host == "www.kongregate.com") {
                                if (this.conf[this.field])
                                    DRMng.Kong.CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
                                else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        /*
+                         * alliance - Alliance UI
+                         * */
+
+                        group = new this.Group('alliance', 'Alliance UI');
+
+                        opt = new this.Option();
+                        opt.setup('alliance_sbs', 'Side by side', false)
+                           .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
+                               ' (doubles width taken by chat area).')
+                           .event(function () {
+                               // make sure initial variable setting wont fire this
+                               if (DRMng.Alliance.tab) {
+                                   let el = document.getElementById('chat_container'),
+                                       a = DRMng.Alliance,
+                                       w = DRMng.Config.local.kong.chatWidth;
+                                   if (this.conf[this.field]) {
+                                       if (el) el.style.width = `${w*2+7}px`;
+                                       a.body.style.removeProperty('display');
+                                   }
+                                   else {
+                                       if (el) el.style.width = `${w}px`;
+                                       a.tab.className = 'chat_room_tab';
+                                   }
+                                   a.active = false;
+                                   holodeck._chat_window.showActiveRoom();
+                                   a.initBody.call(a);
+                               }
                            })
                            .make(group);
 

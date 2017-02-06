@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.16
+// @version        	2.0.17
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -19,7 +19,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '16', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '17', name: 'DotD Raids Manager Next Gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -71,11 +71,11 @@ if(window.location.host == "www.kongregate.com") {
                                 case 'kv_difficulty': case 'difficulty':r.diff = parseInt(i[2]); cnt++; break;
                                 case 'kv_raid_boss': case 'raid_boss': 	r.boss = i[2]; cnt++; break;
                                 case 'kv_hash': case 'hash': 			r.hash = i[2]; cnt++; break;
-                                case 'kv_serverid': case 'serverid': 	r.pid = parseInt(i[2]); break;
+                                case 'kv_serverid': case 'serverid': 	r.sid = parseInt(i[2]); break;
                             }
                         }
                         if (cnt < 4) return null;
-                        r.pid = r.pid === 2 ? 0 : 1;
+                        r.pid = r.sid === 2 ? 0 : 1;
                         return r;
                     },
                     getShortNum: function(num, p) {
@@ -98,6 +98,15 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     getRand: function(i) {
                         return Math.round(Math.random()*(i+.5));
+                    },
+                    deRomanize: function(roman) {
+                        let lut = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};
+                        let arabic = 0, i = roman.length;
+                        while (i--) {
+                            if (lut[roman[i]] < lut[roman[i+1]]) arabic -= lut[roman[i]];
+                            else arabic += lut[roman[i]];
+                        }
+                        return arabic;
                     },
                     hResize: {
                         ev: null,
@@ -364,6 +373,11 @@ if(window.location.host == "www.kongregate.com") {
                             raidData: '',
                             filterData: '',
                             tiersData: '',
+                        },
+                        alliance: {
+                            enabled: false,
+                            channel: '',
+                            pass: ''
                         }
                     },
                     remote: {},
@@ -389,7 +403,7 @@ if(window.location.host == "www.kongregate.com") {
                         localStorage['DRMng'] = JSON.stringify(this.local);
                     }
                 },
-                Kong: {
+                Kong:            {
                     killScripts: function() {
                         let scr = document.getElementsByTagName('script');
                         let counter = 0;
@@ -397,18 +411,18 @@ if(window.location.host == "www.kongregate.com") {
                             scr[i].parentNode.removeChild(scr[i]);
                             counter++;
                         }
-                        console.info('[DRMng] Removed unnecesary script tags (%d)', counter);
+                        console.info('[DRMng] {Kong} Removed unnecesary \<script\> tags (%d)', counter);
                     },
                     killAds: function() {
                         if(typeof kong_ads === 'object') {
-                            console.info("[DRMng] Killed 'kong_ads'!");
+                            console.info("[DRMng] {Kong} Killed 'kong_ads'!");
                             window.kong_ads = { displayAd: function(){} };
                         }
                         else setTimeout(DRMng.Kong.killAds, 50);
                     },
                     killBumper: function() {
                         if(typeof bumper === 'object') {
-                            console.info("[DRMng] Killed 'bumper'!");
+                            console.info("[DRMng] {Kong} Killed 'bumper'!");
                             window.bumper = { requestAd: function(){} };
                         }
                         else setTimeout(DRMng.Kong.killBumper, 50);
@@ -416,7 +430,7 @@ if(window.location.host == "www.kongregate.com") {
                     killFBlike: function() {
                         let like = document.getElementById('quicklinks_facebook');
                         if(like) {
-                            console.info("[DRMng] Killed 'FB like'!");
+                            console.info("[DRMng] {Kong} Killed 'FB like'!");
                             like.parentNode.removeChild(like);
                         }
                         else setTimeout(DRMng.Kong.killFBlike, 1000);
@@ -424,7 +438,7 @@ if(window.location.host == "www.kongregate.com") {
                     killDealSpot: function() {
                         let ds = document.getElementById('dealspot_banner_holder');
                         if (ds) {
-                            console.info("[DRMng] Killed 'DealSpot'!");
+                            console.info("[DRMng] {Kong} Killed 'DealSpot'!");
                             ds.parentNode.removeChild(ds);
                         }
                         else setTimeout(DRMng.Kong.killDealSpot, 1000);
@@ -488,7 +502,7 @@ if(window.location.host == "www.kongregate.com") {
                                 return a
                             };
                             Element.addMethods(Element.Methods);
-                            console.info("[DRMng] Element patched!");
+                            console.info("[DRMng] {Kong} Element patched!");
                         }
                         else setTimeout(this.modifyElement, 50);
                     },
@@ -653,7 +667,7 @@ if(window.location.host == "www.kongregate.com") {
                                     })
                                 })
                             };
-                            console.info("[DRMng] ChatDialogue patched!");
+                            console.info("[DRMng] {Kong} ChatDialogue patched!");
                         }
                         else setTimeout(this.modifyChatDialogue, 50);
                     },
@@ -675,7 +689,7 @@ if(window.location.host == "www.kongregate.com") {
                                     room: { name: this._room.name, type: this._room.type }
                                 })
                             };
-                            console.info("[DRMng] ChatRoom patched!");
+                            console.info("[DRMng] {Kong} ChatRoom patched!");
                         }
                         else setTimeout(this.modifyChatRoom, 50);
                     },
@@ -693,7 +707,7 @@ if(window.location.host == "www.kongregate.com") {
                                     }
                                 })
                             };
-                            console.info("[DRMng] FayeEventDispatcher patched!");
+                            console.info("[DRMng] {Kong} FayeEventDispatcher patched!");
                         }
                         else setTimeout(this.modifyFayeEvent, 50);
                     },
@@ -709,7 +723,7 @@ if(window.location.host == "www.kongregate.com") {
                                     d.trigger("history", a, b.history.length)
                                 })
                             };
-                            console.info("[DRMng] FayeHistory patched!");
+                            console.info("[DRMng] {Kong} FayeHistory patched!");
                         }
                         else setTimeout(this.modifyFayeHistory, 50);
                     },
@@ -734,7 +748,7 @@ if(window.location.host == "www.kongregate.com") {
                                     history: a[12] || false
                                 }
                             };
-                            console.info("[DRMng] FayeTransformer patched!");
+                            console.info("[DRMng] {Kong} FayeTransformer patched!");
                         }
                         else setTimeout(this.modifyFayeTransformer, 50);
                     },
@@ -746,7 +760,7 @@ if(window.location.host == "www.kongregate.com") {
                         if (holodeck && holodeck.ready) {
 							/* Gestures Commands */
                             this.addChatCommand('kiss',function(a,b){
-                                let from = DRMng.UserManager.user.name, who = /^\/kiss (\w+)$/.exec(b), chat = a.activeDialogue();
+                                let from = DRMng.UM.user.name, who = /^\/kiss (\w+)$/.exec(b), chat = a.activeDialogue();
                                 if (from && who && chat) {
                                     let gesture = '** ' + DRMng.Gestures.Kiss.generate().replace('@from',from).replace('@who',who[1]) + ' **';
                                     chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
@@ -754,7 +768,7 @@ if(window.location.host == "www.kongregate.com") {
                                 return false;
                             });
                             this.addChatCommand('hit',function(a,b){
-                                let from = DRMng.UserManager.user.name, who = /^\/hit (\w+)$/.exec(b), chat = a.activeDialogue();
+                                let from = DRMng.UM.user.name, who = /^\/hit (\w+)$/.exec(b), chat = a.activeDialogue();
                                 if (from && who && chat) {
                                     let gesture = '** ' + DRMng.Gestures.Hit.generate().replace('@from',from).replace('@who',who[1]) + ' **';
                                     chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
@@ -762,7 +776,7 @@ if(window.location.host == "www.kongregate.com") {
                                 return false;
                             });
                             this.addChatCommand('poke',function(a,b){
-                                let from = DRMng.UserManager.user.name, who = /^\/poke (\w+)$/.exec(b), chat = a.activeDialogue();
+                                let from = DRMng.UM.user.name, who = /^\/poke (\w+)$/.exec(b), chat = a.activeDialogue();
                                 if (from && who && chat) {
                                     let gesture = '** ' + DRMng.Gestures.Poke.generate().replace('@from',from).replace('@who',who[1]) + ' **';
                                     chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
@@ -770,7 +784,7 @@ if(window.location.host == "www.kongregate.com") {
                                 return false;
                             });
                             this.addChatCommand('slap',function(a,b){
-                                let from = DRMng.UserManager.user.name, who = /^\/slap (\w+)$/.exec(b), chat = a.activeDialogue();
+                                let from = DRMng.UM.user.name, who = /^\/slap (\w+)$/.exec(b), chat = a.activeDialogue();
                                 if (from && who && chat) {
                                     let gesture = '** ' + DRMng.Gestures.Slap.generate().replace('@from',from).replace('@who',who[1]) + ' **';
                                     chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
@@ -793,13 +807,15 @@ if(window.location.host == "www.kongregate.com") {
                                 return false;
                             });
                             this.addChatCommand('clear',function(a,b){
+                                /*
                                 let room = active_room._chat_dialogue;
                                 let chat = room._message_window_node;
                                 let nodes = chat.getElementsByClassName('chat-message');
                                 while (nodes.length) {
                                     nodes[0].parentNode.removeChild(nodes[0]);
                                     room._messages_count--;
-                                }
+                                }*/
+                                holodeck._active_dialogue.clear();
                                 return false;
                             });
                             this.addChatCommand(['raid','rd'],function(a,b){
@@ -827,7 +843,7 @@ if(window.location.host == "www.kongregate.com") {
                                 else chat && chat.displayScriptMessage('Wrong /raid or /rd syntax');
                                 return false;
                             });
-                            console.info("[DRMng] Chat commands added!");
+                            console.info("[DRMng] {Kong} Chat commands added!");
                             //setTimeout(this.killScripts());
                         }
                         else setTimeout(this.addChatCommands.bind(this), 50);
@@ -869,7 +885,7 @@ if(window.location.host == "www.kongregate.com") {
                         if (ifr) {
                             for (let i = 0; i < ifr.length; ++i)
                                 if (ifr[i].id !== 'gameiframe') ifr[i].parentNode.removeChild(ifr[i]);
-                            console.info("[DRMng] All redundant iframes killed!");
+                            console.info("[DRMng] {Kong} All redundant iframes killed!");
                             if (document.querySelector('iframe#gameiframe') === null) {
                                 console.info("Game needs forced loading!");
                                 DRMng.Kong.forceGameLoad();
@@ -937,7 +953,7 @@ if(window.location.host == "www.kongregate.com") {
 
                         // <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
                         let link = document.createElement('link');
-                        link.setAttribute('href', 'https://fonts.googleapis.com/css?family=Open+Sans');
+                        link.setAttribute('href', 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800');
                         link.setAttribute('rel', 'stylesheet');
                         document.head.appendChild(link);
 
@@ -963,7 +979,8 @@ if(window.location.host == "www.kongregate.com") {
 						display: flex;\
 						padding-top: 0;\
 					}\
-					div#maingame, div#maingamecontent, div#flashframecontent, td#gameholder { width: auto !important; }\
+					div#maingame, div#maingamecontent, div#flashframecontent, td#gameholder { width: auto\
+					 !important; height: auto !important }\
 					td#gameholder { overflow: hidden; }\
 					div#maingamecontent table.game_table { position: inherit; }\
 					/* TO RESIZER! td#gameholder, div#game { width: 760px !important; overflow: hidden; }*/\
@@ -1052,7 +1069,7 @@ if(window.location.host == "www.kongregate.com") {
 						background-image: none;\
 						background-color: rgba(0,0,0,0.5) !important;\
 					}\
-					div#maingame { border: 1px solid rgba(0,0,0,0.2); border-radius: 0; }\
+					div#maingame { border: 1px solid rgba(0,0,0,0.2); border-radius: 0; padding: 7px; }\
 					div.upper_gamepage { padding: 0; }\
 					div#maingame div.user_connection .logged_in_user { color: #ddd; }\
 					\
@@ -1419,6 +1436,7 @@ if(window.location.host == "www.kongregate.com") {
 						padding: 2px 4px;\
 						color: #f5f5f5;\
 						border-top: 1px solid #202020;\
+						font-weight: 300;\
 					}\
 					div#kong_game_ui div.chat_controls span.chat_char_countdown {\
 						background-color: #252525;\
@@ -1475,7 +1493,7 @@ if(window.location.host == "www.kongregate.com") {
 					}\
 					div#kong_game_ui div.chat_message_window > div > p {\
 						margin: 0;\
-						padding: 3px 5px;\
+						padding: 4px 5px;\
 					}\
 					div#kong_game_ui div.chat_message_window > div > p.whisper {\
 						background-color: transparent;\
@@ -1489,6 +1507,9 @@ if(window.location.host == "www.kongregate.com") {
 						padding: 5px;\
 						margin: 0;\
 					}\
+					div#kong_game_ui div.chat_message_window > div > p.service {\
+					    border-left: 4px solid #69b;\
+					}\
 					div#kong_game_ui div.chat_message_window > div > p.raid {\
 						border-right: 4px solid #777;\
 					}\
@@ -1501,15 +1522,31 @@ if(window.location.host == "www.kongregate.com") {
 					div#kong_game_ui div.chat_message_window > div > p.visited.h { border-right-color: #763; }\
 					div#kong_game_ui div.chat_message_window > div > p.visited.n { border-right-color: #452; }\
 					div#kong_game_ui div.chat_message_window > div > p.raid.dead { border-right-color: #555; }\
+					div#kong_game_ui div.chat_message_window span.header {\
+					    display: flex;\
+					    margin-bottom: 1px;\
+					    align-items: baseline;\
+					}\
 					div#kong_game_ui div.chat_message_window span.timestamp,\
 					div#kong_game_ui div.chat_message_window span.extraid {\
 						color: #bbb;\
 						font-family: 'Open Sans', sans-serif;\
+						font-weight: 300;\
 					}\
 					div#kong_game_ui div.chat_message_window span.timestamp > span,\
 					div#kong_game_ui div.chat_message_window span.extraid { float: right; font-size: 10px; }\
 					div#kong_game_ui div.chat_message_window p.raid.dead span.extraid,\
 					div#kong_game_ui div.chat_message_window p.raid.dead span.timestamp > span a { color: #888; }\
+					div#kong_game_ui div.chat_message_window span.sticker {\
+					    font-size: 9px;\
+                        background-color: #888;\
+                        color: #333;\
+                        line-height: 11px;\
+                        padding: 1px 0 0;\
+                        font-weight: 800;\
+                        width: 30px;\
+                        text-align: center;\
+					}\
 					div#kong_game_ui div.chat_message_window span.username {\
 						color: #8cf;\
 						text-decoration: none;\
@@ -1519,6 +1556,9 @@ if(window.location.host == "www.kongregate.com") {
 					div#kong_game_ui div.chat_message_window span.separator {\
 						padding-right: 1px;\
 					}\
+					div#kong_game_ui div.chat_message_window p.service span.separator,\
+					div#kong_game_ui div.chat_message_window p.service span.header,\
+					div#kong_game_ui div.chat_message_window p.service span.username { display: none }\
 					div#kong_game_ui div.chat_message_window span.username.is_self,\
 					div#kong_game_ui div.chat_message_window .sent_whisper span.username { color: #e65; }\
 					div#kong_game_ui div.chat_message_window span.guildname {\
@@ -1528,12 +1568,21 @@ if(window.location.host == "www.kongregate.com") {
 					}\
 					div#kong_game_ui div.chat_message_window span.guildname:before { content: '('; }\
 					div#kong_game_ui div.chat_message_window span.guildname:after { content: ')'; }\
-					div#kong_game_ui div.chat_message_window .message { max-width: 99%; }\
+					div#kong_game_ui div.chat_message_window .message {\
+					    max-width: 99%;\
+					    font-weight: 300;\
+                        color: #fff;\
+					}\
 					div#kong_game_ui div.chat_message_window .message img {\
 						display: block;\
 						margin: 5px auto 2px;\
 						max-width: 100%;\
 						cursor: pointer\
+					}\
+					div#kong_game_ui div.chat_message_window .message embed {\
+					    height: auto;\
+                        margin: 4px auto -2px;\
+                        display: inline-block;\
 					}\
 					div#kong_game_ui div.chat_message_window .message a {\
 						color: #E29F1F;\
@@ -1606,7 +1655,7 @@ if(window.location.host == "www.kongregate.com") {
                         setTimeout(DRMng.Kong.setHeaderWidth, 500);
                     }
                 },
-                Raids: {
+                Raids:           {
                     filter: '',
                     all: [],
                     deadCache: {},
@@ -1623,7 +1672,7 @@ if(window.location.host == "www.kongregate.com") {
                     server: null,
                     checkAndSend: function() {
                         let link = document.getElementById('DRMng_submitRaidLink');
-                        let r = DRMng.Util.getRaidFromUrl(link.innerHTML, DRMng.UserManager.user.name);
+                        let r = DRMng.Util.getRaidFromUrl(link.innerHTML, DRMng.UM.user.name);
                         if (r && !isNaN(+r.id) && r.hash.length === 10 && ['Kasan','Elyssa'][r.pid] === DRMng.Config.local.server)
                         {
                             let delay = parseInt(document.getElementById('DRMng_submitDelay').value);
@@ -1656,10 +1705,10 @@ if(window.location.host == "www.kongregate.com") {
                         r = r && r.id ? r : DRMng.Raids.get(r);
                         multi = multi ? 's' : '';
                         if (r) {
-                            let u = DRMng.UserManager.user;
+                            let u = DRMng.UM.user;
                             if (u.qualified) {
                                 let authData = 'kongregate_user_id=' + u.ID + '&kongregate_game_auth_token=' + u.authToken;
-                                let raidData = '&kv_raid_id=' + r.id + '&kv_hash=' + r.hash + '&serverid=' + (DRMng.Config.local.server === 'Elyssa' ? '1' : '2');
+                                let raidData = '&kv_raid_id=' + r.id + '&kv_hash=' + r.hash + '&serverid=' + (r.sid || (DRMng.Config.local.server === 'Elyssa' ? '1' : '2'));
                                 let data = {
                                     eventName: 'DRMng.joinRaid' + multi,
                                     url: 'http://50.18.191.15/kong/raidjoin.php?' + authData + raidData,
@@ -1670,13 +1719,13 @@ if(window.location.host == "www.kongregate.com") {
                                 DRMng.postMessage(data);
                             }
                             else {
-                                console.warn("[DRMng] User not qualified in join! How that happened huh?", DRMng.UserManager.user);
+                                console.warn("[DRMng] {Raids} User not qualified in join! How that happened huh?", DRMng.UM.user);
                                 this.joined++;
                                 DRMng.Raids.joinMsg();
                             }
                         }
                         else {
-                            console.warn("[DRMng] Bad raid passed to join!", r);
+                            console.warn("[DRMng] {Raids} Bad data passed to join:", r);
                             this.joined++;
                             DRMng.Raids.joinMsg();
                         }
@@ -2117,56 +2166,66 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     init: function() { setTimeout(this.cleanDeadCache, 180000); }
                 },
-                UserManager: {
+                UM: {
                     numTries: 0,
                     knownUsers: {},
                     user: { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null },
-                    getCrucialUserData: function () {
+                    getBasicUserData: function() {
                         if (typeof active_user === 'object' && active_user.username().toLowerCase() !== 'guest') {
-                            DRMng.UserManager.user.ID = active_user.id();
-                            DRMng.UserManager.user.name = active_user.username();
-                            DRMng.UserManager.user.authToken = active_user.gameAuthToken();
-                            let usr = DRMng.UserManager.user;
-                            if (usr.ID && usr.name && usr.authToken) {
-                                DRMng.UserManager.user.qualified = true;
-                                return
-                            }
+                            this.user.ID = active_user.id();
+                            this.user.name = active_user.username();
+                            this.user.authToken = active_user.gameAuthToken();
+                            setTimeout(this.getExtendedUserData.bind(this), 1);
                         }
-                        console.warn("[DRMng] Missing active user data, retrying in .25 sec...");
-                        setTimeout(DRMng.UserManager.getCrucialUserData, 250);
+                        else {
+                            console.info("[DRMng] {UserManager} User data not ready, trying again in .10 sec");
+                            setTimeout(this.getBasicUserData.bind(this), 100);
+                        }
                     },
-                    getUserNode: function () {
-                        DRMng.UserManager.user.guild = holodeck._chat_window._rooms_by_type.guild._room.name;
-                        let usrNode = holodeck._chat_window._rooms_by_type.guild.users();
+                    getUserNode: function() {
+                        let guild = holodeck._chat_window._rooms_by_type.guild,
+                            users = guild.users();
 
-                        if (usrNode.length === 0) { setTimeout(DRMng.UserManager.getUserNode, 100); return; }
+                        if (users.length !== 0) {
+                            // set IGN
+                            for (let i = 0, l = users.length; i < l; ++i)
+                                if (users[i].username === this.user.name)
+                                { this.user.IGN = users[i]._game_character_name; break; }
 
-                        for (let i = 0; i < usrNode.length; ++i)
-                            if (usrNode[i].username === DRMng.UserManager.user.name) {
-                                DRMng.UserManager.user.IGN = usrNode[i]._game_character_name;
-                                break;
-                            }
+                            // set guild
+                            this.user.guild = guild._room.name;
+
+                            // qualify user data
+                            this.user.qualified = true;
+                        }
+                        else setTimeout(this.getUserNode.bind(this), 100);
                     },
-                    getExtendedUserData: function () {
+                    getExtendedUserData: function() {
                         if (holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
-                            if (holodeck._chat_window._rooms_by_type.guild) DRMng.UserManager.getUserNode();
-                            else if (DRMng.UserManager.numTries++ < 10) {
-                                console.warn("[DRMng] Missing game guild data, retrying in 2 sec... (%d)", DRMng.UserManager.numTries);
-                                setTimeout(DRMng.UserManager.getExtendedUserData, 2000);
+                            if (holodeck._chat_window._rooms_by_type.guild) setTimeout(this.getUserNode.bind(this), 1);
+                            else if (this.numTries++ < 20) {
+                                console.info("[DRMng] {UserManager} Guild data missing, trying again in 1 sec" +
+                                    " (%d/20)", this.numTries + 1);
+                                setTimeout(this.getExtendedUserData.bind(this), 1000);
                             }
-                            else console.warn("[DRMng] No guild information found! Guild info omitted.");
-
+                            else {
+                                console.warn('[DRMng] {UserManager} Guild info missing. Mutiks advice: "Join private' +
+                                    ' guild!"');
+                                this.user.guild = "";
+                                this.user.IGN = "";
+                                this.user.qualified = true;
+                            }
                         }
-                        else setTimeout(DRMng.UserManager.getExtendedUserData, 500);
+                        else setTimeout(this.getExtendedUserData.bind(this), 100);
                     },
-                    getUserData: function () {
+                    getUserData: function() {
                         // Needed to log into raids Engine
-                        DRMng.UserManager.getCrucialUserData();
-                        // Assures validity of IGN/Guild information
-                        DRMng.UserManager.getExtendedUserData();
+                        this.numTries = 0;
+                        this.user.qualified = false;
+                        setTimeout(this.getBasicUserData.bind(this), 1);
                     }
                 },
-                Engine: {
+                Engine:          {
                     client: null,
                     changeServer: function(server) {
                         server = server || (DRMng.Config.local.server === 'Elyssa' ? 'Kasan' : 'Elyssa');
@@ -2185,92 +2244,636 @@ if(window.location.host == "www.kongregate.com") {
                         setTimeout(this.client.connect.bind(this.client),1000);
                     },
                     init: function() {
-                        if (typeof io === 'function' && DRMng.UserManager.user.qualified) {
-                            let user = DRMng.UserManager.user;
-                            DRMng.Engine.client = io
+                        if (typeof io === 'function' && DRMng.UM.user.qualified) {
+                            this.client = io
                                 .connect('http://remote.erley.org:3000/' + DRMng.Config.local.server, {multiplex: false})
-                                .on('error', function (data) { console.warn(data) })
-                                .on('msg', DRMng.Engine.handleMessage)
-                                .on('service', DRMng.Engine.handleService)
-                                .on('disconnect', function () { console.warn('[DRMng] Socket client disconnected!') })
-                                .on('connect', function () {
-                                    console.info('[DRMng] Chat socket connection established, joining...');
-                                    DRMng.Engine.client.emit('join', {
-                                        usr: user.name, ign: user.IGN, gld: user.guild,
+                                .on('error', function(data) { console.warn('[DRMng] {Engine} Error:', data) })
+                                .on('msg', this.handleMessage)
+                                .on('service', this.handleService)
+                                .on('disconnect', function() { console.warn('[DRMng] {Engine} Socket client' +
+                                    ' disconnected.') })
+                                .on('connect', function() {
+                                    console.info('[DRMng] {Engine} Socket connection established, joining...');
+                                    this.client.emit('join', {
+                                        usr: DRMng.UM.user.name, ign: DRMng.UM.user.IGN, gld: DRMng.UM.user.guild,
                                         chk: DRMng.Config.local.checkSums });
-                                });
+                                }.bind(this));
                         }
                         else {
-                            console.warn("[DRMng] Missing data to start engine, retrying in 1 sec...");
-                            setTimeout(DRMng.Engine.init, 1000);
+                            console.info("[DRMng] {Engine} Resources not ready, trying again in 1 sec...");
+                            setTimeout(this.init.bind(this), 1000);
                         }
                     },
-                    handleMessage: function(d) { console.log(d) },
+                    handleMessage: function(d) { console.info('[DRMng] {Engine} Message event:', d); },
                     handleService: function(d) {
                         switch(d.action) {
                             case 'raidData':
                                 if (DRMng.Config.local.checkSums.raidData !== d.data.raidDataHash &&
                                     d.data.raidDataHash.length > 6) {
-                                    console.info("[DRMng] New raids data! Old hash: %s, new hash: %s",
+                                    console.info("[DRMng] {Engine} New raids data! Old hash: %s | New hash: %s",
                                         DRMng.Config.local.checkSums.raidData, d.data.raidDataHash);
                                     setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI, d.data.raidData), 1);
                                     DRMng.Config.local.raidData = d.data.raidData;
                                     DRMng.Config.local.checkSums.raidData = d.data.raidDataHash;
                                     DRMng.Config.saveLocal();
-                                    console.info(d.data);
+                                    //console.info(d.data);
                                 }
                                 else setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 1);
                                 break;
                             case 'filterData':
                                 if (DRMng.Config.local.checkSums.filterData !== d.data.filterDataHash &&
                                     d.data.filterDataHash.length > 6) {
-                                    console.info("[DRMng] New keywords data! Old hash: %s, new hash: %s",
+                                    console.info("[DRMng] {Engine} New keywords data! Old hash: %s | New hash: %s",
                                         DRMng.Config.local.checkSums.filterData, d.data.filterDataHash);
                                     DRMng.Config.local.filterData = d.data.filterData;
                                     DRMng.Config.local.checkSums.filterData = d.data.filterDataHash;
                                     DRMng.Config.saveLocal();
                                 }
-                                console.info(d.data);
+                                //console.info(d.data);
                                 break;
                             case 'tiersData':
                                 if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
                                     d.data.tiersDataHash.length > 6) {
-                                    console.info("[DRMng] New tiers data! Old hash: %s, new hash: %s",
+                                    console.info("[DRMng] {Engine} New tiers data! Old hash: %s | New hash: %s",
                                         DRMng.Config.local.checkSums.tiersData, d.data.tiersDataHash);
                                     DRMng.Config.local.tiersData = JSON.parse(d.data.tiersData);
                                     DRMng.Config.local.checkSums.tiersData = d.data.tiersDataHash;
                                     DRMng.Config.saveLocal();
                                 }
-                                console.info(d.data);
+                                //console.info(d.data);
                                 break;
                             case 'bootStrap':
-                                console.info("Bootstrap:", d);
-                                DRMng.Raids.insertAll(d.raids);
+                                console.log("[DRMng] {Engine} Bootstrap:", d);
+                                setTimeout(DRMng.Raids.insertAll.bind(DRMng.Raids,d.raids), 1);
                                 break;
-                            case 'newRaid': DRMng.Raids.insert(d.data); break;
-                            case 'nukedRaid': DRMng.Raids.remove(d.data); break;
-                            case 'partialUpdate': DRMng.Raids.update(d.data,false); break;
-                            case 'fullUpdate': DRMng.Raids.update(d.data,true); break;
+                            case 'newRaid':
+                                setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, d.data), 1);
+                                break;
+                            case 'nukedRaid':
+                                setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, d.data), 1);
+                                break;
+                            case 'partialUpdate':
+                                setTimeout(DRMng.Raids.update.bind(DRMng.Raids, d.data, false), 1);
+                                break;
+                            case 'fullUpdate':
+                                setTimeout(DRMng.Raids.update.bind(DRMng.Raids, d.data, true), 1);
+                                break;
                             case 'delayedSub':
                                 let mode = d.data.error ? 0 : 1;
-                                DRMng.UI.submitResponse(mode, d.data.msg);
+                                setTimeout(DRMng.UI.submitResponse.bind(DRMng.UI, mode, d.data.msg), 1);
                                 break;
-                            default: console.info(d);
+                            default:
+                                console.info('[DRMng] {Engine} Unknown data:', d);
                         }
+                    }
+                },
+                Alliance: {
+                    tabs: null,
+                    tab: null,
+                    unr: null,
+                    body: null,
+                    chat: null,
+                    conf: null,
+                    input: null,
+                    inputCnt: null,
+                    client: null,
+                    active: false,
+                    count: null,
+                    users: {
+                        html: null,
+                        count: 0,
+                        keys: [],
+                        fields: {},
+                        lock: false,
+                        update: function() {
+                            // update keys
+                            this.keys = Object.keys(this.fields);
+                            // sort userlist
+                            this.keys.sort();
+                            // clear list
+                            while(this.html.firstChild) this.html.removeChild(this.html.firstChild);
+                            // fill it up again
+                            this.count = this.keys.length;
+
+                            for (let i = 0; i < this.count; ++i)
+                                this.html.appendChild(this.fields[this.keys[i]].html);
+
+                            DRMng.Alliance.countUpdate();
+                        },
+                        add: function(user, noUpdate) {
+                            if (!this.lock) {
+                                this.lock = true;
+                                // TODO: Stop using update and inject field into sorted array
+                                if (user instanceof DRMng.Alliance.User) {
+                                    this.fields[user.name] = user;
+                                    if (!noUpdate) this.update();
+                                }
+                                this.lock = false;
+                            }
+                            else setTimeout(this.add.bind(this, user, noUpdate), 10);
+                        },
+                        del: function(name) {
+                            if (!this.lock) {
+                                this.lock = true;
+                                if (this.fields.hasOwnProperty(name)) {
+                                    this.html.removeChild(this.fields[name].html);
+                                    delete this.fields[name];
+                                    let idx = this.keys.indexOf(name);
+                                    if (idx !== -1) this.keys.splice(idx, 1);
+                                    this.count--;
+                                    DRMng.Alliance.countUpdate();
+                                    //this.update();
+                                }
+                                this.lock = false;
+                            }
+                            else setTimeout(this.del.bind(this, name), 10);
+                        }
+                    },
+                    User: function(name, ign, guild, socket) {
+                        this.html = null;
+                        this.name = name || null;
+                        this.ign = ign || "";
+                        this.guild = guild || "";
+                        this.sock = socket || null;
+                        this.setup = function() {
+                            if (this.name) {
+                                this.html = document.createElement('div');
+                                this.html.setAttribute('style', 'display: flex; margin: 1px 2px; align-items: center;');
+                                let span;
+                                span = document.createElement('span');
+                                span.setAttribute('style', 'font-size: 9px; background-color: #4a4a4a; color: #ddd;' +
+                                    ' line-height: 11px; padding: 1px 0 0; font-weight: 700; width: 30px;' +
+                                    ' text-align: center; text-shadow: 0 0 5px #333; flex-grow: 0; flex-shrink: 0;' +
+                                    ' margin-right: 5px; border: 1px solid #363636;');
+                                span.textContent = this.guild ? DRMng.Alliance.getGuildTag(this.guild) : '???';
+                                this.html.appendChild(span);
+
+                                span = document.createElement('span');
+                                span.setAttribute('style','flex-grow: 0; flex-shrink: 0; color: #f0f0f9;' +
+                                    ' margin-right: 4px; padding-bottom: 1px;');
+                                span.textContent = this.name;
+                                this.html.appendChild(span);
+
+                                span = document.createElement('span');
+                                span.setAttribute('style','flex-grow: 1; flex-shrink: 1; color: #ddd; font-style:' +
+                                    ' italic; padding-bottom: 1px;');
+                                span.textContent = '(' + this.ign + ')';
+                                this.html.appendChild(span);
+                            }
+                            return this;
+                        };
+                        return this.setup();
+                    },
+                    countUpdate: function() {
+                        if (this.active)
+                            this.count.textContent = this.users.count;
+                    },
+                    nameUpdate: function() {
+                        let name = this.conf.name ? this.conf.name : (this.conf.channel + ' alliance');
+                        name = name.trim();
+                        name = name.charAt(0).toUpperCase() + name.slice(1);
+                        document.querySelector('.room_name.h6').textContent = name;
+                    },
+                    getGuildTag: function(guild) {
+                        let roman = /^(.+\s)([IXV]+)$/.exec(guild);
+                        if (roman) guild = roman[1] + DRMng.Util.deRomanize(roman[2]);
+                        let reg = /([A-Z]+|\w)\w*/g;
+                        let tag = '', part;
+                        while (part = reg.exec(guild)) tag += part[1];
+                        return tag
+                    },
+                    initConfig: function() {
+                        this.conf = DRMng.Config.local.alliance;
+                        //DRMng.Config.saveLocal();
+                    },
+                    setUnread: function(unset) {
+                        if (this.unr) {
+                            unset = unset || false;
+                            this.unr.setAttribute('style', unset ? 'display: none' : '');
+                        }
+                    },
+                    initTab: function() {
+                        let actions = document.getElementById('chat_actions_container');
+                        let tabs = document.getElementById('chat_room_tabs');
+                        let gr = document.getElementById('guild_room_tab');
+                        if (tabs && actions && gr) {
+                            let tab = document.createElement('div');
+                            tab.setAttribute('id', 'alliance_room_tab');
+                            tab.setAttribute('class', 'chat_room_tab');
+                            tab.style.setProperty('display', 'none');
+
+                            let a = document.createElement('a');
+                            a.setAttribute('href', '#');
+                            a.innerHTML = 'Alliance';
+                            a.addEventListener('click', function() {
+                                holodeck._chat_window._active_room.hide();
+                                if (this.tab) {
+                                    this.tab.setAttribute('class', 'chat_room_tab active');
+                                    this.tab.style.setProperty('border-right', '0');
+                                }
+                                if (this.body) this.body.style.removeProperty('display');
+                                this.setUnread(true);
+                                this.active = true;
+                                setTimeout(this.nameUpdate.bind(this), 1);
+                                setTimeout(this.countUpdate.bind(this), 1);
+                                setTimeout(this.scrollToBottom.bind(this), 1);
+                            }.bind(this));
+
+                            let span = document.createElement('span');
+                            span.setAttribute('class', 'unread_chat_messages spriteall spritegame');
+                            span.setAttribute('style', 'display: none');
+                            span.innerHTML = 'Unread';
+                            this.unr = span;
+
+                            a.appendChild(span);
+                            tab.appendChild(a);
+
+                            this.tab = tab;
+                            this.tabs = tabs;
+
+                            // modify kong function to include new Alliance tab
+                            ChatRoom.prototype.show = function() {
+                                if (DRMng.Alliance) {
+                                    DRMng.Alliance.active = false;
+                                    if (DRMng.Alliance.tab) {
+                                        DRMng.Alliance.tab.setAttribute('class', 'chat_room_tab');
+                                        DRMng.Alliance.tab.style.removeProperty('border-right');
+                                    }
+                                    if (DRMng.Alliance.body)
+                                        DRMng.Alliance.body.style.setProperty('display', 'none');
+                                }
+                                this._node.show();
+                                this.updateRoomHeader();
+                                this._chat_actions_node.show();
+                                this._tab_for_room.addClassName("active");
+                                this._unread_message_node.hide();
+                                this.scrollToBottom();
+                            };
+                            ChatRoom.prototype.isActive = function() {
+                                let drm = DRMng ? DRMng.Alliance.active : false;
+                                return !drm && this == this._chat_window.activeRoom()
+                            };
+
+                            this.tabs.insertBefore(this.tab, actions);
+
+                            this.count = document.getElementsByClassName('number_in_room')[0];
+
+                            console.info("[DRMng] {Alliance} Chat tab created.");
+
+                            setTimeout(this.initBody.bind(this),1);
+                        }
+                        else setTimeout(this.initTab.bind(this), 100);
+                    },
+                    initBody: function() {
+                        let container = document.getElementById('chat_rooms_container');
+                        if (container) {
+                            this.body = document.createElement('div');
+                            this.body.style.setProperty('display', 'none');
+
+                            let usr = document.createElement('div');
+                            usr.setAttribute('class', 'chat_tabpane users_in_room clear');
+                            this.users.html = usr;
+
+                            let chat = document.createElement('div');
+                            chat.setAttribute('class', 'chat_message_window');
+                            this.chat = chat;
+
+                            let inputDiv = document.createElement('div');
+                            inputDiv.setAttribute('class', 'chat_controls');
+
+                            let inputArea = document.createElement('textarea');
+                            inputArea.setAttribute('class', 'chat_input');
+                            inputArea.value = 'Enter text for chat here';
+                            this.input = inputArea;
+
+                            this.input.addEventListener('focus', function() {
+                                if (this.input.value === 'Enter text for chat here') {
+                                    this.input.value = '';
+                                    this.input.style.removeProperty('font-style');
+                                }
+                            }.bind(this));
+                            this.input.addEventListener('blur', function() {
+                                if (this.input.value === '') {
+                                    this.input.value = 'Enter text for chat here';
+                                    this.input.style.setProperty('font-style', 'italic');
+                                }
+                            }.bind(this));
+                            this.input.addEventListener('keydown', function(e) {
+                                //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
+                                switch (e.key) {
+                                    case 'Enter':
+                                        if (!e.shiftKey) {
+                                            this.send();
+                                            e.preventDefault();
+                                        }
+                                        break;
+                                }
+                            }.bind(this));
+                            this.input.addEventListener('keyup', function() {
+                                if (this.input.value !== 'Enter text for chat here') {
+                                    let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
+                                    txt = txt[2] || "";
+                                    if (this.inputCnt) this.inputCnt.textContent = txt.length;
+                                }
+                            }.bind(this));
+
+                            let cnt = document.createElement('span');
+                            cnt.setAttribute('class', 'chat_chars_remaining');
+                            cnt.textContent = '0';
+                            this.inputCnt = cnt;
+
+                            let cntCont = document.createElement('span');
+                            cntCont.setAttribute('class', 'chat_char_countdown');
+                            cntCont.appendChild(this.inputCnt);
+                            cntCont.appendChild(document.createTextNode('/Inf'));
+
+                            inputDiv.appendChild(this.input);
+                            inputDiv.appendChild(cntCont);
+                            this.body.appendChild(this.users.html);
+                            this.body.appendChild(this.chat);
+                            this.body.appendChild(inputDiv);
+                            container.appendChild(this.body);
+
+                            console.info("[DRMng] {Alliance} Chat body created.");
+
+                            setTimeout(this.setup.bind(this), 1);
+                        }
+                        else setTimeout(this.initBody.bind(this), 100);
+                    },
+                    setup: function(channel, password) {
+                        if (this.conf.enabled) {
+                            if (typeof io === 'function' && this.tab && this.chat && DRMng.UM.user.qualified) {
+                                this.tab.style.removeProperty('display');
+
+                                let usr = DRMng.UM.user;
+                                let user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
+
+                                let ch = channel || this.conf.channel;
+                                let pass = password || this.conf.pass;
+
+                                if (!ch || !pass) {
+                                    this.conf.enabled = false;
+                                    DRMng.Config.saveLocal();
+                                    return;
+                                }
+
+                                if (this.client && this.client.connected) this.client.disconnect();
+                                else this.client =
+                                    io.connect(`http://remote.erley.org:3000/${ch}`,
+                                        { query: `token=${DRMng.Util.crc32(pass)}`, multiplex: false });
+
+                                this.client.on('error', function(d) {
+                                    console.warn(d);
+                                    this.setButton();
+                                    //destroyChat();
+                                }.bind(this));
+
+                                this.client.on('disconnect', function() {
+                                    console.warn('[DRMng] {Alliance} Chat client disconnected!');
+                                    this.setButton();
+                                }.bind(this));
+
+                                this.client.on('connect', function() {
+                                    //console.info('[DRMng] {Alliance} Socket connection established, joining...');
+                                    // clear chat window
+                                    while (this.chat.firstChild) this.chat.removeChild(this.chat.firstChild);
+                                    // login to server
+                                    this.client.emit('join', user);
+                                    console.info("[DRMng] {Alliance} User login data [%s|%s|%s]", user.usr, user.ign, user.gld);
+                                    // save data if valid
+                                    if (channel) this.conf.channel = channel;
+                                    if (password) this.conf.pass = password;
+                                    DRMng.Config.saveLocal();
+                                    // set button in leave mode
+                                    this.setButton(true);
+                                }.bind(this));
+
+                                this.client.on('msg', this.messageEvent.bind(this));
+                                this.client.on('service', this.serviceEvent.bind(this));
+                            }
+                            else {
+                                console.info('[DRMng] {Alliance} Resources not ready, trying again in 1 sec...');
+                                setTimeout(this.setup.bind(this, channel, password), 1000);
+                            }
+                        }
+                    },
+                    send: function() {
+                        let msg = this.input.value;
+                        if (msg && msg !== 'Enter text for chat here') {
+                            let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
+                            if (pm && pm[1] && pm[2]) this.client.emit('msg', {type: 1, user: pm[1], text: pm[2]});
+                            else this.client.emit('msg', {type: 0, text: msg});
+                            this.input.value = '';
+                        }
+                    },
+                    serviceEvent: function(data) {
+                        let usr;
+                        switch (data.act) {
+                            case 'loadData':
+                                // load users
+                                for (let u in data.users) {
+                                    if (data.users.hasOwnProperty(u)) {
+                                        usr = data.users[u];
+                                        this.users.add(new this.User(usr.usr, usr.ign, usr.gld, usr.sid), true);
+                                    }
+                                }
+                                this.users.lock = true;
+                                this.users.update();
+                                this.users.lock = false;
+
+                                // load history
+                                this.messageLock = true;
+                                for (let i = 0, l = data.log.length; i < l; ++i) this.messageEvent(data.log[i], true);
+                                if (this.messageBuffer.length > 0) {
+                                    let data;
+                                    while (data = this.messageBuffer.shift()) this.messageEvent(data, true);
+                                }
+                                this.messageLock = false;
+
+                                console.log("[DRMng] {Alliance} LOAD:", data);
+                                break;
+
+                            case 'userJoin':
+                                usr = data.user;
+                                setTimeout(this.users.add(new this.User(usr.usr, usr.ign, usr.gld, usr.sid)), 1);
+                                break;
+
+                            case 'userLeave':
+                                usr = data.user;
+                                setTimeout(this.users.del(usr.usr), 1);
+                                break;
+
+                            default:
+                                console.log("[DRMng] {Alliance} SRV:",data);
+                        }
+                    },
+                    messageTmpl: new Template(
+                        '<p class="#{mainCls}">' +
+                            '<span class="header">' +
+                                '<span class="timestamp" style="flex-grow: 1">#{ts}</span>' +
+                                '<span class="sticker">#{tag}</span>' +
+                            '</span>' +
+                            '<span style="display: block">' +
+                                '<span username="#{user}" class="#{userCls}">#{pfx}#{user}</span>' +
+                                '<span class="#{ignCls}">#{ign}</span>' +
+                                '<span class="separator">#{sep}</span>' +
+                                '<span class="message hyphenate">#{msg}</span>' +
+                            '</span>' +
+                        '</p>'
+                    ),
+                    messageLock: true,
+                    messageBuffer: [],
+                    messageEvent: function(data, history) {
+                        if (!this.messageLock || history || data.type === 4) {
+                            let u = DRMng.UM.user,
+                                t = data.type,
+                                c = t === 4,
+                                e = ['username', 'truncate'],
+                                f = data.usr.usr === u.name,
+                                h = ['', 'From ', 'To ', '', ''][t],
+                                g = [];
+
+                            e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
+                            h && g.push('whisper');
+                            (t === 1) && g.push('received_whisper');
+                            (t === 2) && g.push('sent_whisper');
+                            c && g.push('service');
+                            f && e.push("is_self");
+
+                            let r = function(data, pc, uc, pfx) {
+                                let msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
+                                if (msg) {
+                                    let r = DRMng.Util.getRaidFromUrl(msg[2], data.usr.usr);
+                                    if (r) {
+                                        let srv = DRMng.Config.local.server.toLowerCase(), g = this.getGuildTag(data.usr.gld),
+                                            v = DRMng.Config.local.visited, l, m = msg[1] + msg[3],
+                                            i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
+                                            t = new Date(data.ts).format("mmm d, HH:MM"), u = data.usr.usr,
+                                            ign = data.usr.ign;
+
+                                        pc.push('raid');
+                                        pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
+                                        pc.push(r.id);
+                                        (v[srv].indexOf(r.id) > -1) && pc.push('visited');
+
+                                        n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
+                                        n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
+
+                                        l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
+                                        l = `DRMng.Raids.joinOne(${l}); return false;`;
+
+                                        let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff-1]*1000/i.maxPlayers) : '';
+                                        f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : 'FS '}${f}`;
+
+                                        return `<p class="${pc.join(' ')}">
+                                                    <span class="header">
+                                                        <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
+                                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
+                                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
+                                                    </span>
+                                                    <span style="display: flex">
+                                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
+                                                        <span class="guildname truncate">${ign}</span>
+                                                        <span class="separator">${s}</span>
+                                                        <span class="extraid" style="flex-grow: 1; text-align: right">${f}</span>
+                                                    </span>
+                                                    <span class="message hyphenate">${m}</span>
+                                                </p>`;
+                                    }
+                                }
+                                return null;
+                            }.bind(this)(data, g, e, h);
+
+                            // TODO: Finish parsing other items like img, link etc
+                            /*
+                            else {
+                                let reg = /(https?\S+[^,\s])/g, l, link, start, end;
+                                while (l = reg.exec(b)) {
+                                    link = /\.(jpe?g|png|gif)$/.test(l[1])
+                                        ? '<img src="' + l[1] + '" alt="'+ l[1] +'" onclick="window.open(this.src)">'
+                                        : '<a href="' + l[1] + '" target="_blank">' + l[1].replace(/^https?:\/\//,'') + '</a>';
+                                    start = b.substr(0, reg.lastIndex - l[1].length);
+                                    end = b.slice(reg.lastIndex);
+                                    b = start + link + end;
+                                    reg.lastIndex += link.length - l[1].length;
+                                }
+                            }*/
+                            let content;
+                            if (r) content = r;
+                            else content = this.messageTmpl.evaluate({
+                                mainCls:      g.join(" "),
+                                ts:           new Date(data.ts).format("mmm d, HH:MM"),
+                                pfx:          h,
+                                user:         c ? '' : data.usr.usr,
+                                userCls:      e.join(' '),
+                                ign:          c ? '' : data.usr.ign || '',
+                                ignCls:       data.usr.ign && !c ? 'guildname truncate' : '',
+                                tag:          c ? '' : this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
+                                sep:          c ? '' : ': ',
+                                msg:          data.txt
+                            });
+
+                            let msg = document.createElement('div');
+                            msg.setAttribute('class', 'chat-message');
+                            msg.innerHTML = content;
+                            this.chat.appendChild(msg);
+                            if (this.active) this.scrollToBottom();
+                            else this.setUnread();
+                        }
+                        else this.messageBuffer.push(data);
+                    },
+                    scrollToBottom: function() { this.chat.scrollTop = this.chat.scrollHeight; },
+                    setButton: function(conn) {
+                        let b = document.getElementById('DRMng_allianceJoin');
+                        if (b) {
+                            conn = conn || false;
+                            if (conn) {
+                                b.setAttribute('class', 'l');
+                                b.textContent = 'Leave';
+                            }
+                            else {
+                                b.setAttribute('class', 'n');
+                                b.textContent = 'Join';
+                            }
+                        }
+                    },
+                    action: function(b) {
+                        let a = DRMng.Alliance;
+                        if (a.conf.enabled) {
+                            a.conf.enabled = false;
+                            if (a.client.connected) a.client.disconnect();
+                            holodeck._chat_window.showActiveRoom();
+                            this.tab.style.setProperty('display', 'none');
+                        }
+                        else {
+                            let ch = document.getElementById('DRMng_allianceChnl'),
+                                ps = document.getElementById('DRMng_alliancePass');
+                            if (ch.getAttribute('class') === null && ps.getAttribute('class') === null) {
+                                a.conf.enabled = true;
+                                setTimeout(a.setup.bind(a, ch.value, ps.value), 1);
+                            }
+                        }
+                    },
+                    init: function() {
+                        this.initConfig();
+                        setTimeout(this.initTab.bind(this), 1000);
                     }
                 },
                 UI: {
                     Groups: {},
-                    Group: function(alias, title) {
+                    Group: function(alias, title, visible) {
                         this.fields = [];
                         this.html = null;
                         this.cont = null;
-                        this.setup = function(alias, title) {
+                        this.setup = function(alias, title, visible) {
                             if (alias && title) {
+                                visible = visible || false;
                                 let groupDiv = document.createElement('div');
-                                groupDiv.setAttribute('class', 'group flex');
+                                groupDiv.setAttribute('class', visible ? 'group flex' : 'group flex hide');
+                                groupDiv.setAttribute('group', 'option');
                                 let titleDiv = document.createElement('div');
                                 titleDiv.setAttribute('class', 'title');
+                                titleDiv.addEventListener('click', DRMng.UI.roll.bind(this, titleDiv));
                                 titleDiv.innerHTML = "" + title;
                                 let contentDiv = document.createElement('div');
                                 groupDiv.appendChild(titleDiv);
@@ -2289,12 +2892,9 @@ if(window.location.host == "www.kongregate.com") {
                             }
                             return this;
                         };
-                        return this.setup(alias, title);
+                        return this.setup(alias, title, visible);
                     },
-                    /*
-                    * var opt = new DRMng.UI.Option().setup("kongui_hideForum","Hide forum area",true).desc("Hides kongregate forum part located below game window.").make();
-                    * */
-                    Option: function(props) {
+                    Option: function() {
                         this.html = null;
                         this.conf = null;
                         this.cbFn = null;
@@ -2358,7 +2958,9 @@ if(window.location.host == "www.kongregate.com") {
 
                             if (_desc) {
                                 let descField = document.createElement('div');
-                                descField.setAttribute('style', 'border-top: 1px solid #404040; background-color: #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style: italic; max-height: 45px; overflow: hidden; color: #eaeaea;');
+                                descField.setAttribute('style', 'border-top: 1px solid #404040; background-color:' +
+                                    ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
+                                    ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
                                 descField.innerHTML = "" + _desc;
                                 optionDiv.appendChild(descField);
                             }
@@ -2490,7 +3092,7 @@ if(window.location.host == "www.kongregate.com") {
 					#DRMng_status {\
 						flex-grow: 1;\
 						font-size: 12px;\
-						font-weight: bold;\
+						font-weight: 600;\
 						padding: 6px 10px;\
 						text-align: center;\
 						white-space: nowrap;\
@@ -2510,7 +3112,7 @@ if(window.location.host == "www.kongregate.com") {
 						flex-grow: 1;\
 						text-align: center;\
 						background-color: transparent;\
-						padding: 6px 2px 5px;\
+						padding: 6px 8px 5px;\
 						border: 1px solid #444;\
 						border-left: 0;\
 						border-top: 0;\
@@ -2650,7 +3252,7 @@ if(window.location.host == "www.kongregate.com") {
 						border-bottom: 1px solid #222;\
 						text-align: center;\
 						color: #ccc;\
-						font-weight: bold;\
+						font-weight: 600;\
 						font-size: 10pt;\
 						padding: 4px 0;\
 						background-color: #333;\
@@ -2701,7 +3303,7 @@ if(window.location.host == "www.kongregate.com") {
 						flex-grow: 2;\
 						width: 50%;\
 						color: #eee;\
-						padding: 3px 5px;\
+						padding: 4px 5px 2px;\
 						white-space: nowrap;\
 						overflow: hidden;\
 						text-overflow: ellipsis;\
@@ -2709,7 +3311,8 @@ if(window.location.host == "www.kongregate.com") {
 					}\
 					#DRMng_main div.buttonStripe:hover { background-color: #404040 }\
 					#DRMng_main div.txtInputStripe > input[type=text] { flex-grow: 2; }\
-					#DRMng_main div.buttonStripe > input[type=text] { flex-grow: 1; }\
+					#DRMng_main div.buttonStripe > input[type=text],\
+					#DRMng_main div.buttonStripe > input[type=password] { flex-grow: 1; }\
 					#DRMng_main div.buttonStripe > :first-child,\
 					#DRMng_main div.txtInputStripe > :first-child { border-left: 0; }\
 					#DRMng_main div.txtInputStripe > p {\
@@ -2745,14 +3348,14 @@ if(window.location.host == "www.kongregate.com") {
 					#DRMng_main div.buttonStripe > button.l:hover { background-color: #743; }\
 					#DRMng_main div.buttonStripe > button.nm:hover { background-color: #648; }\
 					#DRMng_main div.buttonStripe > button.single:hover { background-color: #353; }\
-					#DRMng_main div > input[type=text] {\
+					#DRMng_main div > input[type=text], #DRMng_main div > input[type=password] {\
 						height: 19px;\
 						padding: 1px 7px;\
 						text-align: center;\
 					}\
-					#DRMng_main div > input[type=text]:hover,\
+					#DRMng_main div > input[type=text]:hover, #DRMng_main div > input[type=password]:hover,\
 					#DRMng_main div.txtInputStripe > p:hover { background: #404040; cursor: text }\
-					#DRMng_main div > input[type=text]:focus,\
+					#DRMng_main div > input[type=text]:focus, #DRMng_main div > input[type=password]:focus,\
 					#DRMng_main div.txtInputStripe > p:focus { background: #3a3a3a; }\
 					#DRMng_main div > input[type=text].default,\
 					#DRMng_main div.txtInputStripe > p.default { font-style: italic; }\
@@ -2776,7 +3379,7 @@ if(window.location.host == "www.kongregate.com") {
 					#DRMng_info > div:first-child { display: flex; }\
 					#DRMng_info span.title {\
 						font-size: 12px;\
-						font-weight: bold;\
+						font-weight: 600;\
 						flex-shrink:1;\
 						white-space: nowrap;\
 						text-overflow: ellipsis;\
@@ -2801,7 +3404,9 @@ if(window.location.host == "www.kongregate.com") {
 					#DRMng_info label {\
 						position: relative;\
 						z-index: 1;\
-						font-size: 9px;\
+						font-size: 7pt;\
+						font-weight: 300;\
+						color: #fff;\
 					}\
 					#DRMng_info progress {\
 						border: 0;\
@@ -2836,6 +3441,7 @@ if(window.location.host == "www.kongregate.com") {
 						flex-direction: column;\
 						width: 34px;\
 						background: #4c4c4c;\
+						border-left: 1px solid #000;\
 					}\
 					#DRMng_Sidebar.flex {\
 						height: 690px;\
@@ -3037,7 +3643,7 @@ if(window.location.host == "www.kongregate.com") {
                                     btn.setAttribute('onclick', button.command);
                                     break;
                                 case 'chat':
-                                    btn.setAttribute('onclick', "active_room._chat_dialogue._holodeck.processChatCommand('" + button.command + "')");
+                                    btn.setAttribute('onclick', "holodeck._active_dialogue._holodeck.processChatCommand('" + button.command + "')");
                                     break;
                                 case 'www':
                                     btn.setAttribute('onclick', "window.open('" + button.command + "')");
@@ -3139,11 +3745,27 @@ if(window.location.host == "www.kongregate.com") {
                             if (el[i].innerHTML.toLowerCase() === DRMng.Config.local.sortBy)
                                 el[i].className = 'active';
 
+                        // Alliance
+                        el = document.getElementById('DRMng_allianceChnl');
+                        if (DRMng.Config.local.alliance.channel) {
+                            el.removeAttribute('class');
+                            el.value = DRMng.Config.local.alliance.channel;
+                        }
+                        el = document.getElementById('DRMng_alliancePass');
+                        if (DRMng.Config.local.alliance.pass) {
+                            el.removeAttribute('class');
+                            el.setAttribute('type', 'password');
+                            el.value = DRMng.Config.local.alliance.pass;
+                        }
                     },
                     loadOptions: function() {
                         let group, opt;
 
-                        group = new this.Group('kongui', 'Kongregate UI');
+                        /*
+                         * kongui - Kongregate UI
+                         * */
+
+                        group = new this.Group('kongui', 'Kongregate UI', true);
 
                         opt = new this.Option();
                         opt.setup('kongui_stickyHeader', 'Sticky header', true)
@@ -3151,6 +3773,26 @@ if(window.location.host == "www.kongregate.com") {
                            .event(function () {
                                let mode = this.conf[this.field] ? 'fixed' : 'absolute';
                                DRMng.Kong.CSS.rpl(this.field, 'div#headerwrap', 'position: ' + mode);
+                           })
+                           .make(group);
+
+                        opt = new this.Option();
+                        opt.setup('kongui_hideToolbar', 'Hide game toolbar', false)
+                           .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
+                               else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        opt = new this.Option();
+                        opt.setup('kongui_hideFrame', 'Hide game frame', false)
+                           .desc('Hides 7px wide frame around game window.')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, 'div#maingame', 'padding: 0');
+                               else DRMng.Kong.CSS.del(this.field);
                            })
                            .make(group);
 
@@ -3174,6 +3816,35 @@ if(window.location.host == "www.kongregate.com") {
                            })
                            .make(group);
 
+                        /*
+                        * drmui - RaidsManager UI
+                        * */
+
+                        group = new this.Group('drmui', 'RaidsManager UI');
+
+                        opt = new this.Option();
+                        opt.setup('drmui_disableTransitions', 'Disable transitions', false)
+                           .desc('Disables animated transitions for various UI elements to improve performance on' +
+                               ' low-end hardware.')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+                                       ' div#DRMng_info *', 'transition: initial !important');
+                               else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        opt = new this.Option();
+                        opt.setup('drmui_hideSideBar', 'Hide sidebar', false)
+                           .desc('HIdes sidebar which is located between game window and kongregate chat.')
+                           .event(function () {
+                               if (this.conf[this.field])
+                                   DRMng.Kong.CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
+                               else DRMng.Kong.CSS.del(this.field);
+                           })
+                           .make(group);
+
+                        // Save all changes made to config file due to introducing new options
                         DRMng.Config.saveLocal();
                     },
                     raidInfo: function(boss) {
@@ -3294,10 +3965,10 @@ if(window.location.host == "www.kongregate.com") {
                     handleChatClick: function(e) {
                         let el = e.target;
                         console.log("Chat clicked on element [%s|%s|%s]", el.id, el.className, ['Left','Middle','Right','4th','5th'][e.button]);
-                        if (el.className.indexOf('chat_message_window_username') !== -1) {
+                        if (el.className.indexOf('username truncate') !== -1) {
                             e.stopPropagation(); e.preventDefault();
                             console.log("Handle whisping to " + el.getAttribute('username'));
-                            active_room.insertInChatInput('/w ' + el.getAttribute('username') + ' ');
+                            holodeck._active_dialogue.setInput('/w ' + el.getAttribute('username') + ' ');
                         }
                         else if (el.className.indexOf('DRMng_info_picker') !== -1) {
                             let raid = el.className.split(' ')[1];
@@ -3449,6 +4120,44 @@ if(window.location.host == "www.kongregate.com") {
                             });
                         }
 
+                        // alliance chat
+                        flt = document.getElementById('DRMng_allianceChnl');
+                        flt.addEventListener('focus', function() {
+                            if (this.getAttribute('class') === 'default') {
+                                this.removeAttribute('class');
+                                this.value = '';
+                            }
+                        });
+                        flt.addEventListener('blur', function() {
+                            this.value = this.value.trim();
+                            let sv = this.value;
+                            if (this.value == '') {
+                                this.setAttribute('class', 'default');
+                                this.value = 'Channel';
+                            }
+                            DRMng.Config.local.alliance.channel = sv;
+                            DRMng.Config.saveLocal();
+                        });
+
+                        flt = document.getElementById('DRMng_alliancePass');
+                        flt.addEventListener('focus', function() {
+                            if (this.getAttribute('class') === 'default') {
+                                this.removeAttribute('class');
+                                this.setAttribute('type', 'password');
+                                this.value = '';
+                            }
+                        });
+                        flt.addEventListener('blur', function() {
+                            this.value = this.value.trim();
+                            let sv = this.value;
+                            if (this.value == '') {
+                                this.setAttribute('class', 'default');
+                                this.setAttribute('type', 'text');
+                                this.value = 'Password';
+                            }
+                            DRMng.Config.local.alliance.pass = sv;
+                            DRMng.Config.saveLocal();
+                        });
 
                         // resize listeners
                         DRMng.Util.hResize.regPanes.push('chat_container');
@@ -3588,6 +4297,17 @@ if(window.location.host == "www.kongregate.com") {
 									</div>\
 									<div id="DRMng_submitResponse" class="textField"></div>\
 								</div>\
+								<div class="group">\
+								    <div class="title">Alliance chat</div>\
+								    <div class="buttonStripe">\
+								        <input type="text" spellcheck="false" class="default" size="1"\
+								            id="DRMng_allianceChnl" value="Channel">\
+								        <input type="text" spellcheck="false" class="default" size="1"\
+								            id="DRMng_alliancePass" value="Password">\
+								        <button onclick="DRMng.Alliance.action(this)"\
+								            id="DRMng_allianceJoin" class="n">Join</button>\
+								    </div>\
+								</div>\
 							</div>\
 							<div class="" id="DRMng_Options"></div>\
 						</div>\
@@ -3660,7 +4380,7 @@ if(window.location.host == "www.kongregate.com") {
                     type = data ? type + '#' + data : type;
                     if (game) game.contentWindow.postMessage(type,'http://50.18.191.15');
                 },
-                init: function() {
+                init:            function() {
 
                     // load localStorage
                     this.Config.loadLocal();
@@ -3669,7 +4389,7 @@ if(window.location.host == "www.kongregate.com") {
                     this.Kong.init();
 
                     // get user data
-                    this.UserManager.getUserData();
+                    this.UM.getUserData();
 
                     // load UI
                     this.UI.init();
@@ -3682,6 +4402,10 @@ if(window.location.host == "www.kongregate.com") {
 
                     // connect to Server
                     this.Engine.init();
+
+                    // silently init alliance chat
+                    // and connect if proper credentials are present
+                    this.Alliance.init();
                 }
             };
             console.log('[DRMng] Initialized. Checking for needed Kong resources ...');

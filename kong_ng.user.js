@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.18
+// @version        	2.0.19
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -19,7 +19,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '18', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '19', name: 'DotD Raids Manager Next Gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -501,6 +501,7 @@ if(window.location.host == "www.kongregate.com") {
                             let sbs = document.createElement('div');
                             sbs.setAttribute('id', 'alliance_chat_sbs');
                             sbs.setAttribute('style', 'display: none');
+                            sbs.addEventListener('click', DRMng.Alliance.sbsEvent);
                             document.getElementById('chat_tab_pane').appendChild(sbs);
                         }
                         else setTimeout(this.addSbsChatContainer.bind(this), 10);
@@ -1573,6 +1574,7 @@ if(window.location.host == "www.kongregate.com") {
 						text-shadow: 0 0 5px #111;\
 						padding-right: 1px;\
 					}\
+					div#kong_game_ui div.chat_message_window span.username:hover { text-decoration: underline; }\
 					div#kong_game_ui div.chat_message_window span.separator {\
 						padding-right: 1px;\
 					}\
@@ -2436,7 +2438,7 @@ if(window.location.host == "www.kongregate.com") {
 
                                 span = document.createElement('span');
                                 span.setAttribute('style','flex-grow: 1; flex-shrink: 1; color: #ddd; font-style:' +
-                                    ' italic; padding-bottom: 1px;');
+                                    ' italic; padding-bottom: 1px; text-overflow: ellipsis; overflow: hidden;');
                                 span.textContent = '(' + this.ign + ')';
                                 this.html.appendChild(span);
                             }
@@ -2551,6 +2553,7 @@ if(window.location.host == "www.kongregate.com") {
                                 this.body = document.createElement('div');
 
                                 if (!this.conf.sbs) this.body.style.setProperty('display', 'none');
+                                else this.body.style.setProperty('width', '100%');
 
                                 let usr = document.createElement('div');
                                 usr.setAttribute('class', 'chat_tabpane users_in_room clear');
@@ -2746,6 +2749,17 @@ if(window.location.host == "www.kongregate.com") {
                                 console.log("[DRMng] {Alliance} SRV:",data);
                         }
                     },
+                    sbsEvent: function(e) {
+                        //console.log(e.target);
+                        /*
+                        let usr = e.target.getAttribute('username');
+                        if (usr) {
+                            this.input.value = `/w ${usr} `;
+                            this.input.focus();
+                        }
+                        */
+                        setTimeout(DRMng.UI.handleChatClick.bind(DRMng.UI, e, true), 1);
+                    },
                     messageTmpl: new Template(
                         '<p class="#{mainCls}">' +
                             '<span class="header">' +
@@ -2814,7 +2828,7 @@ if(window.location.host == "www.kongregate.com") {
                                                         <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
                                                         <span class="guildname truncate">${ign}</span>
                                                         <span class="separator">${s}</span>
-                                                        <span class="extraid" style="flex-grow: 1; text-align: right">${f}</span>
+                                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
                                                     </span>
                                                     <span class="message hyphenate">${m}</span>
                                                 </p>`;
@@ -4046,13 +4060,21 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         DRMng.UI.fillInfoTimeout = setTimeout(DRMng.UI.fillInfo, 30, id);
                     },
-                    handleChatClick: function(e) {
-                        let el = e.target;
-                        console.log("Chat clicked on element [%s|%s|%s]", el.id, el.className, ['Left','Middle','Right','4th','5th'][e.button]);
-                        if (el.className.indexOf('username truncate') !== -1) {
+                    handleChatClick: function(e, sbs) {
+                        let el = e.target, usr;
+                        sbs = sbs || false;
+                        //console.log("Chat clicked on element [%s|%s|%s]", el.id, el.className,
+                        // ['Left','Middle','Right','4th','5th'][e.button]);
+                        if ((usr = el.getAttribute('username'))) {
                             e.stopPropagation(); e.preventDefault();
-                            console.log("Handle whisping to " + el.getAttribute('username'));
-                            holodeck._active_dialogue.setInput('/w ' + el.getAttribute('username') + ' ');
+                            let a = DRMng.Alliance;
+                            console.log(`[DRMng] {${a.active?'Alliance':'Kong'}} PM to ` + usr);
+                            if (a.active || sbs) {
+                                a.input.value = `/w ${usr} `;
+                                a.input.dispatchEvent(new Event('focus'));
+                                a.input.focus();
+                            }
+                            else holodeck._active_dialogue.setInput(`/w ${usr} `);
                         }
                         else if (el.className.indexOf('DRMng_info_picker') !== -1) {
                             let raid = el.className.split(' ')[1];

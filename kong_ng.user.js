@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.19
+// @version        	2.0.20
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -19,7 +19,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '19', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '20', name: 'DotD Raids Manager Next Gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -1668,7 +1668,7 @@ if(window.location.host == "www.kongregate.com") {
 					div.chat_message_window table.raidinfo td:last-child { border-right: 0 }\
 					div.chat_message_window table.raidinfo tr:last-child td { border-bottom: 0 }\
 					div.chat_message_window table.raidinfo td:first-child,\
-					div.chat_message_window table.raidinfo tr:first-child td { font-weight: bold }\
+					div.chat_message_window table.raidinfo tr:first-child td { font-weight: 600 }\
 					\
 					";
 
@@ -2665,8 +2665,10 @@ if(window.location.host == "www.kongregate.com") {
                                         { query: `token=${DRMng.Util.crc32(pass)}`, multiplex: false });
 
                                 this.client.on('error', function(d) {
-                                    console.warn(d);
+                                    console.warn("[DRMng] {Alliance} Chat client error:", d);
                                     this.setButton();
+                                    document.getElementById('alliance_chat_sbs').style.setProperty('display', 'none');
+                                    this.tab.style.setProperty('display', 'none');
                                     //destroyChat();
                                 }.bind(this));
 
@@ -2774,6 +2776,49 @@ if(window.location.host == "www.kongregate.com") {
                             '</span>' +
                         '</p>'
                     ),
+                    raidMessage: function(data, pc, uc, pfx) {
+                        let msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
+                        if (msg) {
+                            let r = DRMng.Util.getRaidFromUrl(msg[2], data.usr.usr);
+                            if (r) {
+                                let srv = DRMng.Config.local.server.toLowerCase(), g = this.getGuildTag(data.usr.gld),
+                                    v = DRMng.Config.local.visited, l, m = msg[1] + msg[3],
+                                    i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
+                                    t = new Date(data.ts).format("mmm d, HH:MM"), u = data.usr.usr,
+                                    ign = data.usr.ign;
+
+                                pc.push('raid');
+                                pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
+                                pc.push(r.id);
+                                (v[srv].indexOf(r.id) > -1) && pc.push('visited');
+
+                                n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
+                                n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
+
+                                l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
+                                l = `DRMng.Raids.joinOne(${l}); return false;`;
+
+                                let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff-1]*1000/i.maxPlayers) : '';
+                                f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : 'FS '}${f}`;
+
+                                return `<p class="${pc.join(' ')}">
+                                                    <span class="header">
+                                                        <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
+                                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
+                                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
+                                                    </span>
+                                                    <span style="display: flex">
+                                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
+                                                        <span class="guildname truncate">${ign}</span>
+                                                        <span class="separator">${s}</span>
+                                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
+                                                    </span>
+                                                    <span class="message hyphenate">${m}</span>
+                                                </p>`;
+                            }
+                        }
+                        return null;
+                    },
                     messageLock: true,
                     messageBuffer: [],
                     messageEvent: function(data, history) {
@@ -2793,79 +2838,33 @@ if(window.location.host == "www.kongregate.com") {
                             c && g.push('service');
                             f && e.push("is_self");
 
-                            let r = function(data, pc, uc, pfx) {
-                                let msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
-                                if (msg) {
-                                    let r = DRMng.Util.getRaidFromUrl(msg[2], data.usr.usr);
-                                    if (r) {
-                                        let srv = DRMng.Config.local.server.toLowerCase(), g = this.getGuildTag(data.usr.gld),
-                                            v = DRMng.Config.local.visited, l, m = msg[1] + msg[3],
-                                            i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
-                                            t = new Date(data.ts).format("mmm d, HH:MM"), u = data.usr.usr,
-                                            ign = data.usr.ign;
+                            let content = this.raidMessage(data, g, e, h);
+                            if (!content) {
+                                let reg = /(https?\S+[^,\s])/g, l, link, start, end, msg = data.txt;
 
-                                        pc.push('raid');
-                                        pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
-                                        pc.push(r.id);
-                                        (v[srv].indexOf(r.id) > -1) && pc.push('visited');
-
-                                        n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
-                                        n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
-
-                                        l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
-                                        l = `DRMng.Raids.joinOne(${l}); return false;`;
-
-                                        let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff-1]*1000/i.maxPlayers) : '';
-                                        f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : 'FS '}${f}`;
-
-                                        return `<p class="${pc.join(' ')}">
-                                                    <span class="header">
-                                                        <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
-                                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
-                                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
-                                                    </span>
-                                                    <span style="display: flex">
-                                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
-                                                        <span class="guildname truncate">${ign}</span>
-                                                        <span class="separator">${s}</span>
-                                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
-                                                    </span>
-                                                    <span class="message hyphenate">${m}</span>
-                                                </p>`;
-                                    }
-                                }
-                                return null;
-                            }.bind(this)(data, g, e, h);
-
-                            // TODO: Finish parsing other items like img, link etc
-                            /*
-                            else {
-                                let reg = /(https?\S+[^,\s])/g, l, link, start, end;
-                                while (l = reg.exec(b)) {
+                                while (l = reg.exec(msg)) {
                                     link = /\.(jpe?g|png|gif)$/.test(l[1])
-                                        ? '<img src="' + l[1] + '" alt="'+ l[1] +'" onclick="window.open(this.src)">'
-                                        : '<a href="' + l[1] + '" target="_blank">' + l[1].replace(/^https?:\/\//,'') + '</a>';
-                                    start = b.substr(0, reg.lastIndex - l[1].length);
-                                    end = b.slice(reg.lastIndex);
-                                    b = start + link + end;
+                                        ? `<img src="${l[1]}" alt="${l[1]}" onclick="window.open(this.src)">`
+                                        : `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
+                                    start = msg.substr(0, reg.lastIndex - l[1].length);
+                                    end = msg.slice(reg.lastIndex);
+                                    msg = start + link + end;
                                     reg.lastIndex += link.length - l[1].length;
                                 }
-                            }*/
-                            let content;
-                            if (r) content = r;
-                            else content = this.messageTmpl.evaluate({
-                                mainCls:      g.join(" "),
-                                ts:           new Date(data.ts).format("mmm d, HH:MM"),
-                                pfx:          h,
-                                user:         c ? '' : data.usr.usr,
-                                userCls:      e.join(' '),
-                                ign:          c ? '' : data.usr.ign || '',
-                                ignCls:       data.usr.ign && !c ? 'guildname truncate' : '',
-                                tag:          c ? '' : this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
-                                sep:          c ? '' : ': ',
-                                msg:          data.txt
-                            });
 
+                                content = this.messageTmpl.evaluate({
+                                    mainCls: g.join(" "),
+                                    ts:      new Date(data.ts).format("mmm d, HH:MM"),
+                                    pfx:     h,
+                                    user:    c ? '' : data.usr.usr,
+                                    userCls: e.join(' '),
+                                    ign:     c ? '' : data.usr.ign || '',
+                                    ignCls:  data.usr.ign && !c ? 'guildname truncate' : '',
+                                    tag:     c ? '' : this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
+                                    sep:     c ? '' : ': ',
+                                    msg:     msg
+                                });
+                            }
                             let msg = document.createElement('div');
                             msg.setAttribute('class', 'chat-message');
                             msg.innerHTML = content;
@@ -2887,7 +2886,9 @@ if(window.location.host == "www.kongregate.com") {
                             else {
                                 b.setAttribute('class', 'n');
                                 b.textContent = 'Join';
+                                this.conf.enabled = false;
                             }
+                            DRMng.UI.setChatWidth();
                         }
                     },
                     action: function(b) {
@@ -3745,6 +3746,10 @@ if(window.location.host == "www.kongregate.com") {
                                         {
                                             name: 'TiersII', action: 'www',
                                             command: 'https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ'
+                                        },
+                                        {
+                                            name: 'Keyki', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI'
                                         }
                                     ]
                                 }
@@ -3789,14 +3794,18 @@ if(window.location.host == "www.kongregate.com") {
                         let sbLen = labLen * 26 + grpButtLen * 23 + staButtLen * 23;
                         if (sbLen > 690) sb.className = 'flex';
                     },
-                    loadDefaults: function() {
+                    setChatWidth: function() {
                         let lc = DRMng.Config.local;
-                        // Chat width
                         let el = document.getElementById('chat_container');
                         if (el) {
                             let w = lc.kong.chatWidth;
-                            el.style.width = `${lc.alliance.sbs ? (w*2+7) : w}px`;
+                            el.style.width = `${(lc.alliance.sbs && lc.alliance.enabled) ? (w*2+7) : w}px`;
                         }
+                    },
+                    loadDefaults: function() {
+                        let lc = DRMng.Config.local, el;
+                        // Chat width
+                        this.setChatWidth();
 
                         // Script width
                         el = document.getElementById('DRMng_main');
@@ -3921,20 +3930,15 @@ if(window.location.host == "www.kongregate.com") {
                         opt.setup('alliance_sbs', 'Side by side', false)
                            .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
                                ' (doubles width taken by chat area).')
-                           .event(function () {
+                           .event(function() {
                                // make sure initial variable setting wont fire this
                                if (DRMng.Alliance.tab) {
                                    let el = document.getElementById('chat_container'),
                                        a = DRMng.Alliance,
                                        w = DRMng.Config.local.kong.chatWidth;
-                                   if (this.conf[this.field]) {
-                                       if (el) el.style.width = `${w*2+7}px`;
-                                       a.body.style.removeProperty('display');
-                                   }
-                                   else {
-                                       if (el) el.style.width = `${w}px`;
-                                       a.tab.className = 'chat_room_tab';
-                                   }
+                                   if (this.conf[this.field]) a.body.style.removeProperty('display');
+                                   else a.tab.className = 'chat_room_tab';
+                                   DRMng.UI.setChatWidth();
                                    a.active = false;
                                    holodeck._chat_window.showActiveRoom();
                                    a.initBody.call(a);
@@ -4071,8 +4075,8 @@ if(window.location.host == "www.kongregate.com") {
                             console.log(`[DRMng] {${a.active?'Alliance':'Kong'}} PM to ` + usr);
                             if (a.active || sbs) {
                                 a.input.value = `/w ${usr} `;
-                                a.input.dispatchEvent(new Event('focus'));
                                 a.input.focus();
+                                a.input.dispatchEvent(new Event('focus'));
                             }
                             else holodeck._active_dialogue.setInput(`/w ${usr} `);
                         }

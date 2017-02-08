@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.21
+// @version        	2.0.22
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -23,7 +23,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '21', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '22', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -2514,7 +2514,7 @@ if(window.location.host == "www.kongregate.com") {
                         let actions = document.getElementById('chat_actions_container');
                         let tabs = document.getElementById('chat_room_tabs');
                         let gr = document.getElementById('guild_room_tab');
-                        if (tabs && actions && gr) {
+                        if (tabs && actions && gr && actions.parentNode === tabs) {
                             let tab = document.createElement('div');
                             tab.setAttribute('id', 'alliance_room_tab');
                             tab.setAttribute('class', 'chat_room_tab');

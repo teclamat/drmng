@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.20
+// @version        	2.0.21
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -14,12 +14,16 @@
 
 //best loop atm: for(var i=0, l=obj.length; i<l; ++i) - for with caching and pre-increment
 
+// TODO: lightshot -> regex /og:image.+?content="(.+?)"/ | before xmlHTTP rename prntscr.com -> prnt.sc | make
+// TODO: bridge class and redirect requests there, class should take care of getting the link and returning data for
+// TODO: regular chat message formatting this time with proper image links
+
 if(window.location.host == "www.kongregate.com") {
     if(window.top == window.self) {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '20', name: 'DotD Raids Manager Next Gen'},
+                version: {major: '2', minor: '0', rev: '21', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -633,7 +637,7 @@ if(window.location.host == "www.kongregate.com") {
                                     this._messages_count++
                                 }
                             };
-                            ChatDialogue.prototype.displayScriptMessage = function (msg, isRaidInfo) {
+                            ChatDialogue.prototype.serviceMessage = function (msg, isRaidInfo) {
                                 isRaidInfo = isRaidInfo || null;
                                 msg = ChatDialogue.DRM_SCRIPT_TEMPLATE.evaluate({
                                     message: msg,
@@ -766,6 +770,22 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         else setTimeout(this.modifyFayeTransformer, 50);
                     },
+                    modifyHolodeck: function() {
+                        if (Holodeck && Holodeck.prototype) {
+                            Holodeck.prototype.processChatCommand = function(a,d) {
+                                var b = ((a.match(/^\/([^\s]+)/) || [])[1] || "").toLowerCase();
+                                if (this._chat_commands[b]) {
+                                    var c = d ? DRMng.Alliance : this;
+                                    return void 0 === this._chat_commands[b].detect(function (b) {
+                                            return !1 === b(c, a)
+                                        })
+                                }
+                                return !0
+                            };
+                            console.info("[DRMng] {Kong} Holodeck patched!");
+                        }
+                        else setTimeout(this.modifyHolodeck, 50);
+                    },
                     addChatCommand: function(cmd, call) {
                         cmd = typeof cmd === 'object' ? cmd : [cmd];
                         for (let i = 0; i < cmd.length; ++i) holodeck.addChatCommand(cmd[i],call);
@@ -773,41 +793,52 @@ if(window.location.host == "www.kongregate.com") {
                     addChatCommands: function() {
                         if (holodeck && holodeck.ready) {
 							/* Gestures Commands */
-                            this.addChatCommand('kiss',function(a,b){
-                                let from = DRMng.UM.user.name, who = /^\/kiss (\w+)$/.exec(b), chat = a.activeDialogue();
-                                if (from && who && chat) {
-                                    let gesture = '** ' + DRMng.Gestures.Kiss.generate().replace('@from',from).replace('@who',who[1]) + ' **';
-                                    chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
+                            this.addChatCommand(['kiss','hit','poke','slap'],function(a,b) {
+                                let tmp = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(b),
+                                    from = DRMng.UM.user.name,
+                                    who = tmp[2],
+                                    alliance = !(a instanceof Holodeck),
+                                    chat = alliance ? a : a.activeDialogue();
+                                if (from && who && chat && tmp[1]) {
+                                    let mode = tmp[1].charAt(0).toUpperCase() + tmp[1].slice(1),
+                                        gesture = `** ${DRMng.Gestures[mode].generate()
+                                                                            .replace('@from',from)
+                                                                            .replace('@who',who)} **`;
+                                    //console.debug(`[DRMng] {Gesture} ${alliance?'Alliance':'Kong'} chat: ${gesture}`);
+                                    if (alliance) DRMng.Alliance.send(gesture);
+                                    else chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
                                 }
                                 return false;
                             });
-                            this.addChatCommand('hit',function(a,b){
-                                let from = DRMng.UM.user.name, who = /^\/hit (\w+)$/.exec(b), chat = a.activeDialogue();
-                                if (from && who && chat) {
-                                    let gesture = '** ' + DRMng.Gestures.Hit.generate().replace('@from',from).replace('@who',who[1]) + ' **';
-                                    chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
-                                }
-                                return false;
-                            });
-                            this.addChatCommand('poke',function(a,b){
-                                let from = DRMng.UM.user.name, who = /^\/poke (\w+)$/.exec(b), chat = a.activeDialogue();
-                                if (from && who && chat) {
-                                    let gesture = '** ' + DRMng.Gestures.Poke.generate().replace('@from',from).replace('@who',who[1]) + ' **';
-                                    chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
-                                }
-                                return false;
-                            });
-                            this.addChatCommand('slap',function(a,b){
-                                let from = DRMng.UM.user.name, who = /^\/slap (\w+)$/.exec(b), chat = a.activeDialogue();
-                                if (from && who && chat) {
-                                    let gesture = '** ' + DRMng.Gestures.Slap.generate().replace('@from',from).replace('@who',who[1]) + ' **';
-                                    chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
-                                }
-                                return false;
-                            });
+                            // TODO: /perc
+                            /*1 : Brown/Grey<br>\
+                             4k : Brown/Grey/Green<br>\
+                             6k : Grey/Green<br>\
+                             10k : Grey/Green/Blue<br>\
+                             14k : Green/Blue<br>\
+                             16k : Green/Blue/Purple<br>\
+                             18k : Blue/Purple<br>\
+                             22k : Blue/Purple/Orange<br>\
+                             24k : Purple/Orange<br>\
+                             30k : Orange<br>\
+                             33k : Orange/Red (more orange)<br>\
+                             36k : Orange/Red (more red)<br>\
+                             50k : Orange/Red (even more red)<br>\
+                             70k : Red<br>\
+                             80k : Red/Bronze<br>\
+                             90k : Red/Bronze<br>\
+                             100k : ???<br>\
+                             110k : Bronze/Silver<br>\
+                             120k : Bronze/Silver<br>\
+                             130k : Bronze/Silver<br>\
+                             140k : Silver<br>\
+                             150k : Silver/Gold<br>\
+                             160k : Silver/Gold<br>\
+                             170k : Silver/Gold";
+                            * */
                             this.addChatCommand(['reload','reloaf','relaod','rl'],function(a,b){
-                                let type = /^\/(reload|reloaf|relaod|rl) (.+)$/.exec(b);
-                                type = type ? type[2] : '';
+                                let type = /^\/\w+\s?(.*)$/.exec(b);
+                                type = type ? type[1] : '';
                                 switch (type) {
                                     case 'game':
                                         DRMng.postGameMessage('gameReload');
@@ -821,40 +852,45 @@ if(window.location.host == "www.kongregate.com") {
                                 return false;
                             });
                             this.addChatCommand('clear',function(a,b){
-                                /*
-                                let room = active_room._chat_dialogue;
-                                let chat = room._message_window_node;
-                                let nodes = chat.getElementsByClassName('chat-message');
-                                while (nodes.length) {
-                                    nodes[0].parentNode.removeChild(nodes[0]);
-                                    room._messages_count--;
-                                }*/
-                                holodeck._active_dialogue.clear();
+                                if (a instanceof Holodeck) holodeck._active_dialogue.clear();
+                                else a.clear();
+                                return false;
+                            });
+                            this.addChatCommand('wiki',function(a,b){
+                                let l = /^\/wiki (.+)$/.exec(b);
+                                if (l) window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${l[1]}`);
+                                return false;
+                            });
+                            this.addChatCommand('enc',function(a,b){
+                                let l = /^\/enc (.+)$/.exec(b);
+                                if (l) window.open(`http://mutik.erley.org/enc/#task=src_${encodeURI(`"${l[1]}"`)}`);
                                 return false;
                             });
                             this.addChatCommand(['raid','rd'],function(a,b){
+                                console.log("ChatCmdCtx:", a);
                                 let raid = /^\/(raid|rd) (.+)$/.exec(b);
-                                let chat = a.activeDialogue();
+                                let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
                                 if (raid) {
                                     raid = raid[2].toLowerCase();
                                     let keys = DRMng.Config.local.raidKeys,
                                         data = DRMng.Config.local.raidData,
                                         found = [], i, len;
                                     for (i = 0, len = keys.length; i < len; ++i) {
-                                        if (keys[i].indexOf(raid) > -1 || data[keys[i]].fName.toLowerCase().indexOf(raid) > -1)
+                                        if (keys[i].indexOf(raid) > -1 ||
+                                            data[keys[i]].fName.toLowerCase().indexOf(raid) > -1)
                                             found.push([keys[i], data[keys[i]].fName]);
                                     }
                                     if (found.length > 1) {
                                         let raidPicker = '';
                                         for (i = 0, len = found.length; i < len; ++i)
-                                            raidPicker += '<br><span class="DRMng_info_picker ' + found[i][0] + '">' + found[i][1] + ' (' + found[i][0] + ')</span>';
-                                        chat && chat.displayScriptMessage('Multiple results found, pick one:' + raidPicker);
+                                            raidPicker += `<br><span class="DRMng_info_picker ${found[i][0]}">${found[i][1]} (${found[i][0]})</span>`;
+                                        chat && chat.serviceMessage('Multiple results found, pick one:' + raidPicker);
                                     }
                                     else if (found.length === 1)
-                                        chat && chat.displayScriptMessage(DRMng.UI.raidInfo(found[0][0]), data[found[0][0]].banner);
-                                    else chat && chat.displayScriptMessage('No info found matching ' + raid);
+                                        chat && chat.serviceMessage(DRMng.UI.raidInfo(found[0][0]), data[found[0][0]].banner);
+                                    else chat && chat.serviceMessage('No info found matching ' + raid);
                                 }
-                                else chat && chat.displayScriptMessage('Wrong /raid or /rd syntax');
+                                else chat && chat.serviceMessage('Wrong /raid or /rd syntax');
                                 return false;
                             });
                             console.info("[DRMng] {Kong} Chat commands added!");
@@ -869,6 +905,7 @@ if(window.location.host == "www.kongregate.com") {
                         else setTimeout(this.moveChatOptions.bind(this), 50);
                     },
                     modifyKongEngine: function() {
+                        this.modifyHolodeck();
                         this.modifyChatRoom();
                         this.modifyChatDialogue();
                         this.modifyFayeEvent();
@@ -1522,14 +1559,12 @@ if(window.location.host == "www.kongregate.com") {
 						margin: 0;\
 						border-left: 4px solid #943;\
 					}\
-					div#kong_game_ui div.chat_message_window > div > div.script {\
+					div#kong_game_ui div.chat_message_window > div > div.script,\
+					div#kong_game_ui div.chat_message_window > div > div.service {\
 						border-left: 4px solid #69b;\
 						text-align: center;\
 						padding: 5px;\
 						margin: 0;\
-					}\
-					div#kong_game_ui div.chat_message_window > div > p.service {\
-					    border-left: 4px solid #69b;\
 					}\
 					div#kong_game_ui div.chat_message_window > div > p.raid {\
 						border-right: 4px solid #777;\
@@ -1557,7 +1592,7 @@ if(window.location.host == "www.kongregate.com") {
 					div#kong_game_ui div.chat_message_window span.timestamp > span,\
 					div#kong_game_ui div.chat_message_window span.extraid { float: right; font-size: 10px; }\
 					div#kong_game_ui div.chat_message_window p.raid.dead span.extraid,\
-					div#kong_game_ui div.chat_message_window p.raid.dead span.timestamp > span a { color: #888; }\
+					div#kong_game_ui div.chat_message_window p.raid.dead span a { color: #888; }\
 					div#kong_game_ui div.chat_message_window span.sticker {\
 					    font-size: 9px;\
                         background-color: #888;\
@@ -1633,20 +1668,20 @@ if(window.location.host == "www.kongregate.com") {
 					div.game_details_outer div.game_pub_plays { color: #bbb; }\
 					ul#quicklinks li { background-color: transparent !important; }\
 					\
-					div#kong_game_ui div.chat_message_window div.script.raidinfo {\
+					div#kong_game_ui div.chat_message_window div.raidinfo {\
 						background-size: cover;\
 						background-repeat: no-repeat;\
 						background-position-x: 50%;\
 						background-blend-mode: saturation;\
 						border-left: 0 !important;\
 					}\
-					div.chat_message_window div.script.raidinfo div.name {\
+					div.chat_message_window div.raidinfo div.name {\
 						font-size: 12px;\
 						text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;\
 						color: #fff;\
 						font-weight: bold;\
 					}\
-					div.chat_message_window div.script.raidinfo div.race {\
+					div.chat_message_window div.raidinfo div.race {\
 						color: #eee;\
 						text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;\
 						font-size: 10px;\
@@ -1706,6 +1741,7 @@ if(window.location.host == "www.kongregate.com") {
                                 default: delay *= 60000;
                             }
                             r.delay = delay;
+                            delete r.sid;
                             DRMng.Engine.client.emit('service', { action: 'delayedSub', data: r });
                         }
                         else DRMng.UI.submitResponse(0,'Paste proper raid link before submitting');
@@ -2551,9 +2587,9 @@ if(window.location.host == "www.kongregate.com") {
                         if (container) {
                             if (this.body === null) {
                                 this.body = document.createElement('div');
+                                this.body.style.setProperty('width', '100%');
 
                                 if (!this.conf.sbs) this.body.style.setProperty('display', 'none');
-                                else this.body.style.setProperty('width', '100%');
 
                                 let usr = document.createElement('div');
                                 usr.setAttribute('class', 'chat_tabpane users_in_room clear');
@@ -2680,7 +2716,7 @@ if(window.location.host == "www.kongregate.com") {
                                 this.client.on('connect', function() {
                                     //console.info('[DRMng] {Alliance} Socket connection established, joining...');
                                     // clear chat window
-                                    while (this.chat.firstChild) this.chat.removeChild(this.chat.firstChild);
+                                    this.clear();
                                     // login to server
                                     this.client.emit('join', user);
                                     console.info("[DRMng] {Alliance} User login data [%s|%s|%s]", user.usr, user.ign, user.gld);
@@ -2701,12 +2737,16 @@ if(window.location.host == "www.kongregate.com") {
                             }
                         }
                     },
-                    send: function() {
-                        let msg = this.input.value;
+                    clear: function() {
+                        let c = DRMng.Alliance.chat;
+                        while (c.firstChild) c.removeChild(c.firstChild);
+                    },
+                    send: function(msg) {
+                        msg = msg || this.input.value;
                         if (msg && msg !== 'Enter text for chat here') {
                             let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
                             if (pm && pm[1] && pm[2]) this.client.emit('msg', {type: 1, user: pm[1], text: pm[2]});
-                            else this.client.emit('msg', {type: 0, text: msg});
+                            else holodeck.processChatCommand(msg,true) && this.client.emit('msg', {type: 0, text: msg});
                             this.input.value = '';
                         }
                     },
@@ -2771,11 +2811,27 @@ if(window.location.host == "www.kongregate.com") {
                             '<span style="display: block">' +
                                 '<span username="#{user}" class="#{userCls}">#{pfx}#{user}</span>' +
                                 '<span class="#{ignCls}">#{ign}</span>' +
-                                '<span class="separator">#{sep}</span>' +
+                                '<span class="separator">: </span>' +
                                 '<span class="message hyphenate">#{msg}</span>' +
                             '</span>' +
                         '</p>'
                     ),
+                    serviceMessage: function(msg, ri) {
+                        /*isRaidInfo = isRaidInfo || null;
+                         msg = ChatDialogue.DRM_SCRIPT_TEMPLATE.evaluate({
+                         message: msg,
+                         classNames: 'script' + (isRaidInfo ? ' raidinfo' : ''),
+                         customStyle: isRaidInfo ? ('background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/' + isRaidInfo + '.jpg);') : ''
+                         });*/
+                        if (msg) {
+                            let s = ri ? ` style="background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg);"` : '',
+                                c = ri ? 'service raidinfo' : 'service',
+                                d = document.createElement('div');
+                            d.setAttribute('class', 'chat-message');
+                            d.innerHTML = `<div class="${c}"${s}>${msg}</div>`;
+                            if (this.chat.appendChild(d)) this.scrollToBottom();
+                        }
+                    },
                     raidMessage: function(data, pc, uc, pfx) {
                         let msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
                         if (msg) {
@@ -2799,7 +2855,7 @@ if(window.location.host == "www.kongregate.com") {
                                 l = `DRMng.Raids.joinOne(${l}); return false;`;
 
                                 let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff-1]*1000/i.maxPlayers) : '';
-                                f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : 'FS '}${f}`;
+                                f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : `FS ${f}`}`;
 
                                 return `<p class="${pc.join(' ')}">
                                                     <span class="header">
@@ -2822,20 +2878,19 @@ if(window.location.host == "www.kongregate.com") {
                     messageLock: true,
                     messageBuffer: [],
                     messageEvent: function(data, history) {
-                        if (!this.messageLock || history || data.type === 4) {
+                        if (data.type === 4) this.serviceMessage(data.txt);
+                        else if (!this.messageLock || history) {
                             let u = DRMng.UM.user,
                                 t = data.type,
-                                c = t === 4,
                                 e = ['username', 'truncate'],
                                 f = data.usr.usr === u.name,
-                                h = ['', 'From ', 'To ', '', ''][t],
+                                h = ['', 'From ', 'To ', ''][t],
                                 g = [];
 
                             e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
                             h && g.push('whisper');
                             (t === 1) && g.push('received_whisper');
                             (t === 2) && g.push('sent_whisper');
-                            c && g.push('service');
                             f && e.push("is_self");
 
                             let content = this.raidMessage(data, g, e, h);
@@ -2856,12 +2911,11 @@ if(window.location.host == "www.kongregate.com") {
                                     mainCls: g.join(" "),
                                     ts:      new Date(data.ts).format("mmm d, HH:MM"),
                                     pfx:     h,
-                                    user:    c ? '' : data.usr.usr,
+                                    user:    data.usr.usr,
                                     userCls: e.join(' '),
-                                    ign:     c ? '' : data.usr.ign || '',
-                                    ignCls:  data.usr.ign && !c ? 'guildname truncate' : '',
-                                    tag:     c ? '' : this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
-                                    sep:     c ? '' : ': ',
+                                    ign:     data.usr.ign || '',
+                                    ignCls:  data.usr.ign ? 'guildname truncate' : '',
+                                    tag:     this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
                                     msg:     msg
                                 });
                             }

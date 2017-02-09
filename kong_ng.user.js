@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.22
+// @version        	2.0.23
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -23,7 +23,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '22', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '23', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -854,6 +854,20 @@ if(window.location.host == "www.kongregate.com") {
                             this.addChatCommand('clear',function(a,b){
                                 if (a instanceof Holodeck) holodeck._active_dialogue.clear();
                                 else a.clear();
+                                return false;
+                            });
+                            this.addChatCommand('kill',function(a,b){
+                                let k = /^\/kill\s?(.*)$/.exec(b);
+                                switch (k[1]) {
+                                    case 'game':
+                                        DRMng.postGameMessage('killGame');
+                                        break;
+                                    case 'chat':
+                                        DRMng.postGameMessage('killChat');
+                                        break;
+                                    default:
+                                        document.getElementById('gameiframe').src = "";
+                                }
                                 return false;
                             });
                             this.addChatCommand('wiki',function(a,b){
@@ -4810,6 +4824,11 @@ else if(window.location.host === '50.18.191.15') {
                     case 'gameReload':
                         DRMng.reloadGame();
                         break;
+                    case 'killGame':
+                        document.getElementById('swfdiv').data = "";
+                        break;
+                    case 'killChat':
+                        document.getElementById('chatdiv').data = "";
                 }
             }
         },false);

@@ -3,27 +3,24 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.23
+// @version        	2.0.24
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
 // @include        	*50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
 // @connect			50.18.191.15
+// @connect         prnt.sc
 // @hompage        	http://mutik.erley.org
 // ==/UserScript==
 
 //best loop atm: for(var i=0, l=obj.length; i<l; ++i) - for with caching and pre-increment
-
-// TODO: lightshot -> regex /og:image.+?content="(.+?)"/ | before xmlHTTP rename prntscr.com -> prnt.sc | make
-// TODO: bridge class and redirect requests there, class should take care of getting the link and returning data for
-// TODO: regular chat message formatting this time with proper image links
 
 if(window.location.host == "www.kongregate.com") {
     if(window.top == window.self) {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '23', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '24', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -112,6 +109,28 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         return arabic;
                     },
+                    Gate: {
+                        lightShot: function(link, id) {
+                            link = link.replace(/prntscr.com/,'prnt.sc');
+                            let data = { eventName: 'DRMng.lightShot', url: link, method: 'GET', id: id, timeout: 10000 };
+                            DRMng.postMessage(data);
+                        },
+                        lightShotCb: function(e) {
+                            let d = JSON.parse(e.data);
+                            let i = document.getElementById(d.id);
+                            let l = /og:image.+?content="(.+?)"/.exec(d.responseText);
+                            if (l) {
+                                l = l[1];
+                                if (i) {
+                                    i.setAttribute('src', l);
+                                    i.setAttribute('alt', l);
+                                    i.removeAttribute('id');
+                                }
+                            }
+                            else if (i) i.parentNode.removeChild(i);
+                            setTimeout(DRMng.Alliance.scrollToBottom.bind(DRMng.Alliance), 10);
+                        }
+                    },
                     hResize: {
                         ev: null,
                         regPanes: [],
@@ -127,71 +146,69 @@ if(window.location.host == "www.kongregate.com") {
                         redraw: false,
                         clicked: null,
                         calc: function(e) {
-                            if (DRMng.Util.hResize.pane === null) return false;
-                            DRMng.Util.hResize.rect = DRMng.Util.hResize.pane.getBoundingClientRect();
-                            DRMng.Util.hResize.x = e.clientX - DRMng.Util.hResize.rect.left;
-                            DRMng.Util.hResize.left = DRMng.Util.hResize.regLeft && DRMng.Util.hResize.x < 6;
-                            DRMng.Util.hResize.right = DRMng.Util.hResize.regRight && DRMng.Util.hResize.x >= DRMng.Util.hResize.rect.width - 6;
+                            if (this.pane === null) return false;
+                            this.rect = this.pane.getBoundingClientRect();
+                            this.x = e.clientX - this.rect.left;
+                            this.left = this.regLeft && this.x < 6;
+                            this.right = this.regRight && this.x >= this.rect.width - 6;
                             return true;
                         },
                         findPane: function(e) {
                             let p = e.target, idx;
                             while (p && p.nodeName !== 'BODY') {
-                                idx = DRMng.Util.hResize.regPanes.indexOf(p.id);
+                                idx = this.regPanes.indexOf(p.id);
                                 if (idx > -1) {
-                                    DRMng.Util.hResize.pane = p;
-                                    if (DRMng.Util.hResize.regSide[idx]) {
-                                        DRMng.Util.hResize.regLeft = true;
-                                        DRMng.Util.hResize.regRight = false;
+                                    this.pane = p;
+                                    if (this.regSide[idx]) {
+                                        this.regLeft = true;
+                                        this.regRight = false;
                                     }
                                     else {
-                                        DRMng.Util.hResize.regLeft = false;
-                                        DRMng.Util.hResize.regRight = true;
+                                        this.regLeft = false;
+                                        this.regRight = true;
                                     }
-                                    //console.log("Found pane! [%s]", DRMng.Util.hResize.regPanes[idx]);
                                     break;
                                 }
                                 p = p.parentNode;
                             }
                         },
                         onMouseDown: function(e) {
-                            //console.log(e);
-                            DRMng.Util.hResize.findPane(e);
-                            if (DRMng.Util.hResize.calc(e)) DRMng.Util.hResize.onDown(e);
+                            this.findPane(e);
+                            if (this.calc(e)) this.onDown(e);
                         },
                         onDown: function(e) {
-                            let isResizing = DRMng.Util.hResize.left || DRMng.Util.hResize.right;
+                            let isResizing = this.left || this.right;
                             if (isResizing) e.preventDefault();
-                            DRMng.Util.hResize.clicked = {
-                                x: DRMng.Util.hResize.x,
+                            this.clicked = {
+                                x: this.x,
                                 cx: e.clientX,
-                                w: DRMng.Util.hResize.rect.width,
+                                w: this.rect.width,
                                 isResizing: isResizing,
-                                left: DRMng.Util.hResize.left,
-                                right: DRMng.Util.hResize.right
+                                left: this.left,
+                                right: this.right
                             }
                         },
                         hold: false,
                         resetHold: function() {
-                            DRMng.Util.hResize.hold = false;
+                            this.hold = false;
                         },
                         onMove: function(e) {
-                            if (DRMng.Util.hResize.hold) return;
-                            if (DRMng.Util.hResize.clicked === null) {
-                                DRMng.Util.hResize.findPane(e);
-                                DRMng.Util.hResize.hold = true;
-                                setTimeout(DRMng.Util.hResize.resetHold,500);
+                            if (this.hold) return;
+                            if (this.clicked === null) {
+                                this.findPane(e);
+                                this.hold = true;
+                                setTimeout(this.resetHold.bind(this),500);
                             }
-                            DRMng.Util.hResize.onMoveProgress(e);
+                            this.onMoveProgress(e);
                         },
                         onMoveProgress: function(e) {
-                            if(!DRMng.Util.hResize.calc(e)) return;
-                            DRMng.Util.hResize.ev = e;
-                            DRMng.Util.hResize.redraw = true;
+                            if(!this.calc(e)) return;
+                            this.ev = e;
+                            this.redraw = true;
                         },
                         onUp: function() {
-                            if (DRMng.Util.hResize.pane) {
-                                let p = DRMng.Util.hResize.pane;
+                            if (this.pane) {
+                                let p = this.pane;
                                 switch(p.id) {
                                     case 'chat_container':
                                         let w = parseInt(p.style.width.replace('px',''));
@@ -206,35 +223,35 @@ if(window.location.host == "www.kongregate.com") {
                                         break;
                                 }
                             }
-                            DRMng.Util.hResize.clicked = null;
-                            DRMng.Util.hResize.pane = null;
+                            this.clicked = null;
+                            this.pane = null;
                         },
                         animate: function() {
-                            requestAnimationFrame(DRMng.Util.hResize.animate);
-                            if (!DRMng.Util.hResize.redraw) return;
-                            DRMng.Util.hResize.redraw = false;
+                            requestAnimationFrame(this.animate.bind(this));
+                            if (!this.redraw) return;
+                            this.redraw = false;
 
-                            if (DRMng.Util.hResize.clicked && DRMng.Util.hResize.clicked.isResizing) {
+                            if (this.clicked && this.clicked.isResizing) {
 
-                                if (DRMng.Util.hResize.clicked.right)
-                                    DRMng.Util.hResize.pane.style.width = parseInt(Math.max(DRMng.Util.hResize.x, 200)) + 'px';
+                                if (this.clicked.right)
+                                    this.pane.style.width = parseInt(Math.max(this.x, 200)) + 'px';
 
-                                if (DRMng.Util.hResize.clicked.left) {
-                                    DRMng.Util.hResize.pane.style.width =
-                                        parseInt(Math.max(DRMng.Util.hResize.clicked.cx - DRMng.Util.hResize.ev.clientX + DRMng.Util.hResize.clicked.w, 200)) + 'px';
+                                if (this.clicked.left) {
+                                    this.pane.style.width =
+                                        parseInt(Math.max(this.clicked.cx - this.ev.clientX + this.clicked.w, 200)) + 'px';
                                 }
 
                                 return;
                             }
-                            if (DRMng.Util.hResize.pane) {
-                                if (DRMng.Util.hResize.right || DRMng.Util.hResize.left) DRMng.Util.hResize.pane.style.cursor = 'ew-resize';
-                                else DRMng.Util.hResize.pane.style.cursor = 'default';
+                            if (this.pane) {
+                                if (this.right || this.left) this.pane.style.cursor = 'ew-resize';
+                                else this.pane.style.cursor = 'default';
                             }
                         },
                         init: function() {
-                            document.addEventListener('mousemove', DRMng.Util.hResize.onMove);
-                            document.addEventListener('mouseup', DRMng.Util.hResize.onUp);
-                            DRMng.Util.hResize.animate();
+                            document.addEventListener('mousemove', this.onMove.bind(this));
+                            document.addEventListener('mouseup', this.onUp.bind(this));
+                            this.animate();
                         }
                     }
                 },
@@ -1648,6 +1665,7 @@ if(window.location.host == "www.kongregate.com") {
 						display: block;\
 						margin: 5px auto 2px;\
 						max-width: 100%;\
+						max-height: 200px;\
 						cursor: pointer\
 					}\
 					div#kong_game_ui div.chat_message_window .message embed {\
@@ -2831,12 +2849,6 @@ if(window.location.host == "www.kongregate.com") {
                         '</p>'
                     ),
                     serviceMessage: function(msg, ri) {
-                        /*isRaidInfo = isRaidInfo || null;
-                         msg = ChatDialogue.DRM_SCRIPT_TEMPLATE.evaluate({
-                         message: msg,
-                         classNames: 'script' + (isRaidInfo ? ' raidinfo' : ''),
-                         customStyle: isRaidInfo ? ('background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/' + isRaidInfo + '.jpg);') : ''
-                         });*/
                         if (msg) {
                             let s = ri ? ` style="background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg);"` : '',
                                 c = ri ? 'service raidinfo' : 'service',
@@ -2912,9 +2924,15 @@ if(window.location.host == "www.kongregate.com") {
                                 let reg = /(https?\S+[^,\s])/g, l, link, start, end, msg = data.txt;
 
                                 while (l = reg.exec(msg)) {
-                                    link = /\.(jpe?g|png|gif)$/.test(l[1])
-                                        ? `<img src="${l[1]}" alt="${l[1]}" onclick="window.open(this.src)">`
-                                        : `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
+                                    if (/\.(jpe?g|a?png|gif)$/.test(l[1]))
+                                        link = `<img src="${l[1]}" alt="${l[1]}" onclick="window.open(this.src)">`;
+                                    else if (/(prntscr.com|prnt.sc)/.test(l[1])) {
+                                        let id = `prntsc_${new Date().getTime()}`;
+                                        link = `<img id="${id}" onclick="window.open(this.src)">`;
+                                        setTimeout(DRMng.Util.Gate.lightShot.bind(DRMng.Util.Gate,l[1],id), 1);
+                                    }
+                                    else
+                                        link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
                                     start = msg.substr(0, reg.lastIndex - l[1].length);
                                     end = msg.slice(reg.lastIndex);
                                     msg = start + link + end;
@@ -4174,6 +4192,7 @@ if(window.location.host == "www.kongregate.com") {
                         // Message listeners
                         document.addEventListener("DRMng.joinRaid", DRMng.Raids.joinResponse, false);
                         document.addEventListener("DRMng.joinRaids", DRMng.Raids.joinMultiResponse, false);
+                        document.addEventListener("DRMng.lightShot", DRMng.Util.Gate.lightShotCb, false);
 
                         // Script Hide/Show button
                         document.getElementById('DRMng_onoff').addEventListener('click', function(){
@@ -4340,10 +4359,12 @@ if(window.location.host == "www.kongregate.com") {
                         // resize listeners
                         DRMng.Util.hResize.regPanes.push('chat_container');
                         DRMng.Util.hResize.regSide.push(0);
-                        document.getElementById('chat_container').addEventListener('mousedown', DRMng.Util.hResize.onMouseDown);
+                        document.getElementById('chat_container')
+                                .addEventListener('mousedown', DRMng.Util.hResize.onMouseDown.bind(DRMng.Util.hResize));
                         DRMng.Util.hResize.regPanes.push('DRMng_main');
                         DRMng.Util.hResize.regSide.push(1);
-                        document.getElementById('DRMng_main').addEventListener('mousedown', DRMng.Util.hResize.onMouseDown);
+                        document.getElementById('DRMng_main')
+                                .addEventListener('mousedown', DRMng.Util.hResize.onMouseDown.bind(DRMng.Util.hResize));
                     },
                     roll: function(elem) {
                         let gr = elem ? elem.parentNode : null;

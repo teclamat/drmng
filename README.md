@@ -22,6 +22,5 @@ Main features are:
 
 # TODO
 * Sidebar configuration
-* Alliance chat
-* Options framework (partially implemented atm)
+* Options framework (partially implemented)
 * Configuration stored on server

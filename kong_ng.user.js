@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.24
+// @version        	2.0.25
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '24', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '25', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -122,13 +122,13 @@ if(window.location.host == "www.kongregate.com") {
                             if (l) {
                                 l = l[1];
                                 if (i) {
+                                    i.addEventListener('load', DRMng.Alliance.scrollToBottom.bind(DRMng.Alliance));
                                     i.setAttribute('src', l);
                                     i.setAttribute('alt', l);
                                     i.removeAttribute('id');
                                 }
                             }
                             else if (i) i.parentNode.removeChild(i);
-                            setTimeout(DRMng.Alliance.scrollToBottom.bind(DRMng.Alliance), 10);
                         }
                     },
                     hResize: {
@@ -1668,10 +1668,10 @@ if(window.location.host == "www.kongregate.com") {
 						max-height: 200px;\
 						cursor: pointer\
 					}\
-					div#kong_game_ui div.chat_message_window .message embed {\
-					    height: auto;\
-                        margin: 4px auto -2px;\
-                        display: inline-block;\
+					div#kong_game_ui div.chat_message_window .message iframe {\
+					    width: 100%;\
+                        margin: 4px auto 0;\
+                        display: block;\
 					}\
 					div#kong_game_ui div.chat_message_window .message a {\
 						color: #E29F1F;\
@@ -2931,6 +2931,8 @@ if(window.location.host == "www.kongregate.com") {
                                         link = `<img id="${id}" onclick="window.open(this.src)">`;
                                         setTimeout(DRMng.Util.Gate.lightShot.bind(DRMng.Util.Gate,l[1],id), 1);
                                     }
+                                    else if (link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1]))
+                                        link = `<iframe type="text/html" width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
                                     else
                                         link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
                                     start = msg.substr(0, reg.lastIndex - l[1].length);
@@ -2960,7 +2962,13 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         else this.messageBuffer.push(data);
                     },
-                    scrollToBottom: function() { this.chat.scrollTop = this.chat.scrollHeight; },
+                    scrollToBottom: function(force) {
+                        let elHeight = this.chat.lastChild; elHeight = elHeight ? elHeight.offsetHeight : 0;
+                        let chatHeight = this.chat.offsetHeight + this.chat.scrollTop - 2 + elHeight;
+                        console.debug(`EL:${elHeight}, CHAT:${chatHeight}, scrollTop:${this.chat.scrollTop}, scrollHeight:${this.chat.scrollHeight}`)
+                        if (chatHeight >= this.chat.scrollHeight || force)
+                            this.chat.scrollTop = this.chat.scrollHeight;
+                    },
                     setButton: function(conn) {
                         let b = document.getElementById('DRMng_allianceJoin');
                         if (b) {

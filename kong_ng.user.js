@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.25
+// @version        	2.0.26
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '25', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '26', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -402,6 +402,11 @@ if(window.location.host == "www.kongregate.com") {
                             channel: '',
                             pass: '',
                             sbs: false
+                        },
+                        gameFrame: {
+                            removeWChat: false,
+                            leftWChat: false,
+                            hideWChat: false
                         }
                     },
                     remote: {},
@@ -479,13 +484,6 @@ if(window.location.host == "www.kongregate.com") {
                         li = document.createElement('li');
                         li.className = 'spritegame';
                         li.innerHTML = '<a onclick="DRMng.postGameMessage(\'chatReload\');">Reload Chat</a>';
-                        li.style.backgroundPosition = '0 -280px';
-                        li.style.cursor = 'pointer';
-                        document.getElementById('quicklinks').appendChild(li);
-
-                        li = document.createElement('li');
-                        li.className = 'spritegame';
-                        li.innerHTML = '<a onclick="DRMng.Kong.hideWorldChat(this)">Hide WC</a>';
                         li.style.backgroundPosition = '0 -280px';
                         li.style.cursor = 'pointer';
                         document.getElementById('quicklinks').appendChild(li);
@@ -949,18 +947,12 @@ if(window.location.host == "www.kongregate.com") {
                     setHeaderWidth: function() {
                         document.getElementById('header').style.width = document.getElementById('maingame').offsetWidth + 'px';
                     },
-                    hideWorldChat: function(el) {
-                        if (el) {
-                            if (el.innerHTML === 'Hide WC') {
-                                el.innerHTML = 'Show WC';
-                                document.getElementById('game').style.width = '760px';
-                            }
-                            else {
-                                el.innerHTML = 'Hide WC';
-                                document.getElementById('game').style.width = '1025px';
-                            }
-                        }
-                        return false;
+                    hideWorldChat: function() {
+                        let config = DRMng.Config.local.gameFrame;
+                        if (config.hideWChat || config.removeWChat)
+                            document.getElementById('game').style.width = '760px';
+                        else
+                            document.getElementById('game').style.width = '1025px';
                     },
                     killIframes: function() {
                         let ifr = document.querySelectorAll('iframe');
@@ -3077,7 +3069,9 @@ if(window.location.host == "www.kongregate.com") {
                             if (callback && typeof callback === 'function') this.cbFn = callback;
                             return this;
                         };
-                        this.make = function(group) {
+                        this.make = function(group, skipCb) {
+                            skipCb = skipCb || false;
+
                             let optionDiv = document.createElement('div');
                             optionDiv.setAttribute('class', 'buttonStripe');
                             optionDiv.setAttribute('style', 'flex-wrap: wrap; overflow: hidden; max-height: 74px;');
@@ -3105,7 +3099,7 @@ if(window.location.host == "www.kongregate.com") {
                             optionDiv.appendChild(titleField);
                             optionDiv.appendChild(button);
 
-                            if (typeof this.cbFn === 'function') this.cbFn.call(this, {target: button});
+                            if (typeof this.cbFn === 'function' && !skipCb) this.cbFn.call(this, {target: button});
 
                             if (_desc) {
                                 let descField = document.createElement('div');
@@ -4038,7 +4032,39 @@ if(window.location.host == "www.kongregate.com") {
                                    a.initBody.call(a);
                                }
                            })
-                           .make(group);
+                           .make(group, true);
+
+                        /*
+                         * gameFrame - Game Frame UI
+                         * */
+
+                        group = new this.Group('gameFrame', 'Game UI');
+
+                        opt = new this.Option();
+                        opt.setup('gameFrame_removeWChat', 'Disable World Chat', false)
+                           .desc('Disables World Chat located next to game window.')
+                           .event(function(){
+                               DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
+                               DRMng.Kong.hideWorldChat();
+                           })
+                           .make(group, true);
+
+                        opt = new this.Option();
+                        opt.setup('gameFrame_leftWChat', 'World Chat on left side', false)
+                           .desc('Moves World Chat to the left side of game window.')
+                           .event(DRMng.postGameMessage.bind(this, 'chatSettings', DRMng.Config.local.gameFrame))
+                           .make(group, true);
+
+                        opt = new this.Option();
+                        opt.setup('gameFrame_hideWChat', 'Hide World Chat', false)
+                           .desc('Hides World Chat (without disabling it completely).')
+                           .event(function(){
+                               DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
+                               DRMng.Kong.hideWorldChat();
+                           })
+                           .make(group, true);
+
+                        DRMng.Kong.hideWorldChat();
 
                         // Save all changes made to config file due to introducing new options
                         DRMng.Config.saveLocal();
@@ -4766,10 +4792,18 @@ else if(window.location.host === '50.18.191.15') {
                 }
                 else if (this.config.leftWChat && !this.config.hideWChat) {
                     if (chatDiv) chatDiv.parentNode.style.left = '0';
+                    else {
+                        setTimeout(this.reloadChat.bind(this), 1);
+                        return;
+                    }
                     if (swfDiv) swfDiv.parentNode.style.left = '265px';
                 }
                 else {
                     if (chatDiv) chatDiv.parentNode.style.left = '760px';
+                    else {
+                        setTimeout(this.reloadChat.bind(this), 1);
+                        return;
+                    }
                     if (swfDiv) swfDiv.parentNode.style.left = '0';
                 }
             },
@@ -4779,6 +4813,7 @@ else if(window.location.host === '50.18.191.15') {
                         'https://5thplanetdawn.insnw.net/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf',
                         'chatdiv', '265', '690'
                     );
+                    setTimeout(this.applyChatSettings.bind(this), 100);
                 //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/chat/" + this.config.version.chat + "/chatclient.swf", "chatdiv", "265", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), chatParams);
             },
             reloadGame: function () {
@@ -4845,7 +4880,17 @@ else if(window.location.host === '50.18.191.15') {
                 c[0] = c[0].substring(6);
                 switch(c[0]) {
                     case 'chatSettings':
-                        DRMng.applyChatSettings();
+                        if (c[1]) {
+                            let data = JSON.parse(c[1]);
+                            if (data) {
+                                //console.debug(`Chat Settings: ${c[1]}`);
+                                DRMng.config.removeWChat = data.removeWChat || false;
+                                DRMng.config.hideWChat = data.hideWChat || false;
+                                DRMng.config.leftWChat= data.leftWChat || false;
+                                DRMng.save();
+                                DRMng.applyChatSettings();
+                            }
+                        }
                         break;
                     case 'chatReload':
                         DRMng.reloadChat();

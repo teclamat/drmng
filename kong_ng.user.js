@@ -654,15 +654,23 @@ if(window.location.host == "www.kongregate.com") {
                             };
                             ChatDialogue.prototype.serviceMessage = function (msg, isRaidInfo) {
                                 isRaidInfo = isRaidInfo || null;
-                                msg = ChatDialogue.DRM_SCRIPT_TEMPLATE.evaluate({
-                                    message: msg,
-                                    classNames: 'script' + (isRaidInfo ? ' raidinfo' : ''),
-                                    customStyle: isRaidInfo ? ('background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/' + isRaidInfo + '.jpg);') : ''
-                                });
                                 let d = this, e = this._message_window_node;
                                 let node = document.createElement('div');
                                 node.className = 'chat-message';
-                                node.innerHTML = msg;
+                                if (msg instanceof HTMLElement) {
+                                    let dd = document.createElement('div');
+                                    dd.setAttribute('class', 'service');
+                                    dd.appendChild(msg);
+                                    node.appendChild(dd);
+                                }
+                                else {
+                                    msg = ChatDialogue.DRM_SCRIPT_TEMPLATE.evaluate({
+                                        message:     msg,
+                                        classNames:  'script' + (isRaidInfo ? ' raidinfo' : ''),
+                                        customStyle: isRaidInfo ? ('background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/' + isRaidInfo + '.jpg);') : ''
+                                    });
+                                    node.innerHTML = msg;
+                                }
                                 e.appendChild(node);
                                 setTimeout(d.scrollToBottom.bind(d),10);
                                 //this.insert(msg, null, {timestamp: new Date().getTime()});
@@ -819,38 +827,92 @@ if(window.location.host == "www.kongregate.com") {
                                         gesture = `** ${DRMng.Gestures[mode].generate()
                                                                             .replace('@from',from)
                                                                             .replace('@who',who)} **`;
-                                    //console.debug(`[DRMng] {Gesture} ${alliance?'Alliance':'Kong'} chat: ${gesture}`);
                                     if (alliance) DRMng.Alliance.send(gesture);
                                     else chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
                                 }
                                 return false;
                             });
+                            this.addChatCommand('perc',function(a,b){
+                                let pval = /.+\s(\d+)(\w?)/.exec(b);
+                                if (pval) {
+                                    let mul = 1;
+                                    switch (pval[2]) {
+                                        case 'k': mul *= 1000; break;
+                                        case 'm': mul *= 1000000; break;
+                                    }
+                                    pval = parseInt(pval[1]) || 0;
+                                    pval *= mul;
+                                }
+                                else pval = 0;
+
+                                const D = [
+                                    { val: 1, bok: ['Brown', 'Grey'], bokp: [50,50] },
+                                    { val: 4000, bok: ['Brown', 'Grey', 'Green'], bokp: [33,34,33] },
+                                    { val: 6000, bok: ['Grey', 'Green'], bokp: [50,50] },
+                                    { val: 10000, bok: ['Grey', 'Green', 'Blue'], bokp: [33,34,33] },
+                                    { val: 14000, bok: ['Green', 'Blue'], bokp: [50,50] },
+                                    { val: 16000, bok: ['Green', 'Blue', 'Purple'], bokp: [33,34,33] },
+                                    { val: 18000, bok: ['Blue', 'Purple'], bokp: [50,50] },
+                                    { val: 22000, bok: ['Blue', 'Purple', 'Orange'], bokp: [33,34,33] },
+                                    { val: 24000, bok: ['Purple', 'Orange'], bokp: [50,50] },
+                                    { val: 30000, bok: ['Orange'], bokp: [100] },
+                                    { val: 33000, bok: ['Orange', 'Red'], bokp: [75,25] },
+                                    { val: 36000, bok: ['Orange', 'Red'], bokp: [50,50] },
+                                    { val: 50000, bok: ['Orange', 'Red'], bokp: [25,75] },
+                                    { val: 70000, bok: ['Red'], bokp: [100] },
+                                    { val: 80000, bok: ['Red', 'Bronze'], bokp: [75,25] },
+                                    { val: 90000, bok: ['Red', 'Bronze'], bokp: [50,50] },
+                                    { val: 100000, bok: ['Red', 'Bronze'], bokp: [25,75] },
+                                    { val: 110000, bok: ['Bronze', 'Silver'], bokp: [75,25] },
+                                    { val: 120000, bok: ['Bronze', 'Silver'], bokp: [50,50] },
+                                    { val: 130000, bok: ['Bronze', 'Silver'], bokp: [25,75] },
+                                    { val: 140000, bok: ['Silver'], bokp: [100] },
+                                    { val: 150000, bok: ['Silver', 'Gold'], bokp: [75,25] },
+                                    { val: 160000, bok: ['Silver', 'Gold'], bokp: [50,50] },
+                                    { val: 170000, bok: ['Silver', 'Gold'], bokp: [25,75] },
+                                ];
+
+                                let t = document.createElement('table'), row, cell, s;
+                                t.setAttribute('cellspacing', '0');
+                                t.style.setProperty('width', '100%');
+                                t.style.setProperty('font-weight', '300');
+                                t.style.setProperty('font-size', '10px');
+
+                                for (let i = 0, l = D.length; i < l; ++i) {
+                                    if (D[i].val >= pval || i === l - 1) {
+                                        row = document.createElement('tr');
+                                        cell = document.createElement('td');
+                                        cell.style.setProperty('background', '#303030');
+                                        cell.style.setProperty('border-right', '1px solid #000000');
+                                        cell.style.setProperty('border-bottom', '1px solid #000000');
+                                        cell.style.setProperty('padding-right', '5px');
+                                        cell.style.setProperty('text-align', 'right');
+                                        cell.style.setProperty('width', '30px');
+                                        cell.textContent = D[i].val > 1000 ? `${D[i].val/1000}k` : D[i].val;
+                                        row.appendChild(cell);
+                                        cell = document.createElement('td');
+                                        cell.style.setProperty('border-bottom', '1px solid #000000');
+                                        cell.style.setProperty('border-right', '1px solid #000000');
+                                        cell.style.setProperty('width', '80%');
+                                        for (let j = 0; j < D[i].bok.length; j++) {
+                                            s = document.createElement('span');
+                                            s.style.setProperty('width', D[i].bokp[j] + '%');
+                                            s.style.setProperty('background-color', D[i].bok[j]);
+                                            s.style.setProperty('display', 'inline-block');
+                                            s.textContent = D[i].bok[j];
+                                            cell.appendChild(s);
+                                        }
+                                        row.appendChild(cell);
+                                        t.appendChild(row);
+                                    }
+                                }
+
+                                    let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
+                                    if (chat) chat.serviceMessage(t);
+
+                                return false;
+                            });
                             // TODO: /perc
-                            /*1 : Brown/Grey<br>\
-                             4k : Brown/Grey/Green<br>\
-                             6k : Grey/Green<br>\
-                             10k : Grey/Green/Blue<br>\
-                             14k : Green/Blue<br>\
-                             16k : Green/Blue/Purple<br>\
-                             18k : Blue/Purple<br>\
-                             22k : Blue/Purple/Orange<br>\
-                             24k : Purple/Orange<br>\
-                             30k : Orange<br>\
-                             33k : Orange/Red (more orange)<br>\
-                             36k : Orange/Red (more red)<br>\
-                             50k : Orange/Red (even more red)<br>\
-                             70k : Red<br>\
-                             80k : Red/Bronze<br>\
-                             90k : Red/Bronze<br>\
-                             100k : ???<br>\
-                             110k : Bronze/Silver<br>\
-                             120k : Bronze/Silver<br>\
-                             130k : Bronze/Silver<br>\
-                             140k : Silver<br>\
-                             150k : Silver/Gold<br>\
-                             160k : Silver/Gold<br>\
-                             170k : Silver/Gold";
-                            * */
                             this.addChatCommand(['reload','reloaf','relaod','rl'],function(a,b){
                                 let type = /^\/\w+\s?(.*)$/.exec(b);
                                 type = type ? type[1] : '';
@@ -1036,7 +1098,11 @@ if(window.location.host == "www.kongregate.com") {
 					/* Cut out garbage */\
 					html { margin: 0; }\
 					body { height: 100%; background-color: #343546 !important; min-width: inherit !important; }\
-					#play div#primarywrap { min-height: 100%; }\
+					body#play div#primarywrap {\
+					    min-height: 100%;\
+					    background-size: cover !important;\
+					    background-attachment: fixed !important;\
+					}\
 					div#subwrap { display: none; }\
 					#global, #ad_skip_controls, #ima_bumper, #ima_bumper_html5_api, #bumper_premium_header, #ima-ad-container, div.gamepage_categories_outer, div.ad, div.tracking_pixel_ad, #play #gamespotlight,\
 					div#kong_bumper_preroll_600x400-ad-slot, #kong_game_ui div.room_description_rollover_container,\
@@ -2558,7 +2624,7 @@ if(window.location.host == "www.kongregate.com") {
                                 this.active = true;
                                 setTimeout(this.nameUpdate.bind(this), 1);
                                 setTimeout(this.countUpdate.bind(this), 1);
-                                setTimeout(this.scrollToBottom.bind(this), 1);
+                                setTimeout(this.scrollToBottom.bind(this, true), 1);
                             }.bind(this));
 
                             let span = document.createElement('span');
@@ -2692,7 +2758,7 @@ if(window.location.host == "www.kongregate.com") {
                             else setTimeout(this.setup.bind(this), 1);
 
                             container.appendChild(this.body);
-                            this.scrollToBottom();
+                            this.scrollToBottom(true);
 
                             console.info("[DRMng] {Alliance} Chat body attached to DOM.");
                         }
@@ -2797,6 +2863,7 @@ if(window.location.host == "www.kongregate.com") {
                                     while (data = this.messageBuffer.shift()) this.messageEvent(data, true);
                                 }
                                 this.messageLock = false;
+                                this.scrollToBottom(true);
 
                                 console.log("[DRMng] {Alliance} LOAD:", data);
                                 break;
@@ -2842,12 +2909,15 @@ if(window.location.host == "www.kongregate.com") {
                     ),
                     serviceMessage: function(msg, ri) {
                         if (msg) {
-                            let s = ri ? ` style="background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg);"` : '',
-                                c = ri ? 'service raidinfo' : 'service',
-                                d = document.createElement('div');
+                            let d = document.createElement('div'),
+                                dd = document.createElement('div');
                             d.setAttribute('class', 'chat-message');
-                            d.innerHTML = `<div class="${c}"${s}>${msg}</div>`;
-                            if (this.chat.appendChild(d)) this.scrollToBottom();
+                            dd.setAttribute('class', ri ? 'service raidinfo' : 'service');
+                            if (ri) dd.setAttribute('style', `background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg);`);
+                            if (msg instanceof HTMLElement) dd.appendChild(msg);
+                            else dd.innerHTML = msg;
+                            d.appendChild(dd);
+                            if (this.chat.appendChild(d)) this.scrollToBottom(true);
                         }
                     },
                     raidMessage: function(data, pc, uc, pfx) {
@@ -2957,9 +3027,7 @@ if(window.location.host == "www.kongregate.com") {
                     scrollToBottom: function(force) {
                         let elHeight = this.chat.lastChild; elHeight = elHeight ? elHeight.offsetHeight : 0;
                         let chatHeight = this.chat.offsetHeight + this.chat.scrollTop - 2 + elHeight;
-                        console.debug(`EL:${elHeight}, CHAT:${chatHeight}, scrollTop:${this.chat.scrollTop}, scrollHeight:${this.chat.scrollHeight}`)
-                        if (chatHeight >= this.chat.scrollHeight || force)
-                            this.chat.scrollTop = this.chat.scrollHeight;
+                        if (chatHeight >= this.chat.scrollHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
                     },
                     setButton: function(conn) {
                         let b = document.getElementById('DRMng_allianceJoin');
@@ -3085,11 +3153,9 @@ if(window.location.host == "www.kongregate.com") {
                             button.setAttribute('style', 'border-left-color: #3a3a3a;');
                             button.addEventListener('click', function(e) {
                                 this.flipConf();
+
                                 e.target.setAttribute('class', this.getConf() ? "n" : "l");
                                 e.target.innerHTML = this.getConf() ? "On" : "Off";
-
-                                console.info("Options button hit:", this);
-                                console.info("And its event target:", e.target);
 
                                 if (typeof this.cbFn === 'function') this.cbFn.call(this, e);
 
@@ -4883,7 +4949,6 @@ else if(window.location.host === '50.18.191.15') {
                         if (c[1]) {
                             let data = JSON.parse(c[1]);
                             if (data) {
-                                //console.debug(`Chat Settings: ${c[1]}`);
                                 DRMng.config.removeWChat = data.removeWChat || false;
                                 DRMng.config.hideWChat = data.hideWChat || false;
                                 DRMng.config.leftWChat= data.leftWChat || false;

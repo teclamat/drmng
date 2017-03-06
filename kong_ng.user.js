@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.27
+// @version        	2.0.28
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '26', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '28', name: 'DotD Raids Manager next gen'},
                 Util: {
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
@@ -385,6 +385,7 @@ if(window.location.host == "www.kongregate.com") {
                         sortBy: 'hp',
                         scriptWidth: 300,
                         visited: { kasan: [], elyssa: [] },
+                        dead: { kasan: {}, elyssa: {} },
                         raidData: {},
                         raidKeys: [],
                         filterData: {},
@@ -574,8 +575,8 @@ if(window.location.host == "www.kongregate.com") {
                                         h = d["private"] ? "To " : ( d["whisper"] ? "From " : "" );
 
                                     // helper booleans
-                                    let isWhisp = !!h;
-                                    //isGuild = !isWhisp && d.room.type === 'guild',
+                                    let isWhisp = !!h,
+                                        isGuild = !isWhisp && d.room && d.room.type === 'guild';
                                     //isGame = !isWhisp && d.room.type === 'game';
 
                                     c["class"] && g.push(c["class"]);
@@ -591,11 +592,14 @@ if(window.location.host == "www.kongregate.com") {
                                     if (raid) {
                                         rData = DRMng.Util.getRaidFromUrl(raid[2], a);
                                         if (rData) {
-                                            let server = DRMng.Config.local.server.toLowerCase();
+                                            let srv = DRMng.Config.local.server.toLowerCase(),
+                                                visited = DRMng.Config.local.visited[srv].indexOf(rData.id) > -1,
+                                                dead = DRMng.Config.local.dead[srv].hasOwnProperty(rData.id),
+                                                filter = DRMng.Config.local.filterRaids[srv][rData.boss], hf;
                                             b = raid[1] + raid[3];
                                             g.push(['n', 'h', 'l', 'nm'][rData.diff - 1]);
                                             g.push(rData.id);
-                                            DRMng.Config.local.visited[server].indexOf(rData.id) !== -1 && g.push('visited');
+                                            dead ? g.push('dead') : visited && g.push('visited');
                                             cData.link = raid[2];
                                             let rInfo = DRMng.Config.local.raidData[rData.boss];
                                             let dName = [];
@@ -607,6 +611,16 @@ if(window.location.host == "www.kongregate.com") {
                                                     'WR/ER' :
                                                     'FS ' + DRMng.Util.getShortNumK(rInfo.hp[rData.diff - 1]*1000/rInfo.maxPlayers)) :
                                                 '';
+                                            //filter = DRMng.Config.local.filterRaids[srv][rData.boss], hf;
+                                            if (isGuild) {
+                                                hf = filter ? !filter[rData.diff - 1] : true;
+                                                if (!dead && !visited && hf &&
+                                                    DRMng.Raids.filter.indexOf(`@${rData.boss}_${rData.diff}`) !== -1) {
+                                                    if (DRMng.Raids.isJoining)
+                                                        setTimeout(this.pushToQueue.bind(DRMng.Raids, rData), 1);
+                                                    else setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
+                                                }
+                                            }
                                             //if (isGame && !h) setTimeout(DRMng.Raids.checkAndSend, 1000 + Math.random() * 2000, rData);
                                         }
                                     }
@@ -684,8 +698,7 @@ if(window.location.host == "www.kongregate.com") {
                                 else this.kongBotMessage(a.data.to + " cannot be reached. Please try again later.");
                             };
                             ChatDialogue.prototype.sameTimestamps = function (a, b) {
-                                a = new Date(a); b = new Date(b);
-                                return a.getYear() === b.getYear() && a.getMonth() === b.getMonth() && a.getDay() === b.getDay() && a.getHours() === b.getHours() && a.getMinutes() === b.getMinutes()
+                                return parseInt(a/60000) === parseInt(b/60000);
                             };
                             ChatDialogue.prototype.insert = function (a, b, c) {
                                 let d = this, e = this._message_window_node, f = this._holodeck;
@@ -699,8 +712,7 @@ if(window.location.host == "www.kongregate.com") {
                                         if ("string" == typeof a || a instanceof String)a = $j("<div/>", {html: a, "class": "chat-message"});
                                         if (c && c.timestamp) {
                                             let f = $j(e).children(".chat-message").filter(function () {
-                                                return $j(this).data("timestamp") > c.timestamp
-                                            });
+                                                return $j(this).data("timestamp") > c.timestamp });
                                             0 < f.length ? ($j(a).data(c).insertBefore(f.first()), r = !1) : $j(a).data(c).appendTo(e)
                                         } else $j(a).appendTo(e);
                                         r && d.scrollToBottom();
@@ -1798,17 +1810,17 @@ if(window.location.host == "www.kongregate.com") {
 					";
 
                         DRMng.Util.cssStyle('DRMng_kongCSS',kongCSS);
-
                         setTimeout(DRMng.Kong.setHeaderWidth, 500);
                     }
                 },
-                Raids:           {
+                Raids: {
                     filter: '',
                     all: [],
-                    deadCache: {},
+                    //deadCache: {},
                     locked: false,
                     bootstrap: true,
                     joinQueue: [],
+                    ids: [],
                     joinLen: 0,
                     joined: 0,
                     isJoining: false,
@@ -1839,11 +1851,11 @@ if(window.location.host == "www.kongregate.com") {
                         link.className = 'default';
                     },
                     cleanDeadCache: function() {
-                        let deadThr = new Date().getTime() - 180000;
-                        for (let dead in this.deadCache)
-                            if (this.deadCache.hasOwnProperty(dead) && this.deadCache[dead] < deadThr)
-                                delete this.deadCache[dead];
-                        setTimeout(DRMng.Raids.cleanDeadCache.bind(this), 180000);
+                        let s = DRMng.Config.local.server.toLowerCase(),
+                            d = DRMng.Config.local.dead[s],
+                            deadThr = new Date().getTime() - 129600000; // 3 days old
+                        for (let dead in d) if (d.hasOwnProperty(dead) && d[dead] < deadThr) delete d[dead];
+                        setTimeout(this.cleanDeadCache.bind(this), 3600000); // run each 1h
                     },
                     joinMsg: function(m) {
                         let msg = m ? m : "Joined " + this.joined + " out of " + this.joinLen;
@@ -1881,13 +1893,35 @@ if(window.location.host == "www.kongregate.com") {
                     prepareJoining: function() {
                         if (this.isJoining) return;
                         this.isPreparing = true;
+                        this.ids = [];
                         let i, l, name;
                         this.joinQueue = [];
                         for (i = 0, l = this.all.length; i < l; ++i) {
                             name = this.all[i].boss + '_' + this.all[i].diff;
                             if (!this.all[i].visited &&
                                 !this.all[i].isFull &&
-                                this.filter.indexOf('@'+name) !== -1) this.joinQueue.push(this.all[i]);
+                                this.filter.indexOf('@'+name) !== -1) {
+                                this.joinQueue.push(this.all[i]);
+                                this.ids.push(this.all[i].id);
+                            }
+                        }
+                        // chat raids
+                        let cr = document.querySelectorAll('p.raid:not(.dead):not(.visited) a'),
+                            s = DRMng.Config.local.server.toLowerCase(),
+                            f = DRMng.Config.local.filterRaids[s], r, hf;
+                        for (i = 0, l = cr.length; i < l; ++i) {
+                            r = DRMng.Util.getRaidFromUrl(cr[i].search);
+                            if (r) {
+                                hf = f[r.boss] ? !f[r.boss][r.diff-1] : true;
+                                if (hf) {
+                                    name = `${r.boss}_${r.diff}`;
+                                    if (this.ids.indexOf(r.id) === -1 &&
+                                        this.filter.indexOf('@' + name) !== -1) {
+                                        this.joinQueue.push(r);
+                                        this.ids.push(r.id);
+                                    }
+                                }
+                            }
                         }
                         this.joinLen = this.joinQueue.length;
                         this.isPreparing = false;
@@ -1896,9 +1930,10 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     pushToQueue: function(r, useFilter) {
                         useFilter = useFilter || false;
-                        if (!useFilter || !r.isFull) {
+                        if (this.ids.indexOf(r.id) === -1 && (!useFilter || !r.isFull)) {
                             this.joinQueue.push(r);
                             this.joinLen++;
+                            DRMng.UI.displayStatus();
                         }
                     },
                     switchAutoJoin: function() {
@@ -2196,7 +2231,7 @@ if(window.location.host == "www.kongregate.com") {
                         DRMng.UI.clearRaidList();
                         for (let i = 0, l = this.all.length; i < l; ++i) DRMng.UI.addRaidField(this.all[i]);
 
-                        DRMng.UI.displayStatus();
+                        //DRMng.UI.displayStatus();
                         setTimeout(this.prepareJoining.bind(this), 100);
                         this.bootstrap = false;
                     },
@@ -2209,7 +2244,7 @@ if(window.location.host == "www.kongregate.com") {
 
                         let hFilter = DRMng.Config.local.filterRaids[this.server][raid.boss];
                         if (hFilter === null || !hFilter[raid.diff-1]) {
-                            if (this.getIdx(raid.id) === -1 && !this.deadCache.hasOwnProperty(raid.id)) {
+                            if (this.getIdx(raid.id) === -1 && !this.getDead(raid.id)) {
                                 let idx = this.location(raid) + 1;
                                 raid.visited = DRMng.Config.local.visited[DRMng.Config.local.server.toLowerCase()].indexOf(raid.id) !== -1;
                                 let rd = DRMng.Config.local.raidData[raid.boss];
@@ -2218,8 +2253,7 @@ if(window.location.host == "www.kongregate.com") {
                                 DRMng.UI.addRaidField(raid, idx);
                                 this.count++;
                                 DRMng.UI.displayStatus();
-                                if (!raid.visited && !raid.isFull &&
-                                    this.filter.indexOf('@' + raid.boss + '_' + raid.diff) !== -1)
+                                if (!raid.visited && !raid.isFull && this.filter.indexOf(`@${raid.boss}_${raid.diff}`) !== -1)
                                 {
                                     if (this.isJoining) setTimeout(this.pushToQueue.bind(this, raid), 1);
                                     else setTimeout(this.prepareJoining.bind(this), 1);
@@ -2229,6 +2263,17 @@ if(window.location.host == "www.kongregate.com") {
 
                         this.locked = false;
                     },
+                    setDead: function(id, save) {
+                        let s = DRMng.Config.local.server.toLowerCase();
+                        if (id && !DRMng.Config.local.dead[s].hasOwnProperty(id)) {
+                            DRMng.Config.local.dead[s][id] = new Date().getTime();
+                            if (save) DRMng.Config.saveLocal();
+                        }
+                    },
+                    getDead: function(id) {
+                        let s = DRMng.Config.local.server.toLowerCase();
+                        return id && DRMng.Config.local.dead[s].hasOwnProperty(id);
+                    },
                     remove: function(id, serverNuke) {
                         if (this.locked || this.bootstrap) {
                             setTimeout(DRMng.Raids.remove.bind(this, id, serverNuke), 10);
@@ -2236,7 +2281,8 @@ if(window.location.host == "www.kongregate.com") {
                         }
                         this.locked = true;
 
-                        this.deadCache[id] = new Date().getTime();
+                        this.setDead(id);
+                        //this.deadCache[id] = new Date().getTime();
                         let i = this.getIdx(id);
                         if (i !== -1) {
                             let r = this.get(id);
@@ -2267,7 +2313,7 @@ if(window.location.host == "www.kongregate.com") {
                         this.locked = true;
 
                         let r = this.get(raid.id);
-                        if (r && !this.deadCache.hasOwnProperty(raid.id))
+                        if (r && !this.getDead(raid.id))
                         {
                             let keys = ['hp','participants','m1','m2','m3','m4','m5','m6'];
                             let rd = DRMng.Config.local.raidData[raid.boss], markFull = false;
@@ -2312,7 +2358,7 @@ if(window.location.host == "www.kongregate.com") {
                         if (c === 0) return p;
                         if (c > 0) return this.location(val, p, e);
                     },
-                    init: function() { setTimeout(this.cleanDeadCache, 180000); }
+                    init: function() { setTimeout(this.cleanDeadCache.bind(this), 60000); }
                 },
                 UM: {
                     numTries: 0,
@@ -2573,8 +2619,7 @@ if(window.location.host == "www.kongregate.com") {
                         return this.setup();
                     },
                     countUpdate: function() {
-                        if (this.active)
-                            this.count.textContent = this.users.count;
+                        if (this.active) this.count.textContent = this.users.count;
                     },
                     nameUpdate: function() {
                         let name = this.conf.name ? this.conf.name : (this.conf.channel + ' alliance');
@@ -2766,7 +2811,8 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     setup: function(channel, password) {
                         if (this.conf.enabled) {
-                            if (typeof io === 'function' && this.tab && this.chat && DRMng.UM.user.qualified) {
+                            if (typeof io === 'function' && this.tab && this.chat &&
+                                DRMng.UM.user.qualified && !DRMng.Raids.bootstrap) {
 
                                 if (DRMng.Alliance.conf.sbs)
                                     document.getElementById('alliance_chat_sbs').style.removeProperty('display');
@@ -2842,7 +2888,9 @@ if(window.location.host == "www.kongregate.com") {
                     },
                     serviceEvent: function(data) {
                         let usr;
-                        switch (data.act) {
+                        // TODO: remove act when users move to new version
+                        if (data.act) data.action = data.act;
+                        switch (data.action) {
                             case 'loadData':
                                 // load users
                                 for (let u in data.users) {
@@ -2865,7 +2913,6 @@ if(window.location.host == "www.kongregate.com") {
                                 this.messageLock = false;
                                 this.scrollToBottom(true);
 
-                                console.log("[DRMng] {Alliance} LOAD:", data);
                                 break;
 
                             case 'userJoin':
@@ -2878,8 +2925,33 @@ if(window.location.host == "www.kongregate.com") {
                                 setTimeout(this.users.del(usr.usr), 1);
                                 break;
 
+                            case 'allianceRaids':
+                                //console.info("[DRMng] {Alliance} Batch raids object:", data);
+                                for (let i = 0, l = data.raids.length; i < l; ++i) {
+                                    data.raids[i].createtime = new Date(data.raids[i].createtime).getTime();
+                                    //console.log("[DRMng] {Alliance} Batch raid:", data.raids[i]);
+                                    DRMng.Raids.insert(data.raids[i]);
+                                }
+                                break;
+
+                            case 'newRaid':
+                                setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, data.data), 1);
+                                break;
+
+                            case 'fullUpdate':
+                                setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, true), 1);
+                                break;
+
+                            case 'partialUpdate':
+                                setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, false), 1);
+                                break;
+
+                            case 'nukedRaid':
+                                setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, data.data), 1);
+                                break;
+
                             default:
-                                console.log("[DRMng] {Alliance} SRV:",data);
+                                console.log("[DRMng] {Alliance} SRV:", data);
                         }
                     },
                     sbsEvent: function(e) {
@@ -2926,7 +2998,9 @@ if(window.location.host == "www.kongregate.com") {
                             let r = DRMng.Util.getRaidFromUrl(msg[2], data.usr.usr);
                             if (r) {
                                 let srv = DRMng.Config.local.server.toLowerCase(), g = this.getGuildTag(data.usr.gld),
-                                    v = DRMng.Config.local.visited, l, m = msg[1] + msg[3],
+                                    v = DRMng.Config.local.visited[srv].indexOf(r.id) > -1,
+                                    d = DRMng.Config.local.dead[srv].hasOwnProperty(r.id),
+                                    l, m = msg[1] + msg[3],
                                     i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
                                     t = new Date(data.ts).format("mmm d, HH:MM"), u = data.usr.usr,
                                     ign = data.usr.ign;
@@ -2934,7 +3008,7 @@ if(window.location.host == "www.kongregate.com") {
                                 pc.push('raid');
                                 pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
                                 pc.push(r.id);
-                                (v[srv].indexOf(r.id) > -1) && pc.push('visited');
+                                d ? pc.push('dead') : v && pc.push('visited');
 
                                 n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
                                 n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
@@ -2946,19 +3020,19 @@ if(window.location.host == "www.kongregate.com") {
                                 f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : `FS ${f}`}`;
 
                                 return `<p class="${pc.join(' ')}">
-                                                    <span class="header">
-                                                        <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
-                                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
-                                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
-                                                    </span>
-                                                    <span style="display: flex">
-                                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
-                                                        <span class="guildname truncate">${ign}</span>
-                                                        <span class="separator">${s}</span>
-                                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
-                                                    </span>
-                                                    <span class="message hyphenate">${m}</span>
-                                                </p>`;
+                                            <span class="header">
+                                                <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
+                                                <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
+                                                <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
+                                            </span>
+                                            <span style="display: flex">
+                                                <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
+                                                <span class="guildname truncate">${ign}</span>
+                                                <span class="separator">${s}</span>
+                                                <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
+                                            </span>
+                                            <span class="message hyphenate">${m}</span>
+                                        </p>`;
                             }
                         }
                         return null;
@@ -3774,7 +3848,7 @@ if(window.location.host == "www.kongregate.com") {
                             document.getElementById('DRMng_filterLarge'),
                             document.getElementById('DRMng_filterEpic'),
                             document.getElementById('DRMng_filterColossal'),
-                            undefined, //personal raids not supported
+                            document.getElementById('DRMng_filterGuild'),
                             document.getElementById('DRMng_filterGigantic')
                         ];
 
@@ -3785,7 +3859,7 @@ if(window.location.host == "www.kongregate.com") {
                         for (let r in raids) {
                             if (raids.hasOwnProperty(r)) {
                                 i = raids[r];
-                                if (!i.isGuild && !i.isEvent) {
+                                if (!i.isEvent) {
                                     if (!filters.hasOwnProperty(r)) filters[r] = [false, false, false, false];
                                     div = document.createElement('div');
                                     div.className = "buttonStripe";
@@ -3797,7 +3871,7 @@ if(window.location.host == "www.kongregate.com") {
                                             + flt.toLowerCase() + '">' + flt + '</button>';
                                     }
                                     div.addEventListener('click', DRMng.UI.applyFilter);
-                                    fltDivs[i.size].appendChild(div);
+                                    fltDivs[i.isGuild ? 5 : i.size].appendChild(div);
                                 }
                             }
                         }
@@ -4385,7 +4459,7 @@ if(window.location.host == "www.kongregate.com") {
                             document.getElementById('DRMng_filterLarge'),
                             document.getElementById('DRMng_filterEpic'),
                             document.getElementById('DRMng_filterColossal'),
-                            undefined, //personal raids not supported
+                            document.getElementById('DRMng_filterGuild'),
                             document.getElementById('DRMng_filterGigantic')
                         ];
                         let div = null;
@@ -4578,6 +4652,10 @@ if(window.location.host == "www.kongregate.com") {
 								<div class="group flex hide" group="filter">\
 									<div class="title" onclick="DRMng.UI.roll(this);">Gigantic Raids</div>\
 									<div id="DRMng_filterGigantic" style="display: none;"></div>\
+								</div>\
+								<div class="group flex hide" group="filter">\
+									<div class="title" onclick="DRMng.UI.roll(this);">Guild Raids</div>\
+									<div id="DRMng_filterGuild" style="display: none;"></div>\
 								</div>\
 							</div>\
 							<div class="" id="DRMng_Tools">\

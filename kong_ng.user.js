@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.28
+// @version        	2.0.29
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,8 +20,62 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '28', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '29', name: 'DotD Raids Manager next gen'},
                 Util: {
+                    Node: function(ele) {
+                        this._ele = null;
+                        this.init = function(el) { this._ele = el; return this; };
+                        this.node = function() { return this._ele };
+                        this.set = function(param) {
+                            for (let attr in param) if (param.hasOwnProperty(attr))
+                                this._ele.setAttribute(attr, param[attr]);
+                            return this
+                        };
+                        this.style = function(param) {
+                            for (let prop in param) if (param.hasOwnProperty(prop))
+                                this._ele.style.setProperty(prop, param[prop]);
+                            return this
+                        };
+                        this.txt = function(text) { this._ele.appendChild(document.createTextNode(text)); return this };
+                        this.insert = function(ele) {
+                            if (typeof ele === 'string') {
+                                if (ele.charAt(0) === '<' || ele.length > 8) return this.html(ele, true);
+                                ele = document.createElement(ele);
+                            }
+                            else if (ele instanceof DRMng.Util.Node) ele = ele._ele;
+                            if (ele instanceof Node) this._ele.appendChild(ele);
+                            return this
+                        };
+                        this.html = function(text, overwrite) {
+                            this._ele.innerHTML = overwrite ? text : (this._ele.innerHTML + text);
+                            return this
+                        };
+                        this.on = function(event, func, bubble) {
+                            this._ele.addEventListener(event, func, bubble);
+                            return this
+                        };
+                        this.off = function(event, func, bubble) {
+                            this._ele.removeEventListener(event, func, bubble);
+                            return this
+                        };
+                        this.del = function() { this._ele.parentNode.removeChild(this._ele); return null };
+                        this.attach = function(method, dele) {
+                            if (typeof dele === 'string') dele = document.getElementById(dele);
+                            else if (dele instanceof DRMng.Util.Node) dele = dele._ele;
+                            if (!(dele instanceof Node)) throw 'Invalid attachment element specified';
+                            else if (!/^(?:to|before|after)$/i.test(method)) throw 'Invalid append method specified';
+                            else if (method === 'to') dele.appendChild(this._ele);
+                            else if (method === 'before') dele.parentNode.insertBefore(this._ele, dele);
+                            else if (dele.nextSibling === null) dele.parentNode.appendChild(this._ele);
+                            else dele.parentNode.insertBefore(this._ele, dele.nextSibling);
+                            return this
+                        };
+                        if (typeof ele === 'string')
+                            ele = ele.charAt(0) === '#' ?
+                                document.getElementById(ele.substring(1)) : document.createElement(ele);
+                        if (ele instanceof Node) this.init(ele);
+                        else throw 'Invalid element type specified';
+                    },
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
                     cssStyle: function(id,content) {
@@ -704,10 +758,10 @@ if(window.location.host == "www.kongregate.com") {
                                 let d = this, e = this._message_window_node, f = this._holodeck;
                                 f.scheduleRender(function () {
                                     let g = e.getHeight();
-                                    //var h = g + e.scrollTop + ChatDialogue.SCROLL_FUDGE >= e.scrollHeight;
+                                    let h = g + e.scrollTop + ChatDialogue.SCROLL_FUDGE >= e.scrollHeight;
                                     // removed scroll fudge
-                                    let h = g + e.scrollTop >= e.scrollHeight;
-                                    let r = true; //0 !== g && h;
+                                    //let h = g + e.scrollTop >= e.scrollHeight;
+                                    let r = 0 !== g && h;
                                     f.scheduleRender(function () {
                                         if ("string" == typeof a || a instanceof String)a = $j("<div/>", {html: a, "class": "chat-message"});
                                         if (c && c.timestamp) {
@@ -936,7 +990,7 @@ if(window.location.host == "www.kongregate.com") {
                                         DRMng.postGameMessage('chatReload');
                                         break;
                                     default:
-                                        window.activateGame();
+                                        window.gameLoader.loadGame('');
                                 }
                                 return false;
                             });
@@ -2834,7 +2888,7 @@ if(window.location.host == "www.kongregate.com") {
                                 if (this.client && this.client.connected) this.client.disconnect();
                                 else this.client =
                                     io.connect(`http://remote.erley.org:3000/${ch}`,
-                                        { query: `token=${DRMng.Util.crc32(pass)}`, multiplex: false });
+                                        { query: `token=${ DRMng.Util.crc32(pass) }`, multiplex: false });
 
                                 this.client.on('error', function(d) {
                                     console.warn("[DRMng] {Alliance} Chat client error:", d);
@@ -2965,31 +3019,57 @@ if(window.location.host == "www.kongregate.com") {
                         */
                         setTimeout(DRMng.UI.handleChatClick.bind(DRMng.UI, e, true), 1);
                     },
-                    messageTmpl: new Template(
-                        '<p class="#{mainCls}">' +
-                            '<span class="header">' +
-                                '<span class="timestamp" style="flex-grow: 1">#{ts}</span>' +
-                                '<span class="sticker">#{tag}</span>' +
-                            '</span>' +
-                            '<span style="display: block">' +
-                                '<span username="#{user}" class="#{userCls}">#{pfx}#{user}</span>' +
-                                '<span class="#{ignCls}">#{ign}</span>' +
-                                '<span class="separator">: </span>' +
-                                '<span class="message hyphenate">#{msg}</span>' +
-                            '</span>' +
-                        '</p>'
-                    ),
+                    getMessageHTML: function(d) {
+                        let p = new DRMng.Util.Node('p');
+                        if (d) {
+                            if (d.mainCls) p.set({class: d.mainCls});
+
+                            // 1st row (header)
+                            let hdr = new DRMng.Util.Node('span').set({class: 'header'});
+
+                            // Time field
+                            new DRMng.Util.Node('span')
+                                 .set({class: 'timestamp'}).style({'flex-grow': '1'})
+                                 .txt(d.ts).attach('to', hdr);
+                            // Guild tag
+                            new DRMng.Util.Node('span')
+                                 .set({class: 'sticker'})
+                                 .txt(d.tag).attach('to', hdr);
+
+                            hdr.attach('to', p);
+
+                            // 2nd row
+                            hdr = new DRMng.Util.Node('span').style({display: 'block'});
+
+                            // Username
+                            new DRMng.Util.Node('span')
+                                 .set({class: d.userCls, username: d.user, ign: d.ign})
+                                 .txt((d.pfx || '') + d.user).attach('to', hdr);
+                            // IGN
+                            new DRMng.Util.Node('span')
+                                 .set({class: d.ignCls})
+                                 .txt(d.ign).attach('to', hdr);
+                            // Separator
+                            new DRMng.Util.Node('span')
+                                 .set({class: 'separator'})
+                                 .txt(': ').attach('to', hdr);
+                            // Message
+                            new DRMng.Util.Node('span')
+                                 .set({class: 'message hyphenate'})
+                                 .html(d.msg).attach('to', hdr);
+
+                            hdr.attach('to', p);
+                        }
+                        return p.node();
+                    },
                     serviceMessage: function(msg, ri) {
                         if (msg) {
-                            let d = document.createElement('div'),
-                                dd = document.createElement('div');
-                            d.setAttribute('class', 'chat-message');
-                            dd.setAttribute('class', ri ? 'service raidinfo' : 'service');
-                            if (ri) dd.setAttribute('style', `background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg);`);
-                            if (msg instanceof HTMLElement) dd.appendChild(msg);
-                            else dd.innerHTML = msg;
-                            d.appendChild(dd);
-                            if (this.chat.appendChild(d)) this.scrollToBottom(true);
+                            let p = new DRMng.Util.Node('div').set({class: 'chat-message'});
+                            new DRMng.Util.Node('div')
+                                .set({class: `service${ri?' raidinfo':''}`})
+                                .style(ri?{'background-image': `linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg)`}:{})
+                                .insert(msg).attach('to', p);
+                            if (this.chat.appendChild(p.node())) this.scrollToBottom(true);
                         }
                     },
                     raidMessage: function(data, pc, uc, pfx) {
@@ -3077,7 +3157,18 @@ if(window.location.host == "www.kongregate.com") {
                                     reg.lastIndex += link.length - l[1].length;
                                 }
 
-                                content = this.messageTmpl.evaluate({
+                                /*content = this.messageTmpl.evaluate({
+                                    mainCls: g.join(" "),
+                                    ts:      new Date(data.ts).format("mmm d, HH:MM"),
+                                    pfx:     h,
+                                    user:    data.usr.usr,
+                                    userCls: e.join(' '),
+                                    ign:     data.usr.ign || '',
+                                    ignCls:  data.usr.ign ? 'guildname truncate' : '',
+                                    tag:     this.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
+                                    msg:     msg
+                                });*/
+                                content = this.getMessageHTML({
                                     mainCls: g.join(" "),
                                     ts:      new Date(data.ts).format("mmm d, HH:MM"),
                                     pfx:     h,
@@ -3091,7 +3182,8 @@ if(window.location.host == "www.kongregate.com") {
                             }
                             let msg = document.createElement('div');
                             msg.setAttribute('class', 'chat-message');
-                            msg.innerHTML = content;
+                            if (content instanceof HTMLElement) msg.appendChild(content);
+                            else msg.innerHTML = content;
                             this.chat.appendChild(msg);
                             if (this.active || this.conf.sbs) this.scrollToBottom();
                             else this.setUnread();
@@ -3114,7 +3206,6 @@ if(window.location.host == "www.kongregate.com") {
                             else {
                                 b.setAttribute('class', 'n');
                                 b.textContent = 'Join';
-                                this.conf.enabled = false;
                             }
                             DRMng.UI.setChatWidth();
                         }

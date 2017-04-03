@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.29
+// @version        	2.0.30
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '29', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '30', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -5110,35 +5110,39 @@ else if(window.location.host === '50.18.191.15') {
         };
         window.addEventListener('message', function(e) {
             console.log("[DRMng] Message received!", e.data, e.origin);
+	    try {
             let c = e.data.split('#');
-            if(c[0].indexOf('DRMng.') === 0) {
-                c[0] = c[0].substring(6);
-                switch(c[0]) {
-                    case 'chatSettings':
-                        if (c[1]) {
-                            let data = JSON.parse(c[1]);
-                            if (data) {
-                                DRMng.config.removeWChat = data.removeWChat || false;
-                                DRMng.config.hideWChat = data.hideWChat || false;
-                                DRMng.config.leftWChat= data.leftWChat || false;
-                                DRMng.save();
-                                DRMng.applyChatSettings();
+                if(c[0].indexOf('DRMng.') === 0) {
+                    c[0] = c[0].substring(6);
+                    switch(c[0]) {
+                        case 'chatSettings':
+                            if (c[1]) {
+                                let data = JSON.parse(c[1]);
+                                if (data) {
+                                    DRMng.config.removeWChat = data.removeWChat || false;
+                                    DRMng.config.hideWChat = data.hideWChat || false;
+                                    DRMng.config.leftWChat= data.leftWChat || false;
+                                    DRMng.save();
+                                    DRMng.applyChatSettings();
+                                }
                             }
-                        }
-                        break;
-                    case 'chatReload':
-                        DRMng.reloadChat();
-                        break;
-                    case 'gameReload':
-                        DRMng.reloadGame();
-                        break;
-                    case 'killGame':
-                        document.getElementById('swfdiv').data = "";
-                        break;
-                    case 'killChat':
-                        document.getElementById('chatdiv').data = "";
-                }
-            }
+                            break;
+                        case 'chatReload':
+                            DRMng.reloadChat();
+                            break;
+                        case 'gameReload':
+                            DRMng.reloadGame();
+                            break;
+                        case 'killGame':
+                            document.getElementById('swfdiv').data = "";
+                            break;
+                        case 'killChat':
+                            document.getElementById('chatdiv').data = "";
+                    }
+	        }
+	    } catch (e) {
+	        console.log("[DRMng] failed handling Message! " + e.data);
+	    }
         },false);
         DRMng.init();
     }

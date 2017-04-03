@@ -5118,9 +5118,9 @@ else if(window.location.host === '50.18.191.15') {
                 c[0] = c[0].substring(6);
                 switch(c[0]) {
                     case 'chatSettings':
-                       if (c[1]) {
-                           let data = JSON.parse(c[1]);
-                           if (data) {
+                        if (c[1]) {
+                            let data = JSON.parse(c[1]);
+                            if (data) {
                                 DRMng.config.removeWChat = data.removeWChat || false;
                                 DRMng.config.hideWChat = data.hideWChat || false;
                                 DRMng.config.leftWChat= data.leftWChat || false;
@@ -5129,10 +5129,10 @@ else if(window.location.host === '50.18.191.15') {
                             }
                         }
                         break;
-                   case 'chatReload':
+                    case 'chatReload':
                         DRMng.reloadChat();
                         break;
-                   case 'gameReload':
+                    case 'gameReload':
                         DRMng.reloadGame();
                         break;
                     case 'killGame':
@@ -5141,7 +5141,7 @@ else if(window.location.host === '50.18.191.15') {
                     case 'killChat':
                         document.getElementById('chatdiv').data = "";
                 }
-	    }
+            }
         },false);
         DRMng.init();
     }

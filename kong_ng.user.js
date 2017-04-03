@@ -5110,38 +5110,37 @@ else if(window.location.host === '50.18.191.15') {
         };
         window.addEventListener('message', function(e) {
             console.log("[DRMng] Message received!", e.data, e.origin);
-	    try {
+	    if(typeof e.data !== 'string' || !e.data) {
+	    	return;
+	    }
             let c = e.data.split('#');
-                if(c[0].indexOf('DRMng.') === 0) {
-                    c[0] = c[0].substring(6);
-                    switch(c[0]) {
-                        case 'chatSettings':
-                            if (c[1]) {
-                                let data = JSON.parse(c[1]);
-                                if (data) {
-                                    DRMng.config.removeWChat = data.removeWChat || false;
-                                    DRMng.config.hideWChat = data.hideWChat || false;
-                                    DRMng.config.leftWChat= data.leftWChat || false;
-                                    DRMng.save();
-                                    DRMng.applyChatSettings();
-                                }
+            if(c[0].indexOf('DRMng.') === 0) {
+                c[0] = c[0].substring(6);
+                switch(c[0]) {
+                    case 'chatSettings':
+                       if (c[1]) {
+                           let data = JSON.parse(c[1]);
+                           if (data) {
+                                DRMng.config.removeWChat = data.removeWChat || false;
+                                DRMng.config.hideWChat = data.hideWChat || false;
+                                DRMng.config.leftWChat= data.leftWChat || false;
+                                DRMng.save();
+                                DRMng.applyChatSettings();
                             }
-                            break;
-                        case 'chatReload':
-                            DRMng.reloadChat();
-                            break;
-                        case 'gameReload':
-                            DRMng.reloadGame();
-                            break;
-                        case 'killGame':
-                            document.getElementById('swfdiv').data = "";
-                            break;
-                        case 'killChat':
-                            document.getElementById('chatdiv').data = "";
-                    }
-	        }
-	    } catch (e) {
-	        console.log("[DRMng] failed handling Message! " + e.data);
+                        }
+                        break;
+                   case 'chatReload':
+                        DRMng.reloadChat();
+                        break;
+                   case 'gameReload':
+                        DRMng.reloadGame();
+                        break;
+                    case 'killGame':
+                        document.getElementById('swfdiv').data = "";
+                        break;
+                    case 'killChat':
+                        document.getElementById('chatdiv').data = "";
+                }
 	    }
         },false);
         DRMng.init();

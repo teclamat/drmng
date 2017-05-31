@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.30
+// @version        	2.0.31
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host == "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '30', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '31', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -29,6 +29,11 @@ if(window.location.host == "www.kongregate.com") {
                         this.set = function(param) {
                             for (let attr in param) if (param.hasOwnProperty(attr))
                                 this._ele.setAttribute(attr, param[attr]);
+                            return this
+                        };
+                        this.remove = function(param) {
+                            if (!param instanceof Array) param = [param];
+                            for (let i = 0; i < param.length; ++i) this._ele.removeAttribute(param[i]);
                             return this
                         };
                         this.style = function(param) {
@@ -73,37 +78,35 @@ if(window.location.host == "www.kongregate.com") {
                         if (typeof ele === 'string')
                             ele = ele.charAt(0) === '#' ?
                                 document.getElementById(ele.substring(1)) : document.createElement(ele);
-                        if (ele instanceof Node) this.init(ele);
-                        else throw 'Invalid element type specified';
+                        //if (ele instanceof Node)
+                        this.init(ele);
+                        //else return null;
                     },
                     // Sets or Destroys css Style in document head
                     // if 'content' is null, css with given ID is removed
-                    cssStyle: function(id,content) {
-                        let s = document.getElementById(id);
+                    cssStyle: function(id, content) {
+                        let s = new DRMng.Util.Node(`#${id}`);
                         if (content !== null) {
-                            if (!s) {
-                                s = document.createElement('style');
-                                s.setAttribute('type', 'text/css');
-                                s.setAttribute('id', id);
-                                document.head.appendChild(s);
-                            }
-                            s.innerHTML = content;
+                            if (!s.node()) s = new DRMng.Util.Node('style')
+                                                    .set({type: 'text/css', id: id})
+                                                    .attach('to', document.head);
+                            s.txt(content);
                         }
-                        else if (s) s.parentNode.removeChild(s);
+                        else if (s.node()) s.del();
                     },
-                    copyFields: function(src,dst,fields) {
+                    copyFields: function(src, dst, fields) {
                         for (let i = 0, l = fields.length; i < l; ++i)
                             if (src.hasOwnProperty(fields[i])) dst[fields[i]] = src[fields[i]];
                         return dst;
                     },
-                    getQueryVariable: function(v,s) {
+                    getQueryVariable: function(v, s) {
                         let query = String(s || window.location.search.substring(1));
                         if (query.indexOf('?') > -1) query = query.substring(query.indexOf('?') + 1);
                         let vars = query.split('&');
                         let i = vars.length;
                         while(i--) {
-                            let pair = vars[i].split('=');
-                            if (decodeURIComponent(pair[0]) == v) return decodeURIComponent(pair[1]);
+                            let pair = vars[i].split('='), name = decodeURIComponent(pair[0]);
+                            if (name === v) return name;
                         }
                         return '';
                     },
@@ -171,18 +174,15 @@ if(window.location.host == "www.kongregate.com") {
                         },
                         lightShotCb: function(e) {
                             let d = JSON.parse(e.data);
-                            let i = document.getElementById(d.id);
-                            let l = /og:image.+?content="(.+?)"/.exec(d.responseText);
-                            if (l) {
-                                l = l[1];
-                                if (i) {
-                                    i.addEventListener('load', DRMng.Alliance.scrollToBottom.bind(DRMng.Alliance));
-                                    i.setAttribute('src', l);
-                                    i.setAttribute('alt', l);
-                                    i.removeAttribute('id');
+                            let i = new DRMng.Util.Node(`#${d.id}`);
+                            if (i.node()) {
+                                let l = /og:image.+?content="(.+?)"/.exec(d.responseText);
+                                if (l) {
+                                    i.on('load', DRMng.Alliance.scrollToBottom.bind(DRMng.Alliance))
+                                     .set({src: l[1], alt: l[1]}).remove('id');
                                 }
+                                else i.del();
                             }
-                            else if (i) i.parentNode.removeChild(i);
                         }
                     },
                     hResize: {
@@ -495,7 +495,7 @@ if(window.location.host == "www.kongregate.com") {
                             scr[i].parentNode.removeChild(scr[i]);
                             counter++;
                         }
-                        console.info('[DRMng] {Kong} Removed unnecesary \<script\> tags (%d)', counter);
+                        console.info('[DRMng] {Kong} Removed unnecesary script tags (%d)', counter);
                     },
                     killAds: function() {
                         if(typeof kong_ads === 'object') {
@@ -528,20 +528,17 @@ if(window.location.host == "www.kongregate.com") {
                         else setTimeout(DRMng.Kong.killDealSpot, 1000);
                     },
                     addReloadButton: function() {
-                        let li = document.createElement('li');
-                        li.className = 'spritegame';
-                        //li.innerHTML = '<a onclick="activateGame();">Reload</a>';
-                        li.innerHTML = '<a onclick="DRMng.postGameMessage(\'gameReload\');">Reload Game</a>';
-                        li.style.backgroundPosition = '0 -280px';
-                        li.style.cursor = 'pointer';
-                        document.getElementById('quicklinks').appendChild(li);
+                        new DRMng.Util.Node('li')
+                            .set({class: 'spritegame'})
+                            .style({'background-position': '0 -280px', 'cursor': 'pointer'})
+                            .html('<a onclick="DRMng.postGameMessage(\'gameReload\');">Reload Game</a>', true)
+                            .attach('to', 'quicklinks');
 
-                        li = document.createElement('li');
-                        li.className = 'spritegame';
-                        li.innerHTML = '<a onclick="DRMng.postGameMessage(\'chatReload\');">Reload Chat</a>';
-                        li.style.backgroundPosition = '0 -280px';
-                        li.style.cursor = 'pointer';
-                        document.getElementById('quicklinks').appendChild(li);
+                        new DRMng.Util.Node('li')
+                            .set({class: 'spritegame'})
+                            .style({'background-position': '0 -280px', 'cursor': 'pointer'})
+                            .html('<a onclick="DRMng.postGameMessage(\'chatReload\');">Reload Chat</a>', true)
+                            .attach('to', 'quicklinks');
                     },
                     addSlimButton: function() {
                         // set body class name on script load
@@ -570,8 +567,7 @@ if(window.location.host == "www.kongregate.com") {
                         document.getElementById('nav_welcome_box').appendChild(li);
                     },
                     addSbsChatContainer: function() {
-                        let chat = document.getElementById('chat_window');
-                        if (chat) {
+                        if (document.getElementById('chat_window')) {
                             let sbs = document.createElement('div');
                             sbs.setAttribute('id', 'alliance_chat_sbs');
                             sbs.setAttribute('style', 'display: none');
@@ -2857,6 +2853,7 @@ if(window.location.host == "www.kongregate.com") {
                             else setTimeout(this.setup.bind(this), 1);
 
                             container.appendChild(this.body);
+
                             this.scrollToBottom(true);
 
                             console.info("[DRMng] {Alliance} Chat body attached to DOM.");
@@ -3185,15 +3182,16 @@ if(window.location.host == "www.kongregate.com") {
                             if (content instanceof HTMLElement) msg.appendChild(content);
                             else msg.innerHTML = content;
                             this.chat.appendChild(msg);
-                            if (this.active || this.conf.sbs) this.scrollToBottom();
+                            if (this.active || this.conf.sbs) this.scrollToBottom(f);
                             else this.setUnread();
                         }
                         else this.messageBuffer.push(data);
                     },
                     scrollToBottom: function(force) {
                         let elHeight = this.chat.lastChild; elHeight = elHeight ? elHeight.offsetHeight : 0;
-                        let chatHeight = this.chat.offsetHeight + this.chat.scrollTop - 2 + elHeight;
-                        if (chatHeight >= this.chat.scrollHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
+                        let chatHeight = this.chat.scrollHeight - this.chat.offsetHeight - this.chat.scrollTop;
+                        //console.log(`[debug] {scroll2bottom} diff: ${chatHeight}, last el: ${elHeight}`);
+                        if (chatHeight <= elHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
                     },
                     setButton: function(conn) {
                         let b = document.getElementById('DRMng_allianceJoin');
@@ -5079,8 +5077,8 @@ else if(window.location.host === '50.18.191.15') {
                 let chatDiv = document.getElementById('chatdiv');
                 this.load();
                 if (swfDiv !== null && chatDiv !== null && swfDiv.data && chatDiv.data) {
-                    this.config.version.game = /^.+\/(\d+?)\/.+$/.exec(swfDiv.data)[1];
-                    this.config.version.chat = /^.+\/(\d+?)\/.+$/.exec(chatDiv.data)[1];
+                    this.config.version.game = /^.+\/([\da-z]+?)\/.+$/.exec(swfDiv.data)[1];
+                    this.config.version.chat = /^.+\/([\da-z]+?)\/.+$/.exec(chatDiv.data)[1];
                     if (this.config.version.game === '13525') this.config.version.game = '13524';
                     if (kongregateAPI) {
                         let data = kongregateAPI._flashVarsObject;
@@ -5110,13 +5108,12 @@ else if(window.location.host === '50.18.191.15') {
         };
         window.addEventListener('message', function(e) {
             console.log("[DRMng] Message received!", e.data, e.origin);
-	    if(typeof e.data !== 'string' || !e.data) {
-	    	return;
-	    }
+            if (typeof e.data !== 'string' || !e.data) return;
+
             let c = e.data.split('#');
-            if(c[0].indexOf('DRMng.') === 0) {
+            if (c[0].indexOf('DRMng.') === 0) {
                 c[0] = c[0].substring(6);
-                switch(c[0]) {
+                switch (c[0]) {
                     case 'chatSettings':
                         if (c[1]) {
                             let data = JSON.parse(c[1]);
@@ -5142,7 +5139,7 @@ else if(window.location.host === '50.18.191.15') {
                         document.getElementById('chatdiv').data = "";
                 }
             }
-        },false);
+        }, false);
         DRMng.init();
     }
     scr = document.createElement('script');

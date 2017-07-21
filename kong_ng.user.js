@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.32
+// @version        	2.0.33
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -20,7 +20,7 @@ if(window.location.host === "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '32', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '33', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -2938,7 +2938,7 @@ if(window.location.host === "www.kongregate.com") {
                     serviceEvent: function(data) {
                         let usr;
                         // TODO: remove act when users move to new version
-                        //if (data.act) data.action = data.act;
+                        if (data.act) data.action = data.act;
                         switch (data.action) {
                             case 'loadData':
                                 // load users

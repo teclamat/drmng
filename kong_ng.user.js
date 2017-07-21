@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.31
+// @version        	2.0.32
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -15,12 +15,12 @@
 
 //best loop atm: for(var i=0, l=obj.length; i<l; ++i) - for with caching and pre-increment
 
-if(window.location.host == "www.kongregate.com") {
-    if(window.top == window.self) {
+if(window.location.host === "www.kongregate.com") {
+    if(window.top === window.self) {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '31', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '32', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -41,7 +41,11 @@ if(window.location.host == "www.kongregate.com") {
                                 this._ele.style.setProperty(prop, param[prop]);
                             return this
                         };
-                        this.txt = function(text) { this._ele.appendChild(document.createTextNode(text)); return this };
+                        this.txt = function(text, overwrite) {
+                            if (overwrite) this._ele.textContent = '';
+                            this._ele.appendChild(document.createTextNode(text));
+                            return this
+                        };
                         this.insert = function(ele) {
                             if (typeof ele === 'string') {
                                 if (ele.charAt(0) === '<' || ele.length > 8) return this.html(ele, true);
@@ -87,10 +91,9 @@ if(window.location.host == "www.kongregate.com") {
                     cssStyle: function(id, content) {
                         let s = new DRMng.Util.Node(`#${id}`);
                         if (content !== null) {
-                            if (!s.node()) s = new DRMng.Util.Node('style')
-                                                    .set({type: 'text/css', id: id})
-                                                    .attach('to', document.head);
-                            s.txt(content);
+                            if (!s.node())
+                                s = new DRMng.Util.Node('style').set({type: 'text/css', id: id}).attach('to', document.head);
+                            s.txt(content, true);
                         }
                         else if (s.node()) s.del();
                     },
@@ -2267,7 +2270,7 @@ if(window.location.host == "www.kongregate.com") {
                                     this.setChat(val[i].id, 'visited');
                                 }
                                 rd = DRMng.Config.local.raidData[val[i].boss];
-                                val[i].isFull = rd && val[i].participants && rd.maxPlayers == val[i].participants;
+                                val[i].isFull = rd && val[i].participants && rd.maxPlayers === val[i].participants;
                                 this.all.push(val[i]);
                             }
                         }
@@ -2298,7 +2301,7 @@ if(window.location.host == "www.kongregate.com") {
                                 let idx = this.location(raid) + 1;
                                 raid.visited = DRMng.Config.local.visited[DRMng.Config.local.server.toLowerCase()].indexOf(raid.id) !== -1;
                                 let rd = DRMng.Config.local.raidData[raid.boss];
-                                raid.isFull = !!(rd && raid.participants && rd.maxPlayers == raid.participants);
+                                raid.isFull = rd && raid.participants && rd.maxPlayers === raid.participants;
                                 this.all.splice(idx, 0, raid);
                                 DRMng.UI.addRaidField(raid, idx);
                                 this.count++;
@@ -2366,20 +2369,16 @@ if(window.location.host == "www.kongregate.com") {
                         if (r && !this.getDead(raid.id))
                         {
                             let keys = ['hp','participants','m1','m2','m3','m4','m5','m6'];
-                            let rd = DRMng.Config.local.raidData[raid.boss], markFull = false;
+                            let rd = DRMng.Config.local.raidData[r.boss];
                             if (full) keys = keys.concat(['mnum','size']);
                             r = DRMng.Util.copyFields(raid,r,keys);
 
-                            if (!r.isFull)
-                            {
-                                r.isFull = rd && r.participants && rd.maxPlayers == r.participants;
-                                markFull = r.isFull;
-                            }
+                            if (r.isFull !== true) r.isFull = rd && r.participants && rd.maxPlayers === r.participants;
 
                             // remove
-                            let i = this.getIdx(raid.id);
+                            let i = this.getIdx(r.id);
                             if (i !== -1) this.all.splice(i, 1);
-                            DRMng.UI.removeRaidField(raid.id);
+                            DRMng.UI.removeRaidField(r.id);
 
                             // insert
                             i = this.location(r) + 1;
@@ -2387,8 +2386,7 @@ if(window.location.host == "www.kongregate.com") {
                             DRMng.UI.addRaidField(r, i);
 
                             // handle raid becoming full on update
-                            if (markFull && !this.isJoining
-                                && this.filter.indexOf('@' + raid.boss + '_' + raid.diff) !== -1)
+                            if (r.isFull && !this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) !== -1)
                                 setTimeout(this.prepareJoining.bind(this), 1);
                         }
 
@@ -2754,7 +2752,7 @@ if(window.location.host == "www.kongregate.com") {
                             };
                             ChatRoom.prototype.isActive = function() {
                                 let drm = DRMng ? (DRMng.Alliance.active && !DRMng.Alliance.conf.sbs) : false;
-                                return !drm && this == this._chat_window.activeRoom()
+                                return !drm && this === this._chat_window.activeRoom()
                             };
 
                             this.tabs.insertBefore(this.tab, actions);
@@ -2940,7 +2938,7 @@ if(window.location.host == "www.kongregate.com") {
                     serviceEvent: function(data) {
                         let usr;
                         // TODO: remove act when users move to new version
-                        if (data.act) data.action = data.act;
+                        //if (data.act) data.action = data.act;
                         switch (data.action) {
                             case 'loadData':
                                 // load users
@@ -4378,7 +4376,9 @@ if(window.location.host == "www.kongregate.com") {
                             if (tp+0.05 < r.hp) status = 'Behind timer';
                             if (tp+0.2 < r.hp) status = 'Failing';
                         }
-                        if (r.isFull) status += ", Full";
+                        // Full/ParticipantsNum in status
+                        if (r.isFull) status += `, Full (${r.participants})`;
+                        else status += `, ${r.participants}/${ri.maxPlayers}`;
                         let maxHP = ri.hp[r.diff-1]*1000;
                         let health = 'health ' + DRMng.Util.getShortNumK(maxHP*r.hp, 3) +
                             ' / ' + DRMng.Util.getShortNumK(maxHP, 3) + ' (' + Math.ceil(r.hp*100) + '%)';
@@ -5107,9 +5107,8 @@ else if(window.location.host === '50.18.191.15') {
             }
         };
         window.addEventListener('message', function(e) {
-            console.log("[DRMng] Message received!", e.data, e.origin);
             if (typeof e.data !== 'string' || !e.data) return;
-
+            console.log("[DRMng] Message received!", e.data, e.origin);
             let c = e.data.split('#');
             if (c[0].indexOf('DRMng.') === 0) {
                 c[0] = c[0].substring(6);

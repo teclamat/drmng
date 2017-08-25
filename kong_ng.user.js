@@ -3,11 +3,12 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.33
+// @version        	2.0.34
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
 // @include        	*50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
+// @include        	*dotd-web1.5thplanetgames.com/kong/?DO_NOT_SHARE_THIS_LINK*
 // @connect			50.18.191.15
 // @connect         prnt.sc
 // @hompage        	http://mutik.erley.org
@@ -20,7 +21,7 @@ if(window.location.host === "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '33', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '34', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -865,8 +866,8 @@ if(window.location.host === "www.kongregate.com") {
                                 if (this._chat_commands[b]) {
                                     var c = d ? DRMng.Alliance : this;
                                     return void 0 === this._chat_commands[b].detect(function (b) {
-                                            return !1 === b(c, a)
-                                        })
+                                        return !1 === b(c, a)
+                                    })
                                 }
                                 return !0
                             };
@@ -880,7 +881,7 @@ if(window.location.host === "www.kongregate.com") {
                     },
                     addChatCommands: function() {
                         if (holodeck && holodeck.ready) {
-							/* Gestures Commands */
+                            /* Gestures Commands */
                             this.addChatCommand(['kiss','hit','poke','slap'],function(a,b) {
                                 let tmp = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(b),
                                     from = DRMng.UM.user.name,
@@ -972,8 +973,8 @@ if(window.location.host === "www.kongregate.com") {
                                     }
                                 }
 
-                                    let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
-                                    if (chat) chat.serviceMessage(t);
+                                let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
+                                if (chat) chat.serviceMessage(t);
 
                                 return false;
                             });
@@ -3024,12 +3025,12 @@ if(window.location.host === "www.kongregate.com") {
 
                             // Time field
                             new DRMng.Util.Node('span')
-                                 .set({class: 'timestamp'}).style({'flex-grow': '1'})
-                                 .txt(d.ts).attach('to', hdr);
+                                .set({class: 'timestamp'}).style({'flex-grow': '1'})
+                                .txt(d.ts).attach('to', hdr);
                             // Guild tag
                             new DRMng.Util.Node('span')
-                                 .set({class: 'sticker'})
-                                 .txt(d.tag).attach('to', hdr);
+                                .set({class: 'sticker'})
+                                .txt(d.tag).attach('to', hdr);
 
                             hdr.attach('to', p);
 
@@ -3038,20 +3039,20 @@ if(window.location.host === "www.kongregate.com") {
 
                             // Username
                             new DRMng.Util.Node('span')
-                                 .set({class: d.userCls, username: d.user, ign: d.ign})
-                                 .txt((d.pfx || '') + d.user).attach('to', hdr);
+                                .set({class: d.userCls, username: d.user, ign: d.ign})
+                                .txt((d.pfx || '') + d.user).attach('to', hdr);
                             // IGN
                             new DRMng.Util.Node('span')
-                                 .set({class: d.ignCls})
-                                 .txt(d.ign).attach('to', hdr);
+                                .set({class: d.ignCls})
+                                .txt(d.ign).attach('to', hdr);
                             // Separator
                             new DRMng.Util.Node('span')
-                                 .set({class: 'separator'})
-                                 .txt(': ').attach('to', hdr);
+                                .set({class: 'separator'})
+                                .txt(': ').attach('to', hdr);
                             // Message
                             new DRMng.Util.Node('span')
-                                 .set({class: 'message hyphenate'})
-                                 .html(d.msg).attach('to', hdr);
+                                .set({class: 'message hyphenate'})
+                                .html(d.msg).attach('to', hdr);
 
                             hdr.attach('to', p);
                         }
@@ -4844,7 +4845,7 @@ if(window.location.host === "www.kongregate.com") {
                     type = 'DRMng.' + type;
                     data = data || ''; data = typeof data === 'string' ? data : JSON.stringify(data);
                     type = data ? type + '#' + data : type;
-                    if (game) game.contentWindow.postMessage(type,'http://50.18.191.15');
+                    if (game) game.contentWindow.postMessage(type,'https://dotd-web1.5thplanetgames.com');
                 },
                 init:            function() {
 
@@ -4922,7 +4923,7 @@ if(window.location.host === "www.kongregate.com") {
         document.head.appendChild(scr);
     }
 }
-else if(window.location.host === '50.18.191.15') {
+else if(window.location.host === 'dotd-web1.5thplanetgames.com') {
     function load() {
         window.DRMng = {
             config: {
@@ -5046,7 +5047,7 @@ else if(window.location.host === '50.18.191.15') {
                         'https://5thplanetdawn.insnw.net/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf',
                         'chatdiv', '265', '690'
                     );
-                    setTimeout(this.applyChatSettings.bind(this), 100);
+                setTimeout(this.applyChatSettings.bind(this), 100);
                 //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/chat/" + this.config.version.chat + "/chatclient.swf", "chatdiv", "265", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), chatParams);
             },
             reloadGame: function () {
@@ -5059,18 +5060,18 @@ else if(window.location.host === '50.18.191.15') {
                 //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + this.config.version.game + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params);
                 //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + (parseInt(this.version.game) + 1) + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params, false, DRMng.loadGameCB);
             },
-			/*loadGameCB: function () {
-			 var swf = document.getElementById('swfdiv');
-			 if (swf && typeof swf.PercentLoaded === 'function' && swf.PercentLoaded() !== 0) {
-			 console.info("[DRMng] New game version found, loading!");
-			 DRMng.version.game++;
-			 }
-			 else if (DRMng.loadCount++ < 3) setTimeout(DRMng.loadGameCB, 300);
-			 else {
-			 console.info("[DRMng] New game version not found, loading last known.");
-			 swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + DRMng.config.version.game + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params);
-			 }
-			 },*/
+            /*loadGameCB: function () {
+             var swf = document.getElementById('swfdiv');
+             if (swf && typeof swf.PercentLoaded === 'function' && swf.PercentLoaded() !== 0) {
+             console.info("[DRMng] New game version found, loading!");
+             DRMng.version.game++;
+             }
+             else if (DRMng.loadCount++ < 3) setTimeout(DRMng.loadGameCB, 300);
+             else {
+             console.info("[DRMng] New game version not found, loading last known.");
+             swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + DRMng.config.version.game + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params);
+             }
+             },*/
             counter: 0,
             init: function () {
                 let swfDiv = document.getElementById('swfdiv');

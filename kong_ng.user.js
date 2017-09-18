@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.0.34
+// @version        	2.0.35
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -21,7 +21,7 @@ if(window.location.host === "www.kongregate.com") {
         function main() {
             window.DEBUG = false;
             window.DRMng = {
-                version: {major: '2', minor: '0', rev: '34', name: 'DotD Raids Manager next gen'},
+                version: {major: '2', minor: '0', rev: '35', name: 'DotD Raids Manager next gen'},
                 Util: {
                     Node: function(ele) {
                         this._ele = null;
@@ -2086,14 +2086,17 @@ if(window.location.host === "www.kongregate.com") {
                         window.DEBUG && console.info('[DRMng] Raw filter data:', filterTxt);
                         let server = DRMng.Config.local.server.toLowerCase();
                         if (DRMng.Raids.isAuto) DRMng.Raids.switchAutoJoin();
-                        if (loading) filterTxt = DRMng.Config.local.filterString[server];
+                        if (loading) {
+                            filterTxt = DRMng.Config.local.filterString[server];
+                            if (filterTxt === undefined) filterTxt = ''; 
+                        }
                         else {
                             DRMng.Config.local.filterString[server] = filterTxt;
                             DRMng.Config.saveLocal();
                         }
                         let parts = filterTxt.split(/\s?\|\s?|\sor\s|\s?,\s?/ig);
                         let filters = {add :{raid: [], magic: []}, rem: {raid: [], magic: []}};
-                        let raids, diff, r, reg, i, d, result = [];
+                        let raids, diff, reg, i, d, result = [];
                         // prepare filters
                         for (let p of parts) {
                             let mode = p[0] === '-' ? 'rem' : 'add';
@@ -2128,9 +2131,10 @@ if(window.location.host === "www.kongregate.com") {
                             }
                         }
                         // merge
+                        if (window.DEBUG) console.info('FILTERS', filters);
                         raids = DRMng.Config.local.raidData;
                         if (filters.add.raid.length > 0)
-                            for (r of filters.add.raid) {
+                            for (let r of filters.add.raid) {
                                 i = raids[r[0]]; i = i ? i.hp : [1,1,1,1];
                                 if (i[3] !== undefined && [0,4,5].indexOf(r[1]) !== -1) result.push(r[0] + '_4');
                                 if (i[2] !== undefined && [0,3].indexOf(r[1]) !== -1) result.push(r[0] + '_3');
@@ -2138,7 +2142,7 @@ if(window.location.host === "www.kongregate.com") {
                                 if (i[0] !== undefined && [0,1,5].indexOf(r[1]) !== -1) result.push(r[0] + '_1');
                             }
                         else
-                            for (r of DRMng.Config.local.raidKeys) {
+                            for (let r of DRMng.Config.local.raidKeys) {
                                 i = raids[r]; i = i ? i.hp.length : 4;
                                 for (d = 1; d <= i; ++d) result.push(r+'_'+d);
                             }

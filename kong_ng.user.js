@@ -5052,7 +5052,6 @@ else if(window.location.host === 'dotd-web1.5thplanetgames.com') {
                         'chatdiv', '265', '690'
                     );
                 setTimeout(this.applyChatSettings.bind(this), 100);
-                //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/chat/" + this.config.version.chat + "/chatclient.swf", "chatdiv", "265", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), chatParams);
             },
             reloadGame: function () {
                 //DRMng.loadCount = 0;
@@ -5061,21 +5060,7 @@ else if(window.location.host === 'dotd-web1.5thplanetgames.com') {
                         'https://5thplanetdawn.insnw.net/dotd_live/swf/' + this.config.version.game + '/dotd.swf',
                         'swfdiv', '760', '690'
                     );
-                //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + this.config.version.game + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params);
-                //swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + (parseInt(this.version.game) + 1) + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params, false, DRMng.loadGameCB);
             },
-            /*loadGameCB: function () {
-             var swf = document.getElementById('swfdiv');
-             if (swf && typeof swf.PercentLoaded === 'function' && swf.PercentLoaded() !== 0) {
-             console.info("[DRMng] New game version found, loading!");
-             DRMng.version.game++;
-             }
-             else if (DRMng.loadCount++ < 3) setTimeout(DRMng.loadGameCB, 300);
-             else {
-             console.info("[DRMng] New game version not found, loading last known.");
-             swfobject.embedSWF("https://5thplanetdawn.insnw.net/dotd_live/swf/" + DRMng.config.version.game + "/dotd.swf", "swfdiv", "760", "690", "10.0.0", false, kongregateAPI.flashVarsObject(), params);
-             }
-             },*/
             counter: 0,
             init: function () {
                 let swfDiv = document.getElementById('swfdiv');

@@ -1,0 +1,967 @@
+/* Cut out garbage */
+
+#global,
+#ad_skip_controls,
+#ima_bumper,
+#ima_bumper_html5_api,
+#bumper_premium_header,
+#ima-ad-container,
+div.gamepage_categories_outer,
+div.ad,
+div.tracking_pixel_ad,
+#play #gamespotlight,
+div#kong_bumper_preroll_600x400-ad-slot,
+#kong_game_ui div.room_description_rollover_container,
+#kong_game_ui div#chat_default_content {
+    display: none !important;
+}
+
+/* Redefinition begins here */
+html {
+    margin: 0;
+    color: #3072BD
+}
+body#play {
+    height: 100%;
+    background-color: #343546 !important;
+    min-width: inherit !important;
+    overflow: hidden !important;
+}
+body#play div#primarywrap {
+    height: 100%;
+    background-attachment: local !important;
+    overflow: auto;
+    height: calc(100% - 55px);
+    transition: width .3s;
+    min-width: 630px;
+}
+div#headerwrap {
+    z-index: 9990;
+    background-color: #151515;
+    box-shadow: 0 0 5px -1px #000;
+    border-bottom: 1px solid #000;
+    position: relative;
+    transition: width .3s;
+    min-width: 630px;
+}
+body#play.slim div#primarywrap {
+    height: calc(100% - 28px);
+}
+div#headerwrap .main_nav_menu {
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 1020px;
+}
+div#headerwrap .main_nav_menu_inner {
+    margin: 20px;
+    width: 980px;
+}
+div#subwrap {
+    display: none;
+}
+div.gamepage_title_block h1 {
+    height: 0 !important;
+    overflow: hidden;
+}
+#play.premium_user .gamepage_header_outer {
+    min-height: initial !important;
+    background-image: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#play table#primarylayout {
+    padding-top: 8px;
+}
+div#floating_game_holder {
+    display: flex;
+    padding-top: 0;
+}
+div#maingame,
+div#maingamecontent,
+div#flashframecontent,
+td#gameholder {
+    width: auto !important;
+    height: auto !important
+}
+td#gameholder {
+    overflow: hidden;
+}
+div#maingamecontent table.game_table {
+    position: inherit;
+}
+div#header {
+    height: 54px;
+}
+#play.slim div#header {
+    height: 27px;
+}
+div#header_logo {
+    display: none;
+} 
+ul#nav_welcome_box {
+    left: 0;
+    right: initial;
+    border-bottom: 1px solid #444;
+    height: 27px;
+}
+ul#nav_welcome_box > li {
+    background-color: transparent;
+    margin-left: 0;
+    border-right: 1px solid #444;
+}
+ul#nav_welcome_box > li:first-child {
+    border-left: 1px solid #444;
+}
+ul#nav_welcome_box > li:hover {
+    background-color: #444;
+}
+ul#nav_welcome_box > li.settings ul {
+    position: relative;
+    top: 0;
+    right: 1px; 
+}
+ul#nav_welcome_box > li > a {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+ul#nav_welcome_box > li > a span#mini-profile-level {
+    height: 1.1em;
+    top: -2px;
+    -webkit-filter: brightness(130%);
+    filter: brightness(130%);
+}
+ul#nav_welcome_box > li > a span#profile_control_unread_message_count {
+    background-color: #700;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    line-height: 13px;
+    padding: 0 4px;
+    margin-left: 3px;
+}
+ul#nav_welcome_box > li span.kong_ico:after {
+    color: #fff;
+}
+div#guest_user_welcome_content {
+    left: 0;
+    right: initial;
+}
+div#header ul.main_navigation {
+    left: 0;
+    right: initial;
+    width: initial;
+    border-top: 1px solid #444;
+}
+div#header ul.main_navigation > li {
+    margin: 0;
+    height: 26px;
+    overflow: hidden;
+}
+div#header ul.main_navigation > li:first-child > a {
+    border-left: 1px solid #444;
+}
+div#header ul.main_navigation > li > a {
+    background: transparent;
+    border-right: 1px solid #444;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    line-height: 27px;
+}
+div#header ul.main_navigation > li > a.active {
+    background: rgba(255,255,255,0.1);
+}
+div#header ul.main_navigation > li > a:after {
+    color: #fff;
+}
+div#header ul.main_navigation > li:hover > a {
+    background: #444;
+}
+div#header ul.main_navigation form#search {
+    background-color: transparent;
+    border-right: 1px solid #444;
+    padding: 5px;
+}
+div#header ul.main_navigation form#search dt input {
+    background: transparent;
+    font: italic 12px 'Open Sans';
+    letter-spacing: 0;
+    color: #fff;
+}
+#play.slim div#header ul.main_navigation {
+    display: none;
+}
+.main_nav_top_item.active {
+    background: #500;
+    color: #fff;
+}
+
+/* Cobalt theme definition */
+
+::-webkit-scrollbar {
+    width:12px; height: 12px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.34);
+}
+::-webkit-scrollbar:vertical {
+    border-width: 0 0 0 1px;
+}
+::-webkit-scrollbar:horizontal {
+    border-width: 1px 0 0 0;
+} 
+::-webkit-scrollbar-thumb {
+    min-height: 30px;
+    min-width: 30px;
+}
+::-webkit-scrollbar-track { 
+    background-color: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb { 
+    background-color: rgba(0,0,0,0.2); 
+}
+::-webkit-scrollbar-thumb:hover { 
+    background-color: rgba(0,0,0,0.3); 
+}
+::-webkit-scrollbar-corner { 
+    background-color: transparent; 
+}
+::-webkit-resizer { 
+    background-color: transparent; 
+}
+
+div#maingame,
+div.game_details_outer,
+div.game_page_wrap {
+    background-image: none;
+    background-color: rgba(0,0,0,0.5) !important;
+}
+div#maingame { 
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 0;
+    padding: 7px; 
+}
+div.upper_gamepage {
+    padding: 0; 
+}
+div#maingame div.user_connection .logged_in_user {
+    color: #ddd;
+}
+
+/* Chat tabs and main kong chat divs */
+
+td#chat_container_cell {
+    display: flex;
+}
+div#maingamecontent div#chat_container {
+    margin: 0;
+    background-color: #555;
+    border: 1px solid #151515;
+    height: 688px !important;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+div#kong_game_ui {
+    overflow: hidden;
+}
+div#kong_game_ui * {
+    font-family: 'Open Sans', sans-serif;
+}
+div#kong_game_ui ul.main_tabs {
+    display:flex;
+    margin: 0;
+    height: 27px;
+    background-color: #444;
+    border-bottom: 1px solid #151515;
+    width: calc(100% + 1px);
+}
+div#kong_game_ui ul.main_tabs li.tab {
+    flex-grow: 1;
+    margin: 0;
+    float: none;
+}
+div#kong_game_ui ul.main_tabs li.tab a {
+    background-color: #333;
+    color: #ddd;
+    padding: 7px 0 5px;
+    text-transform: none;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    border: 1px solid #151515;
+    border-width: 0 0 1px 1px;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+div#kong_game_ui ul.main_tabs li.tab:first-child a {
+    border-left: 0;
+}
+div#kong_game_ui ul.main_tabs li.tab a:hover {
+    background-color: #3a3a3a;
+}
+div#kong_game_ui ul.main_tabs li.tab a.active {
+    background-color: #444;
+    color: #eee;
+    margin: 0;
+    padding: 7px 0 5px;
+    text-transform: uppercase;
+    border-bottom-color: #444;
+}
+div#kong_game_ui div.default_tab_pane_content {
+    background-color: #454545;
+    color: #eee;
+    height: calc(100% - 2px);
+    border: 1px solid #202020;
+    box-shadow: 0 0 10px -4px #000;
+}
+div#kong_game_ui div.tabpane {
+    background-color: #555;
+    padding: 0;
+    margin: 7px;
+    height: 646px !important;
+    width: calc(100% - 14px);
+}
+div#kong_game_ui div#chat_tab_pane.tabpane {
+    display: flex;
+    overflow: visible;
+}
+div#kong_game_ui div#chat_tab_pane > div {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 1px;
+}
+div#kong_game_ui span.spinner_big {
+    width: 16px;
+    height: 16px;
+    background-position: 0 -32px;
+}
+div#kong_game_ui div.tabpane div.collapsible_panel {
+    margin-bottom: 10px !important;
+    border: 1px solid #202020;
+    box-shadow: 0 0 10px -4px #000;
+    padding: 0 !important;
+    margin-top: 0 !important;
+}
+div#kong_game_ui div#game_info .creatorinfo p,
+div#kong_game_ui p.gameplays {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+div#kong_game_ui div.tabpane div.collapsible_panel p.panel_handle { 
+    margin: 0 !important;
+    line-height: 24px;
+    background: none;
+    background-color: #404040;
+}
+div#kong_game_ui div.tabpane div.collapsible_panel p.panel_handle a {
+    font-family: 'Open Sans', sans-serif;
+    color: #ddd;
+    font-size: 10pt;
+    text-transform: none;
+    padding: 0 8px;
+}
+div#kong_game_ui div.tabpane div.collapsible_panel div.cntrToggle {
+    background-color: #494949 !important;
+    border-top: 1px solid #353535;
+    color: #eee;
+    margin: 0 !important;
+}
+div#kong_game_ui div#chat_room_chooser div.rooms_list {
+    background-color: transparent;
+    max-height: 566px;
+    margin: 10px 0 7px;
+}
+div#kong_game_ui div#chat_room_chooser div.return_to_room {
+    text-align: center;
+}
+div#kong_game_ui div#chat_room_chooser .choose_room_text {
+    margin: 8px 0 0;
+    color: #ddd;
+    padding: 5px 8px 4px;
+    background-color: #333;
+    border: 1px solid #202020;
+    border-bottom-color: #2c2c2c;
+}
+div#kong_game_ui div#chat_room_chooser div.room_list_header {
+    padding: 3px 8px 2px;
+    color: #ddd;
+    font-size: 8pt;
+    background-color: #3a3a3a;
+    border: 1px solid #202020;
+    border-top: 0;
+}
+div#kong_game_ui div#chat_room_chooser ul.rooms li.room {
+    display: flex;
+    padding: 2px 0;
+    justify-content: space-between;
+}
+div#kong_game_ui div#chat_room_chooser ul.rooms li.room p.name {
+    float: none;
+    margin-left: 7px;
+    margin-right: 3px;
+    flex-grow: 1;
+    color: #ddd;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+div#kong_game_ui div#chat_room_chooser ul.rooms li.room p.name:hover {
+    color: #f5f5f5
+}
+div#kong_game_ui div#chat_room_chooser ul.rooms li.room p.user_count {
+    float: none;
+    margin-right: 5px;
+    color: #fff;
+}
+div#chat_window {
+    border: 1px solid #202020;
+    box-shadow: 0 0 10px -4px #000;
+    background-color: #555;
+}
+div#kong_game_ui div.room_name_container {
+    margin: 0 !important;
+    color: #ddd;
+    font-size: 7pt;
+    background: #3a3a3a;
+    padding: 3px 6px;
+    display: flex;
+    border-bottom: 1px solid #202020;
+    font-family: 'Open Sans', sans-serif;
+    font-style: normal;
+}
+div#kong_game_ui div.room_name_container span.room_name {
+    margin-left: 3px;
+    text-transform: none;
+    color: #eee;
+    vertical-align: inherit;
+    font-size: 8pt;
+    flex-grow: 1;
+    max-width: none;
+}
+div#kong_game_ui a, div#kong_game_ui a:link,
+div#kong_game_ui a:visited, div#kong_game_ui a:link:visited {
+    color: #ccc;
+    text-decoration: none;
+}
+div#kong_game_ui a:hover,
+div#kong_game_ui a:link:hover {
+    color: #eee;
+}
+div#chat_room_tabs {
+    display: flex;
+    height: 22px;
+    background-color: #555;
+}
+div#chat_room_tabs > div.chat_room_tab {
+    flex-grow: 1;
+    width: 1px;
+    height: 16px;
+    border-right: 1px solid #202020;
+    border-bottom: 1px solid #202020;
+    background-color: #444;
+    color: #ccc;
+    padding-top: 2px;
+    z-index: 2;
+}
+div#chat_room_tabs > div.chat_room_tab:hover {
+    background-color: #4c4c4c
+}
+div#chat_room_tabs > div.chat_room_tab.active {
+    border-bottom-color: #555;
+    background-color: #555;
+    color: #fff;
+    text-transform: uppercase;
+}
+div#chat_room_tabs > div.chat_room_tab a {
+    font-size: 7pt;
+    display: flex;
+    justify-content: center;
+    float: none;
+    margin: 0;
+    padding: 0;
+    background-color: transparent !important;
+    text-decoration: none;
+}
+div#chat_room_tabs > div.chat_room_tab a span.unread_chat_messages {
+    flex-grow: 0;
+    right: 5px;
+    top: 3px;
+}
+div#kong_game_ui div#chat_window_header {
+    position: relative;
+}
+div#kong_game_ui div.chat_actions_container {
+    float: none;
+    z-index: 0;
+}
+div#kong_game_ui div.chat_actions_container span.btn_tools {
+    height: 18px;
+    line-height: 18px !important;
+    width: 23px;
+    background: none;
+    border: 0;
+    background-color: #444;
+    border-radius: 0;
+    color: #ddd !important;
+    border-bottom: 1px solid #202020;
+}
+div#kong_game_ui div.chat_actions_container span.btn_tools:hover {
+    background-color: #4c4c4c;
+}
+div#kong_game_ui div.chat_actions_container span.btn_tools span.kong_ico {
+    font-size: 12px;
+}
+div#kong_game_ui div.chat_actions_container ul.chat_actions_list {
+    background-color: #3a3a3a;
+    border: 1px solid #202020;
+    right: -1px;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: 0 0 10px -3px #000;
+    top: 22px;
+    min-width: 140px;
+}
+div#kong_game_ui div.chat_actions_container ul.chat_actions_list li {
+    color: #ddd;
+    font-size: 10px;
+    line-height: 22px;
+}
+div#kong_game_ui div.chat_actions_container ul.chat_actions_list li:hover {
+    background-color: #4a4a4a;
+    color: #fff;
+}
+div#kong_game_ui div#accomplishments_tab_content {
+    border: 1px solid #202020;
+    background-color: #404040;
+    box-shadow: 0 0 10px -4px #000;
+    height: calc(100% - 4px);
+}
+div#kong_game_ui #accomplishments_pane_title {
+    font-family: 'Open Sans', sans-serif;
+    color: #ddd;
+    padding: 2px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    float: none;
+    text-align: center;
+}
+div#kong_game_ui div.high_scores {
+    text-align: center;
+    background-color: #444;
+    border-top: 1px solid #353535;
+    margin: 0 !important;
+    padding: 2px 0 3px;
+}
+div#kong_game_ui ul.accomplishment_vtabs {
+    width: 60px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab {
+    margin-bottom: 0;
+    border-bottom: 1px solid #202020;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab:first-child {
+    border-top: 1px solid #202020;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab a {
+    padding: 6px 0;
+    background-color: transparent;
+    margin: 0;
+    color: #bbb;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab a.active {
+    width: 61px;
+    margin: 0;
+    background-color: #505050;
+    color: #f0f0f0;
+    border: 0;
+    padding: 6px 0;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab a.active div.badge {
+    margin: 2px 0 0 8px;
+}
+div#kong_game_ui ul.accomplishment_vtabs li.vtab p {
+    margin: 0;
+    text-decoration: none;
+    padding: 0 !important;
+}
+div#kong_game_ui div.accomplishment_vtabpane_content {
+    background-color: #505050;
+    border: 0;
+    padding: 0 0 0 8px;
+    border-left: 1px solid #202020;
+    border-top: 1px solid #202020;
+    height: calc(100% - 66px) !important;
+    z-index: 0;
+}
+div#kong_game_ui div.accomplishment_vtabpane_inner {
+    padding: 0 8px 0 0;
+    color: #ddd;
+}
+div#kong_game_ui div.game_accomplishment em,
+div#game_info em {
+    color: #aaa;
+}
+div#kong_game_ui a.show_more,
+div#kong_game_ui a.show_less { 
+    background: none;
+}
+div#kong_game_ui div#holodeck_chat_promotion {
+    width: 100%;
+    background-color: #4a4a4a;
+    padding: 2px 0;
+    position: inherit;
+    border-top: 1px solid #202020;
+    height: 18px;
+}
+div#kong_game_ui div#holodeck_chat_promotion a {
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+    width: calc(100% - 30px);
+}
+div#kong_game_ui div.users_in_room {
+    border-top: 1px solid #202020;
+    border-bottom: 1px solid #202020;
+    background-color: #606060;
+}
+div#kong_game_ui div.users_in_room > div {
+    text-shadow: 0 0 3px #222;
+}
+div#kong_game_ui div.users_in_room span.username {
+    color: #fff;
+    text-decoration: none;
+}
+div#kong_game_ui div.users_in_room span.guild-name {
+    color: #ddd;
+}
+div#kong_game_ui div.users_in_room div.away span.username {
+    color: #ddd
+}
+div#kong_game_ui div.chat_message_window {
+    background-color: #464646;
+    border-top: 1px solid #202020;
+    border-bottom: 1px solid #202020;
+    height: 430px !important;
+}
+div#kong_game_ui div.chat_controls {
+    height: 56px;
+    margin-top: 3px;
+}
+div#kong_game_ui div.chat_controls textarea.chat_input {
+    height: 37px;
+    width: calc(100% - 8px);
+    background-color: #333;
+    outline: none;
+    margin: 0;
+    padding: 2px 4px;
+    color: #f5f5f5;
+    border-top: 1px solid #202020;
+    font-weight: 300;
+}
+div#kong_game_ui div.chat_controls span.chat_char_countdown {
+    background-color: #252525;
+    border-top: 1px solid #202020;
+    color: #bbb;
+    line-height: initial;
+}
+div#kong_game_ui div.chat_controls span.chat_char_countdown span.chat_chars_remaining {
+    color: #888;
+}
+div#kong_game_ui div.faye_disconnect_controls {
+    background-color: #752929;
+    border: 0;
+    color: #fff;
+    font-size: 8pt;
+    text-align: center;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+div#kong_game_ui div.chat_message_window span.history-button {
+    border: 0;
+    background-color: #373737;
+    border-bottom: 1px solid #202020;
+    padding: 2px;
+    color: #ccc;
+    margin: 0;
+}
+div#kong_game_ui div.chat_message_window span.history-button:hover {
+    border-color: #202020;
+    background-color: #333;
+    color: #eee;
+}
+div#kong_game_ui div.chat_message_window span.history-spinner {
+    margin: 2px auto;
+    background-position-y: -32px;
+}
+div#kong_game_ui div.chat_message_window .even {
+    background-color: transparent;
+}
+div#kong_game_ui div.chat_message_window > div {
+    border-bottom: 1px solid #303030;
+    background-color: #3c3c3c;
+    color: #f5f5f5;
+    font-size: 11px;
+}
+div#kong_game_ui div.chat_message_window > div:nth-child(even) {
+    background-color: #404040;
+}
+div#kong_game_ui div.chat_message_window > div:last-child {
+    margin-bottom: -1px;
+}
+div#kong_game_ui div.chat-message > div.media {
+    background-color: #1a1a1a !important;
+}
+div#kong_game_ui div.chat_message_window > div > p {
+    margin: 0;
+    padding: 4px 5px;
+}
+div#kong_game_ui div.chat_message_window > div > p.whisper {
+    background-color: transparent;
+    font-style: normal;
+    margin: 0;
+    border-left: 4px solid #943;
+}
+div#kong_game_ui div.chat_message_window > div > div.script,
+div#kong_game_ui div.chat_message_window > div > div.service {
+    border-left: 4px solid #69b;
+    text-align: center;
+    padding: 5px;
+    margin: 0;
+}
+div#kong_game_ui div.chat_message_window > div > p.raid {
+    border-right: 4px solid #777;
+}
+div#kong_game_ui div.chat_message_window > div > p.nm {
+    border-right-color: #759
+}
+div#kong_game_ui div.chat_message_window > div > p.l {
+    border-right-color: #855
+}
+div#kong_game_ui div.chat_message_window > div > p.h {
+    border-right-color: #984
+}
+div#kong_game_ui div.chat_message_window > div > p.n { 
+    border-right-color: #795
+}
+div#kong_game_ui div.chat_message_window > div > p.visited.nm {
+    border-right-color: #546;
+}
+div#kong_game_ui div.chat_message_window > div > p.visited.l {
+    border-right-color: #633;
+}
+div#kong_game_ui div.chat_message_window > div > p.visited.h {
+    border-right-color: #763;
+}
+div#kong_game_ui div.chat_message_window > div > p.visited.n {
+    border-right-color: #452;
+}
+div#kong_game_ui div.chat_message_window > div > p.raid.dead {
+    border-right-color: #555;
+}
+div#kong_game_ui div.chat_message_window span.header {
+    display: flex;
+    margin-bottom: 1px;
+    align-items: baseline;
+}
+div#kong_game_ui div.chat_message_window span.timestamp,
+div#kong_game_ui div.chat_message_window span.extraid {
+    color: #ccc;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+}
+div#kong_game_ui div.chat_message_window span.timestamp > span,
+div#kong_game_ui div.chat_message_window span.extraid {
+    float: right;
+    font-size: 10px;
+}
+div#kong_game_ui div.chat_message_window p.raid.dead span.extraid,
+div#kong_game_ui div.chat_message_window p.raid.dead span a {
+    color: #888;
+}
+div#kong_game_ui div.chat_message_window span.sticker {
+    font-size: 9px;
+    background-color: #888;
+    color: #333;
+    line-height: 11px;
+    padding: 1px 0 0;
+    font-weight: 800;
+    width: 30px;
+    text-align: center;
+}
+div#kong_game_ui div.chat_message_window span.username {
+    color: #8cf;
+    text-decoration: none;
+    text-shadow: 0 0 5px #111;
+    padding-right: 1px;
+}
+div#kong_game_ui div.chat_message_window span.username:hover {
+    text-decoration: underline;
+}
+div#kong_game_ui div.chat_message_window span.separator {
+    padding-right: 1px;
+}
+div#kong_game_ui div.chat_message_window p.service span.separator,
+div#kong_game_ui div.chat_message_window p.service span.header,
+div#kong_game_ui div.chat_message_window p.service span.username {
+    display: none
+}
+div#kong_game_ui div.chat_message_window span.username.is_self,
+div#kong_game_ui div.chat_message_window .sent_whisper span.username {
+    color: #e65;
+}
+div#kong_game_ui div.chat_message_window span.guildname {
+    font-style: italic;
+    color: #ddd;
+    padding-left: 2px;
+}
+div#kong_game_ui div.chat_message_window span.guildname:before {
+    content: '(';
+}
+div#kong_game_ui div.chat_message_window span.guildname:after {
+    content: ')';
+}
+div#kong_game_ui div.chat_message_window .message {
+    max-width: 99%;
+    font-weight: 300;
+    color: #fff;
+}
+div#kong_game_ui div.chat_message_window .message img {
+    display: block;
+    margin: 5px auto 2px;
+    max-width: 100%;
+    max-height: 200px;
+    cursor: pointer
+}
+div#kong_game_ui div.chat_message_window .message iframe {
+    width: 100%;
+    margin: 4px auto 0;
+    display: block;
+}
+div#kong_game_ui div.chat_message_window .message a {
+    color: #E29F1F;
+    text-shadow: 0 0 3px #111;
+}
+div#kong_game_ui div.chat_message_window .message a:hover {
+    color: #FFB019;
+}
+
+/* Game datails field (1st one below game frame) */
+
+div.game_details_outer:before,
+div.game_details_outer:after {
+    background-image: none !important;
+}
+div.game_details_outer {
+    color: #fff;
+    border: 0;
+    padding: 15px 18px 0;
+    margin: 0 auto 20px;
+}
+div.game_details_outer div.game_user_rating,
+div.game_details_outer div.game_pub_plays {
+    border-color: #bbb;
+    border-style: solid;
+    border-width: 0 1px;
+}
+div.game_details_outer div.game_details_upper {
+    border-bottom: 1px solid #bbb;
+} 
+div.game_details_outer > ul.game_stats_cont {
+    right: 0; 
+    top: 0;
+} 
+div.game_details_outer li.game_stat {
+    border: 0;
+    margin: 0;
+    padding: 4px 8px 0;
+}
+div.game_details_outer .highcontrast {
+    color: white !important;
+}
+div.game_details_outer a:link,
+div.game_details_outer a:link:visited {
+    color: #ccc;
+    text-decoration: none;
+}
+div.game_details_outer a:link:hover  {
+    color: #fff;
+    text-decoration: none;
+}
+div.game_details_outer div.game_tags > ul.tags {
+    height: auto;
+}
+div.game_details_outer div.game_tags > ul.tags > li.tag > a.term:link,
+div.game_details_outer div.game_tags > ul.tags > li.tag > a.term:link:visited {
+    background-color: #606060;
+    box-shadow: none;
+    padding: 2px 4px;
+    color: #eee;
+}
+div.game_details_outer div.game_tags > ul.tags > li.tag > a.term:link:hover {
+    background-color: #404040;
+    box-shadow: none;
+}
+div.game_details_outer div.game_tags a.add_tags {
+    background-color: #b34040;
+    box-shadow: none;
+    padding: 2px 4px;
+}
+div.game_details_outer div.game_tags a.add_tags:hover {
+    background-color: #710000;
+    box-shadow: none;
+}
+div.game_details_outer div.game_pub_plays {
+    color: #bbb;
+}
+ul#quicklinks li {
+    background-color: transparent !important;
+}
+div#kong_game_ui div.chat_message_window div.raidinfo {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position-x: 50%;
+    background-blend-mode: saturation;
+    border-left: 0 !important;
+}
+div.chat_message_window div.raidinfo div.name {
+    font-size: 12px;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    color: #fff;
+    font-weight: bold;
+}
+div.chat_message_window div.raidinfo div.race {
+    color: #eee;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    font-size: 10px;
+    font-weight: bold;
+    font-style: italic;
+}
+div.chat_message_window table.raidinfo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin-top: 7px;
+}
+div.chat_message_window table.raidinfo td {
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+div.chat_message_window table.raidinfo tr:first-child td:first-child {
+    background-color: transparent;
+}
+div.chat_message_window table.raidinfo td:last-child {
+    border-right: 0
+}
+div.chat_message_window table.raidinfo tr:last-child td {
+    border-bottom: 0
+}
+div.chat_message_window table.raidinfo td:first-child,
+div.chat_message_window table.raidinfo tr:first-child td {
+    font-weight: 600
+}

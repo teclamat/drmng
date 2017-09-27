@@ -3,7 +3,7 @@
 // @namespace      	tag://kongregate
 // @description    	Makes managing raids a lot easier
 // @author         	Mutik
-// @version        	2.1.0
+// @version        	2.1.1
 // @grant          	GM_xmlhttpRequest
 // @grant          	unsafeWindow
 // @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -51,7 +51,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `0`,
+            build: `1`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` + 
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
@@ -1103,7 +1103,6 @@ function main()
             modifyChatDialogue: () => {
                 if (ChatDialogue)
                 {
-                    ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
                     ChatDialogue.prototype.displayUnsanitizedMessage = function (a, b, c, d) {
                         // ActiveRoom
                         const ar = this._holodeck.chatWindow().activeRoom();
@@ -1121,6 +1120,7 @@ function main()
                             this._messages_count++;
                         }
                     };
+                    ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
                     ChatDialogue.prototype.serviceMessage = function (cont, raidInfo = null) {
                         const msg = new DRMng.Message(cont, null, {type: `service`});
                         if (raidInfo) {
@@ -1139,6 +1139,14 @@ function main()
                         );
                         else this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
                     };
+                    ChatDialogue.prototype.sendPrivateMessage = function (a, b) {
+                        this._user_manager.sendPrivateMessage(a, b);
+                        DRMng.log(`debug`, `my own pm:`, b);
+                        this.displayUnsanitizedMessage(a, b,
+                            {class: `whisper sent_whisper`},
+                            {private: true}
+                        );
+                    },
                     ChatDialogue.prototype.sameTimestamps = (a, b) => parseInt(a/60000) === parseInt(b/60000);
                     ChatDialogue.prototype.insert = function (msg, b, opts) {
                         const dialogue = this, chat = this._message_window_node;
@@ -4154,17 +4162,17 @@ function main()
                 document.addEventListener(`DRMng.lightShot`, DRMng.Gate.lightShotCb, false);
 
                 // Script Hide/Show button
-                new DRMng.Node(`#DRMng_onoff`).on(`click`, e => {
+                new DRMng.Node(`#DRMng_onoff`).on(`click`, () => {
+                    clearTimeout(DRMng.UI.hideUITimeout);
                     const el = document.getElementById(`DRMng_main`);
                     if (el.className.indexOf(`hidden`) === -1) {
-                        clearTimeout(DRMng.UI.hideUITimeout);
                         el.className = `hidden`;
-                        e.target.className = `hidden`;
+                        new DRMng.Node(`#DRMng_onoff`).attr({class: `hidden`});
                         DRMng.Kong.setWrapperWidth();
                     }
                     else {
                         el.removeAttribute(`class`);
-                        e.target.removeAttribute(`class`);
+                        new DRMng.Node(`#DRMng_onoff`).remove(`class`);
                         DRMng.Kong.setWrapperWidth(DRMng.Config.get(`scriptWidth`));
                     }
                 });

@@ -1,17 +1,17 @@
 // ==UserScript==
-// @name           	DotD Raids Manager Next Gen
-// @namespace      	tag://kongregate
-// @description    	Makes managing raids a lot easier
-// @author         	Mutik
-// @version        	2.1.1
-// @grant          	GM_xmlhttpRequest
-// @grant          	unsafeWindow
-// @include        	http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
-// @include        	*50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
-// @include        	*dotd-web1.5thplanetgames.com/kong/?DO_NOT_SHARE_THIS_LINK*
-// @connect			50.18.191.15
+// @name            DotD Raids Manager Next Gen
+// @namespace       tag://kongregate
+// @description     Makes managing raids a lot easier
+// @author          Mutik
+// @version         2.1.2
+// @grant           GM_xmlhttpRequest
+// @grant           unsafeWindow
+// @include         http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
+// @include         *50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
+// @include         *dotd-web1.5thplanetgames.com/kong/?DO_NOT_SHARE_THIS_LINK*
+// @connect         50.18.191.15
 // @connect         prnt.sc
-// @hompage        	http://mutik.erley.org
+// @hompage         http://mutik.erley.org
 // ==/UserScript==
 
 /**
@@ -29,7 +29,7 @@
 
 function main()
 {
-    DRMng = {
+    window.DRMng = {
         logColors: { debug: `purple`, info: `#1070f0`, log: `#108030` },
         log: function(...args) {
             const type = [`info`,`warn`,`error`,`debug`].indexOf(args[0]) > -1 ? args[0] : `log`;
@@ -51,21 +51,21 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `1`,
+            build: `2`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` + 
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
             }
         },
         /**
-          * DOM Nodes manipulation class
-          */
+         * DOM Nodes manipulation class
+         */
         Node: class {
             /**
-                * Creates a Node
-                * @param {(string|Node)} element Element to create or reference
-                * @return {DRMng.Node} Custom Node instance
-                */
+             * Creates a Node
+             * @param {(string|Node)} element Element to create or reference
+             * @return {DRMng.Node} Custom Node instance
+             */
             constructor(element) {
                 this._el = null;
                 if (typeof element === `string`)
@@ -145,8 +145,8 @@ function main()
             }
         },
         /**
-          * Factory class with various utils
-          */
+         * Factory class with various utils
+         */
         Util: class {
             /**
              * Creates, updates or removes CSS stylesheet with given ID
@@ -184,15 +184,12 @@ function main()
              *                         [window.location.search] will be used
              * @return {string} Value of given field or empty string if field not found
              */
-            getQueryVariable (field, query) {
-                query = query || window.location.search.substring(1);
-                query = query.slice(query.indexOf(`?`) + 1);
-                const vars = query.split(`&`);
-                let i = vars.length, pair, name;
-                while (i--) {
-                    pair = vars[i].split(`=`);
-                    name = decodeURIComponent(pair[0]);
-                    if (name === field) return name;
+            static getQueryVariable (field, query = window.location.search) {
+                const fldStart = query.indexOf(field);
+                if (fldStart > -1) {
+                    const valEnd = query.indexOf(`&`, fldStart);
+                    if (valEnd < 0) return query.slice(fldStart + field.length + 1);
+                    else return query.slice(fldStart + field.length + 1, valEnd);
                 }
                 return ``;
             }
@@ -304,7 +301,7 @@ function main()
                 return arabic;
             }
         },
-        // TODO: Remove when new ones ready
+        // TODO: Remove when new one's ready
         hResize: {
             ev: null,
             regPanes: [],
@@ -430,8 +427,7 @@ function main()
                     if (this.clicked.left) {
                         this.pane.style.width = w + `px`;
                     }
-                    if (this.pane.id === `DRMng_main`) DRMng.Kong.setWrapperWidth(w); 
-                    return;
+                    if (this.pane.id === `DRMng_main`) DRMng.Kong.setWrapperWidth(w);
                 }
             },
             init: function() {
@@ -465,15 +461,82 @@ function main()
                 }
             }
         },
+        Scrollbar: class {
+            constructor(el) {
+                this.target = el;
+                this.bar = new DRMng.Node(`div`).attr({class: `drmng_scroll_bar`}).node;
+                this.wrapper = new DRMng.Node(`div`).attr({class: `drmng_scroll_wrapper`}).node;
+                this.el = new DRMng.Node(`div`).attr({class: `drmng_scroll_content`}).attach(`to`, this.wrapper)
+                    .on(`scroll`, this.moveBar.bind(this)).on(`mouseenter`, this.moveBar.bind(this)).node;
+            
+                while (this.target.firstChild) this.el.appendChild(this.target.firstChild);
+                this.target.appendChild(this.wrapper);
+                this.target.appendChild(this.bar);
+                this.target.classList.add(`drmng_scroll_container`);
+                //this.target.insertAdjacentHTML('beforeend', this.bar);
+                //this.bar = this.target.lastChild;
+                this.bar.style.right = (this.target.clientWidth - this.bar.clientWidth) * -1 + `px`;
+            
+                //DRMng.Scrollbar.dragDealer(this.bar, this);
+                this.bar.addEventListener(`mousedown`, e => {
+                    DRMng.Scrollbar.lastPageY = e.pageY;
+                    this.bar.classList.add(`drmng_scroll_grabbed`);
+                    document.body.classList.add(`drmng_scroll_grabbed`);
+                    document.addEventListener(`mousemove`, this.drag.bind(this));
+                    document.addEventListener(`mouseup`, this.stop.bind(this));
+                    return false;
+                });
+
+                this.moveBar();
+            
+                //this.el.addEventListener(`scroll`, this.moveBar.bind(this));
+                //this.el.addEventListener(`mouseenter`, this.moveBar.bind(this));
+            
+                const css = window.getComputedStyle(el);
+                if (css[`height`] === `0px` && css[`max-height`] !== `0px`) el.style.height = css[`max-height`];
+            }
+            moveBar () {
+                //const right = (this.target.clientWidth - this.bar.clientWidth) * -1;
+                const totalHeight = this.el.scrollHeight;
+                const ownHeight = this.el.clientHeight;
+                const _this = this;
+                this.scrollRatio = ownHeight / totalHeight;
+                window.requestAnimationFrame(() => {
+                    // Hide scrollbar if no scrolling is possible
+                    if (_this.scrollRatio >= 1) _this.bar.classList.add(`drmng_scroll_hidden`);
+                    else {
+                        _this.bar.classList.remove(`drmng_scroll_hidden`);
+                        _this.bar.style.height = Math.max(_this.scrollRatio * 100, 10) + `%`;
+                        _this.bar.style.top = (_this.el.scrollTop / totalHeight ) * 100 + `%`;
+                        //_this.bar.style.right = (this.target.clientWidth - this.bar.clientWidth) * -1 + `px`;
+                    }
+                });
+            }
+            drag (e) {
+                const delta = e.pageY - DRMng.Scrollbar.lastPageY;
+                DRMng.Scrollbar.lastPageY = e.pageY;
+                window.requestAnimationFrame(() => this.el.scrollTop += delta / this.scrollRatio);
+            }
+            stop () {
+                this.bar.classList.remove(`drmng_scroll_grabbed`);
+                document.body.classList.remove(`drmng_scroll_grabbed`);
+                document.removeEventListener(`mousemove`, this.drag);
+                document.removeEventListener(`mouseup`, this.stop);
+            }
+        },
+        initScrollbar: el => {
+            if (el.hasOwnProperty(`drmng_scroll`)) return;
+            Object.defineProperty(el, `drmng_scroll`, new DRMng.Scrollbar(el));
+        },
         /**
-          * XHR calls gateway
-          */
+         * XHR calls gateway
+         */
         Gate: {
             /**
-              * Calls lightshot service to get real image url
-              * @param {string} link Link with obfuscated image url
-              * @param {string} id ID of destination Node
-              */
+             * Calls lightshot service to get real image url
+             * @param {string} link Link with obfuscated image url
+             * @param {string} id ID of destination Node
+             */
             lightShot: (link, id) => {
                 DRMng.postMessage({
                     eventName: `DRMng.lightShot`,
@@ -485,9 +548,9 @@ function main()
             },
             // TODO: Add support for regular kong chat as well
             /**
-              * Lightshot callback
-              * @param {Object} e returned data
-              */
+             * Lightshot callback
+             * @param {Object} e returned data
+             */
             lightShotCb: e => {
                 const d = JSON.parse(e && e.data);
                 const i = new DRMng.Node(`#${d.id}`);
@@ -503,8 +566,8 @@ function main()
             }
         },
         /**
-          * Gestures class
-          */
+         * Gestures class
+         */
         Gestures: {
             Kiss: {
                 smittenAdjective: [`smitten`,`enamored`,`infatuated`,`taken`,`in love`,`inflamed`],
@@ -680,8 +743,8 @@ function main()
         },
         Config: {
             /**
-              * Default local config data
-              */
+             * Default local config data
+             */
             local: {
                 kong: {
                     kongSlimHeader: false,
@@ -714,23 +777,26 @@ function main()
                     removeWChat: false,
                     leftWChat: false,
                     hideWChat: false
+                },
+                sidebar: {
+
                 }
             },
             /**
-              * TODO: Add remote configuration storage
-              * Default remote config data
-              */
+             * TODO: Add remote configuration storage
+             * Default remote config data
+             */
             remote: {},
             /**
-              * Returns config value of given property name
-              * @param {string} key Property name
-              * @return {*} Data from selected property
-              */
+             * Returns config value of given property name
+             * @param {string} key Property name
+             * @return {*} Data from selected property
+             */
             get: key => key.split(`::`).reduce((t,l) => t[l], DRMng.Config.local),
             /**
-              * Sets config parameters. Saves local configuration afterwards
-              * @param {Object} params Parameters as object properties with values
-              */
+             * Sets config parameters. Saves local configuration afterwards
+             * @param {Object} params Parameters as object properties with values
+             */
             set: params => {
                 if (params) {
                     const loc = DRMng.Config.local;
@@ -747,8 +813,8 @@ function main()
                 }
             },
             /**
-              * Loads local config to object
-              */
+             * Loads local config to object
+             */
             loadLocal: () => {
                 const data = localStorage[`DRMng`] ? JSON.parse(localStorage[`DRMng`]) : null;
                 const loc = DRMng.Config.local;
@@ -761,20 +827,20 @@ function main()
                 DRMng.Config.saveLocal();
             },
             /**
-              * Saves config to local storage
-              */
+             * Saves config to local storage
+             */
             saveLocal: () => localStorage[`DRMng`] = JSON.stringify(DRMng.Config.local)
         },
         /**
-          * Chat message class
-          */
+         * Chat message class
+         */
         Message: class {
             /**
-              * Creates message
-              * @param {string|Node|DRMng.Node} message Message content 
-              * @param {string} [user] User name and optional ign 
-              * @param {string} [props] Various message properties
-              */
+             * Creates message
+             * @param {string|Node|DRMng.Node} message Message content
+             * @param {string} [user] User name and optional ign
+             * @param {string} [props] Various message properties
+             */
             constructor (message, user, props) {
                 //console.log(props);
                 this._node = new DRMng.Node(`div`).attr({class: `chat-message`});
@@ -945,8 +1011,8 @@ function main()
             }
         },
         /**
-          * Handles dynamic css rules
-          */
+         * Handles dynamic css rules
+         */
         CSS: class {
             static add (alias, name, value) {
                 if (DRMng.CSS.rules === undefined) DRMng.CSS.rules = {};
@@ -976,12 +1042,12 @@ function main()
             }
         },
         /**
-          * Kongregate module
-          */
+         * Kongregate module
+         */
         Kong: {
             /**
-              * Removes google spying scripts
-              */
+             * Removes google spying scripts
+             */
             killScripts: () => {
                 const scr = document.getElementsByTagName(`script`);
                 let counter = 0;
@@ -992,8 +1058,8 @@ function main()
                 DRMng.log(`debug`, `{Kong} Removed intrusive script tags (${counter})`);
             },
             /**
-              * Adjusts kong_ads object
-              */
+             * Adjusts kong_ads object
+             */
             killAds: () => {
                 if (typeof window.kong_ads === `object`) {
                     window.kong_ads._slots = {};
@@ -1003,8 +1069,8 @@ function main()
                 else setTimeout(DRMng.Kong.killAds, 10);
             },
             /**
-              * Removes FB Like button placed just above kong chat
-              */
+             * Removes FB Like button placed just above kong chat
+             */
             killFBlike: () => {
                 const like = document.getElementById(`quicklinks_facebook`);
                 if(like) {
@@ -1014,8 +1080,8 @@ function main()
                 else setTimeout(DRMng.Kong.killFBlike, 50);
             },
             /**
-              * Removes dealspot object
-              */
+             * Removes dealspot object
+             */
             killDealSpot: () => {
                 const ds = document.getElementById(`dealspot_banner_holder`);
                 if (ds) {
@@ -1025,8 +1091,8 @@ function main()
                 else setTimeout(DRMng.Kong.killDealSpot, 50);
             },
             /**
-              * Adds reload game and reload chat buttons at the top of the game window
-              */
+             * Adds reload game and reload chat buttons at the top of the game window
+             */
             addReloadButton: () => {
                 new DRMng.Node(`li`)
                     .attr({class: `spritegame`})
@@ -1041,8 +1107,8 @@ function main()
                     .attach(`to`, `quicklinks`);
             },
             /**
-              * Adds Slim button to kong user bar
-              */
+             * Add Slim button to kong user bar
+             */
             addSlimButton: () => {
                 if (DRMng.Config.local.kong.kongSlimHeader && document.body.className.indexOf(`slim`) === -1)
                     document.body.className += ` slim`;
@@ -1065,9 +1131,14 @@ function main()
                 }
                 else setTimeout(DRMng.Kong.addSlimButton, 1000);
             },
+            searchFieldIcon: () => {
+                const el = document.getElementById(`nav_search_submit_button`);
+                if (el) el.value = `\uf1c3`;
+                else setTimeout(DRMng.Kong.searchFieldIcon, 100);
+            },
             /**
-              * Adds container for Side-by-Side alliance chat window
-              */
+             * Add container for Side-by-Side alliance chat window
+             */
             addSbsChatContainer: () => {
                 if (document.getElementById(`chat_window`))
                     new DRMng.Node(`div`)
@@ -1078,8 +1149,8 @@ function main()
                 else setTimeout(DRMng.Kong.addSbsChatContainer, 10);
             },
             /**
-              * Modifies Element object
-              */
+             * Modifies Element object
+             */
             modifyElement: () => {
                 if (Element && Element.Methods) {
                     Element._insertionTranslations.after = (a, b) => {
@@ -1098,8 +1169,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyElement, 10);
             },
             /**
-              * Modifies ChatDialogue prototype
-              */
+             * Modifies ChatDialogue prototype
+             */
             modifyChatDialogue: () => {
                 if (ChatDialogue)
                 {
@@ -1146,7 +1217,7 @@ function main()
                             {class: `whisper sent_whisper`},
                             {private: true}
                         );
-                    },
+                    };
                     ChatDialogue.prototype.sameTimestamps = (a, b) => parseInt(a/60000) === parseInt(b/60000);
                     ChatDialogue.prototype.insert = function (msg, b, opts) {
                         const dialogue = this, chat = this._message_window_node;
@@ -1184,8 +1255,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyChatDialogue, 10);
             },
             /**
-              * Modifies ChatRoom prototype
-              */
+             * Modifies ChatRoom prototype
+             */
             modifyChatRoom: () => {
                 if (ChatRoom) {
                     ChatRoom.prototype.receivedMessage = function (a) {
@@ -1227,8 +1298,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyChatRoom, 10);
             },
             /**
-              * Modifies FayeEvent (part of guild chat API)
-              */
+             * Modifies FayeEvent (part of guild chat API)
+             */
             modifyFayeEvent: () => {
                 if (FayeEventDispatcher) {
                     FayeEventDispatcher.prototype.message = function (a, b) {
@@ -1248,8 +1319,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyFayeEvent, 10);
             },
             /**
-              * Modifies FayeHistory (part of guild chat API)
-              */
+             * Modifies FayeHistory (part of guild chat API)
+             */
             modifyFayeHistory: () => {
                 if (FayeHistoryService) {
                     FayeHistoryService.prototype.fetchHistory = function (a, b, c) {
@@ -1267,8 +1338,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyFayeHistory, 10);
             },
             /**
-              * Modifiees FayeTransformer function (part of guild chat API)
-              */
+             * Modifiees FayeTransformer function (part of guild chat API)
+             */
             modifyFayeTransformer: () => {
                 if (FayeMessageTransformer) {// && typeof FayeMessageTransformer.transform === `function`) {
                     FayeMessageTransformer.transform = a => {
@@ -1295,8 +1366,8 @@ function main()
                 else setTimeout(DRMng.Kong.modifyFayeTransformer, 10);
             },
             /**
-              * Modifies chat commands processing inside Holodeck 
-              */
+             * Modifies chat commands processing inside Holodeck
+             */
             modifyHolodeck: function () {
                 if (Holodeck) {
                     Holodeck.prototype.processChatCommand = function (command, ally) {
@@ -1312,15 +1383,15 @@ function main()
                 else setTimeout(this.modifyHolodeck, 10);
             },
             /**
-              * Custom chat commands injector
-              */
+             * Custom chat commands injector
+             */
             addChatCommand: (cmd, call) => {
                 cmd = cmd instanceof Array ? cmd : [cmd];
                 cmd.forEach(c => holodeck.addChatCommand(c, call));
             },
             /**
-              * Definition of all supported chat commands
-              */
+             * Definition of all supported chat commands
+             */
             addChatCommands: () => {
                 const self = DRMng.Kong;
                 if (holodeck && holodeck.ready) {
@@ -1450,7 +1521,7 @@ function main()
                                 DRMng.postGameMessage(`killChat`);
                                 break;
                             default:
-                                DRMng.Node(`#gameiframe`).attr({src: ``});
+                                new DRMng.Node(`#gameiframe`).attr({src: ``});
                         }
                         return false;
                     });
@@ -1501,8 +1572,8 @@ function main()
                 else setTimeout(self.addChatCommands, 100);
             },
             /**
-              * Relocates Chat options button
-              */
+             * Relocates Chat options button
+             */
             moveChatOptions: () => {
                 const src = document.getElementById(`chat_actions_container`);
                 const dst = document.getElementById(`chat_room_tabs`);
@@ -1510,8 +1581,8 @@ function main()
                 else setTimeout(DRMng.Kong.moveChatOptions, 10);
             },
             /**
-              * Meta function to fire all modifications
-              */
+             * Meta function to fire all modifications
+             */
             modifyKongEngine: function () {
                 this.modifyHolodeck();
                 this.modifyChatRoom();
@@ -1522,14 +1593,14 @@ function main()
                 this.modifyElement();
             },
             /**
-              * Sets kongregate header width to match game frame
-              */
+             * Sets kongregate header width to match game frame
+             */
             setHeaderWidth: () => {
                 document.getElementById(`header`).style.width = document.getElementById(`maingame`).offsetWidth + `px`;
             },
             /**
-              * Resize game frame to account for inactive/hidden world chat
-              */
+             * Resize game frame to account for inactive/hidden world chat
+             */
             hideWorldChat: () => {
                 const opts = DRMng.Config.get(`gameFrame`);
                 new DRMng.Node(`#game`).style({width: (opts.hideWChat || opts.removeWChat) ? `760px` : `1025px`});
@@ -1540,8 +1611,8 @@ function main()
                 new DRMng.Node(`#headerwrap`).style({width: width});
             },
             /**
-              * Removes iFrames leaving only one with game
-              */
+             * Removes iFrames leaving only one with game
+             */
             killIframes: () => {
                 [...document.querySelectorAll(`iframe`)].forEach(ifr =>
                     ifr.id !== `gameiframe` && ifr.parentNode.removeChild(ifr));
@@ -1562,11 +1633,12 @@ function main()
                 this.addSlimButton();
                 this.addReloadButton();
                 this.addSbsChatContainer();
+                this.searchFieldIcon();
                 this.modifyKongEngine();
                 this.addChatCommands();
                 this.setWrapperWidth();
                 setTimeout(this.moveChatOptions, 500);
-                setTimeout(this.killIframes, 5000);
+                //setTimeout(this.killIframes, 5000);
 
                 // Open Sans font used by scripts theme
                 new DRMng.Node(`link`)
@@ -1588,9 +1660,9 @@ function main()
             }
         },
         /**
-          * Raids module
-          * All raids management related methods
-          */
+         * Raids module
+         * All raids management related methods
+         */
         Raids: {
             srv: `elyssa`,
             flt: {},
@@ -1608,8 +1680,8 @@ function main()
             isAuto: false,
             count: 0,
             /**
-              * Checks and sends direct submission
-              */
+             * Checks and sends direct submission
+             */
             checkAndSend: () => {
                 const link = document.getElementById(`DRMng_submitRaidLink`);
                 const r = DRMng.Util.getRaidFromUrl(link.textContent, DRMng.UM.user.name);
@@ -1630,8 +1702,8 @@ function main()
                 link.className = `default`;
             },
             /**
-              * Removes old raids from dead cache
-              */
+             * Removes old raids from dead cache
+             */
             cleanDeadCache: function () {
                 const dead = DRMng.Config.get(`dead::${this.srv}`);
                 const deadThr = new Date().getTime() - 129600000; // 3 days old
@@ -1641,17 +1713,17 @@ function main()
                 setTimeout(this.cleanDeadCache.bind(this), 3600000); // run each 1h
             },
             /**
-              * Format message while joining raids
-              * @param {string} [m] Message to show
-              */
+             * Format message while joining raids
+             * @param {string} [m] Message to show
+             */
             joinMsg: function (m) {
                 DRMng.UI.displayStatus(m ? m : `Joined ${this.joined} out of ${this.joinLen}`);
             },
             /**
-              * Joins raids
-              * @param {raidObject} r Raid data
-              * @param {boolean} [multi=false] Switches between single and multi joining callbacks
-              */
+             * Joins raids
+             * @param {raidObject} r Raid data
+             * @param {boolean} [multi=false] Switches between single and multi joining callbacks
+             */
             join: (r, multi = false) => {
                 r = r && r.id ? r : DRMng.Raids.get(r);
                 if (r) {
@@ -2023,7 +2095,7 @@ function main()
                 DRMng.UI.clearRaidList();
                 this.all.forEach(r => DRMng.UI.addRaidField(r));
 
-                setTimeout(this.prepareJoining.bind(this), 50);
+                setTimeout(this.prepareJoining.bind(this), 0);
                 this.bootstrap = false;
             },
             insert: function (raid) {
@@ -2154,9 +2226,9 @@ function main()
             }
         },
         /**
-          * User Manager module
-          * Keeps user and friends data
-          */
+         * User Manager module
+         * Keeps user and friends data
+         */
         UM: {
             numTries: 0,
             knownUsers: {},
@@ -2214,9 +2286,9 @@ function main()
             }
         },
         /**
-          * Engine module
-          * Backend event driven communication
-          */
+         * Engine module
+         * Backend event driven communication
+         */
         Engine: {
             client: null,
             changeServer: server => {
@@ -2238,7 +2310,7 @@ function main()
             init: () => {
                 if (typeof io === `function` && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
-                        .connect(`http://remote.erley.org:3000/` + DRMng.Config.local.server, {multiplex: false})
+                        .connect(`http://remote.erley.org:3000/` + DRMng.Config.local.server, { multiplex: false })
                         .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
                         .on(`msg`, DRMng.Engine.handleMessage)
                         .on(`service`, DRMng.Engine.handleService)
@@ -2258,7 +2330,8 @@ function main()
                     setTimeout(DRMng.Engine.init, 1000);
                 }
             },
-            handleMessage: msg => DRMng.Kong.serviceMsg(msg.txt),
+            //handleMessage: msg => DRMng.Kong.serviceMsg(msg.txt),
+            handleMessage: msg => DRMng.log(`info`, `{Engine::Message} ${msg.txt}`),
             handleService: d => {
                 if (!d) return;
                 const config = DRMng.Config;
@@ -2462,7 +2535,8 @@ function main()
                     let a = document.createElement(`a`);
                     a.setAttribute(`href`, `#`);
                     a.innerHTML = `Alliance`;
-                    a.addEventListener(`click`, function() {
+                    a.addEventListener(`click`, function(e) {
+                        e.preventDefault(); e.stopPropagation();
                         holodeck._chat_window._active_room.hide();
                         if (this.tab) {
                             this.tab.setAttribute(`class`, `chat_room_tab active`);
@@ -2471,9 +2545,10 @@ function main()
                         if (this.body) this.body.style.removeProperty(`display`);
                         this.setUnread(true);
                         this.active = true;
-                        setTimeout(this.nameUpdate.bind(this), 1);
-                        setTimeout(this.countUpdate.bind(this), 1);
-                        setTimeout(this.scrollToBottom.bind(this, true), 1);
+                        setTimeout(this.nameUpdate.bind(this), 0);
+                        setTimeout(this.countUpdate.bind(this), 0);
+                        setTimeout(this.scrollToBottom.bind(this, true), 0);
+                        return false;
                     }.bind(this));
 
                     let span = document.createElement(`span`);
@@ -2494,9 +2569,9 @@ function main()
 
                     console.info(`[DRMng] {Alliance} Chat tab created.`);
 
-                    setTimeout(this.initBody.bind(this),1);
+                    setTimeout(this.initBody.bind(this),0);
                 }
-                else setTimeout(this.initTab.bind(this), 100);
+                else setTimeout(this.initTab.bind(this), 50);
             },
             initBody: function() {
                 let container = document.getElementById(this.conf.sbs ? `alliance_chat_sbs` : `chat_rooms_container`);
@@ -2569,6 +2644,8 @@ function main()
                         this.body.appendChild(this.users.html);
                         this.body.appendChild(this.chat);
                         this.body.appendChild(inputDiv);
+
+                        //DRMng.initScrollbar(this.chat);
 
                         console.info(`[DRMng] {Alliance} Chat body created.`);
                     }
@@ -2666,6 +2743,15 @@ function main()
                     this.input.value = ``;
                 }
             },
+            /**
+             * Service event handler
+             * @param {object} data
+             * @param {string} data.act
+             * @param {string} data.action
+             * @param {object} data.users
+             * @param {Array} data.raids
+             * @param {object} data.data
+             */
             serviceEvent: function(data) {
                 let usr;
                 // TODO: remove act when users move to new version
@@ -2864,7 +2950,7 @@ function main()
                                 setTimeout(DRMng.Gate.lightShot.bind(DRMng.Gate,l[1],id), 1);
                             }
                             else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1])))
-                                link = `<iframe type="text/html" width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
+                                link = `<iframe width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" sandbox="allow-scripts" frameborder="0"></iframe>`;
                             else
                                 link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, ``)}</a>`;
                             start = msg.substr(0, reg.lastIndex - l[1].length);
@@ -2965,7 +3051,7 @@ function main()
                     return this;
                 };
                 this.add = function(option) {
-                    if (option && option instanceof DRMng.UI.Option) {
+                    if (option && (option instanceof DRMng.UI.Option || option instanceof DRMng.UI.SidebarConfig)) {
                         this.fields.push(option);
                         if (this.cont) this.cont.appendChild(option.html);
                     }
@@ -2979,16 +3065,25 @@ function main()
                 this.cbFn = null;
                 this.group = ``;
                 this.field = ``;
+                this.type = ``;
                 let _title = ``, _desc = ``;
-                this.setup = function(alias, title, value) {
+                this.setup = function(alias, title, type = `bool`, value) {
                     if (alias !== null) {
+                        const defaults = {
+                            bool: false,
+                            number: 0,
+                            object: {}
+                        };
                         let name = alias.split(`_`);
                         this.group = name[0] || `other`;
                         this.field = name[1] || alias;
+                        this.type = type;
                         _title = title || this.field;
-                        if (DRMng.Config.local[this.group] === undefined) DRMng.Config.local[this.group] = {};
-                        this.conf = DRMng.Config.local[this.group];
-                        if (this.conf[this.field] === undefined) this.conf[this.field] = value || false;
+                        if (type !== `action`) {
+                            if (DRMng.Config.local[this.group] === undefined) DRMng.Config.local[this.group] = {};
+                            this.conf = DRMng.Config.local[this.group];
+                            if (this.conf[this.field] === undefined) this.conf[this.field] = value || defaults[type];
+                        }
                     }
                     return this;
                 };
@@ -3005,8 +3100,7 @@ function main()
                     if (callback && typeof callback === `function`) this.cbFn = callback;
                     return this;
                 };
-                this.make = function(group, skipCb) {
-                    skipCb = skipCb || false;
+                this.make = function(group, skipCb = false, name = `Apply`) {
 
                     let optionDiv = document.createElement(`div`);
                     optionDiv.setAttribute(`class`, `buttonStripe`);
@@ -3017,18 +3111,24 @@ function main()
                     titleField.innerHTML = `` + _title;
 
                     let button = document.createElement(`button`);
-                    button.setAttribute(`class`, this.getConf() ? `n` : `l`);
+                    if (this.type === `bool`) {
+                        button.setAttribute(`class`, this.getConf() ? `n` : `l`);
+                        button.textContent = this.getConf() ? `On` : `Off`;
+                    }
+                    else {
+                        button.classList.add(`n`);
+                        button.textContent = name;
+                    }
                     button.setAttribute(`style`, `border-left-color: #3a3a3a;`);
                     button.addEventListener(`click`, function(e) {
-                        this.flipConf();
-
-                        e.target.setAttribute(`class`, this.getConf() ? `n` : `l`);
-                        e.target.innerHTML = this.getConf() ? `On` : `Off`;
-
+                        if (this.type === `bool`) {
+                            this.flipConf();
+                            e.target.setAttribute(`class`, this.getConf() ? `n` : `l`);
+                            e.target.innerHTML = this.getConf() ? `On` : `Off`;
+                        }
                         if (typeof this.cbFn === `function`) this.cbFn.call(this, e);
 
                     }.bind(this));
-                    button.innerHTML = this.getConf() ? `On` : `Off`;
 
                     optionDiv.appendChild(titleField);
                     optionDiv.appendChild(button);
@@ -3050,34 +3150,151 @@ function main()
 
                     return this;
                 };
+                this.makeSbButton = btn => {
+                    btn = btn || { name: `X`, command: `` };
+                    return new DRMng.Node(`div`)
+                        .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
+                            const el = e.target.parentNode;
+                            el.parentNode.insertBefore(el.nextSibling, el);
+                        }))
+                        .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
+                            const el = e.target.parentNode;
+                            el.parentNode.insertBefore(el, el.previousSibling);
+                        }))
+                        .data(new DRMng.Node(`input`).attr({type: `text`, value: btn.name, class: `inp_fld`}))
+                        .data(new DRMng.Node(`input`).attr({type: `text`, value: btn.command, class: `inp_cmd`}))
+                        .data(new DRMng.Node(`span`).attr({class: `red`}).txt(`\uf270`).on(`click`, e => {
+                            const el = e.target.parentNode;
+                            el.parentNode.removeChild(el);
+                        }));
+                };
+                this.makeSbGroup = grp => {
+                    grp = grp || { name: `Group` };
+                    const el = new DRMng.Node(`div`)
+                        .attr({class: `drmng_config_sb`})
+                        .data(new DRMng.Node(`div`)
+                            .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
+                                const el = e.target.parentNode.parentNode;
+                                el.parentNode.insertBefore(el.nextSibling, el);
+                            }))
+                            .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
+                                const el = e.target.parentNode.parentNode;
+                                el.parentNode.insertBefore(el, el.previousSibling);
+                            }))
+                            .data(new DRMng.Node(`input`).attr({type: `text`, value: grp.name, class: `inp_grp`}))
+                            .data(new DRMng.Node(`span`).attr({class: `del_grp red`}).txt(`\uf272`).on(`click`, e => {
+                                const el = e.target.parentNode.parentNode;
+                                el.parentNode.removeChild(el);
+                            }))
+                            .data(new DRMng.Node(`span`).attr({class: `add_grp`}).txt(`\uf277`)
+                                .on(`click`, e => this.makeSbGroup().attach(`before`, e.target.parentNode.parentNode)))
+                            .data(new DRMng.Node(`span`).txt(`\uf275`)
+                                .on(`click`, e => this.makeSbButton().attach(`to`, e.target.parentNode.parentNode)))
+                        );
+                    if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn)));
+                    else el.data(this.makeSbButton());
+                    return el;
+                };
+                this.makeSb = function(group, data) {
+                    /*const grp = new DRMng.Node(`div`)
+                        .attr({class: `drmng_config_sb`})
+                        .data(new DRMng.Node(`div`)
+                            .data(new DRMng.Node(`span`).txt(`\uf2f9`))
+                            .data(new DRMng.Node(`span`).txt(`\uf2fc`))
+                            .data(new DRMng.Node(`input`).attr({type: `text`, value: data.name, class: `inp_grp`}))
+                            .data(new DRMng.Node(`span`).attr({class: `del_grp red`}).txt(`\uf272`)
+                                .on(`click`, () => this.html.parentNode.removeChild(this.html)))
+                            .data(new DRMng.Node(`span`).txt(`\uf275`)
+                                .on(`click`, () => this.makeSbButton({name: `X`, command: ``}).attach(`to`, this.html)))
+                        );
+                    data.buttons.forEach(btn => grp.data(this.makeSbButton(btn)));*/
+                    this.html = this.makeSbGroup(data).node;
+                    if (group && group instanceof DRMng.UI.Group) group.add(this);
+                    //return this;
+                };
+            },
+            SidebarConfig: class {
+                constructor() {
+                    this.html = null;
+                    this.conf = DRMng.Config.local.sidebar.data;
+                    if (this.conf === undefined) {
+                        this.conf = {
+                            groups: [
+                                {
+                                    name: `Info`, hidden: false,
+                                    buttons: [
+                                        { name: `Emall`, action: `chat`, command: `/raid elite mall` },
+                                        { name: `Cecil`, action: `chat`, command: `/raid elite cecil` },
+                                        { name: `Mang`, action: `chat`, command: `/raid elite mangler` }
+                                    ]
+                                },
+                                {
+                                    name: `Sheet`, hidden: true,
+                                    buttons: [
+                                        {
+                                            name: `Proc`, action: `www`,
+                                            command: `https://docs.google.com/spreadsheets/d/1YTbJ0wgJUygdmix6a8BzLThrHhDINX943aadjboOTj8`
+                                        },
+                                        {
+                                            name: `Magic`, action: `www`,
+                                            command: `https://docs.google.com/spreadsheets/d/1O0eVSnzlACP9XJDq0VN4kN51ESUusec3-gD4dKPHRNU`
+                                        },
+                                        {
+                                            name: `TiersI`, action: `www`,
+                                            command: `https://docs.google.com/spreadsheets/d/10a8qCq5zgyR-kAOq-kuKuttADfU16aVWxgTCf9Eu4b8`
+                                        },
+                                        {
+                                            name: `TiersII`, action: `www`,
+                                            command: `https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ`
+                                        },
+                                        {
+                                            name: `Keyki`, action: `www`,
+                                            command: `https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI`
+                                        }
+                                    ]
+                                }
+                            ],
+                            buttons: [
+                                { name: `Join`, action: `func`, command: `DRMng.Raids.joinAll` },
+                                { name: `Kill`, action: `chat`, command: `/kill` },
+                                { name: `Server`, action: `func`, command: `DRMng.Engine.changeServer` }
+                            ]
+                        };
+                        DRMng.Config.local.sidebar.data = this.conf;
+                        DRMng.Config.saveLocal();
+                    }
+                    setTimeout(DRMng.UI.setupSidebar.bind(DRMng.UI), 0);
+                }
+                make(group) {
+                    this.conf.groups.forEach(grp => new DRMng.UI.Option().makeSb(group, grp));
+                    new DRMng.UI.Option().makeSb(group, {name: `Buttons`, buttons: this.conf.buttons});
+                }
             },
             addRaidField: function(r, idx) {
-                //console.log("UI adding elem %f, %d", r.hp, idx);
-                let div = document.createElement(`div`);
-                div.id = `DRMng_` + r.id;
-                let diff = [`N`, `H`, `L`, `NM`][r.diff - 1];
+                const ifo = DRMng.Config.local.raidData[r.boss];
                 // classes
-                let cls = [diff.toLowerCase()];
+                const cls = [`drm_` + r.boss + `_` + r.diff];
+                cls.push([`n`,`h`,`l`,`nm`][r.diff-1]);
                 r.visited && cls.push(`visited`);
-                cls.push(`drm_` + r.boss + `_` + r.diff);
-                div.className = cls.join(` `);
-                let extInfo = DRMng.Config.local.raidData[r.boss];
-                let name = extInfo ? extInfo.sName : r.boss.replace(/_/g,` `);
-                let isWER = extInfo && extInfo.maxPlayers === 90000;
-                div.innerHTML =
-                    `<span>` + diff + ` ` + name + `</span>` +
-                    `<span>` + (isWER ? `Infinite HP` : `HP: `+((r.hp * 100).toPrecision(3).slice(0,4))+`%`) + `</span>`;
-                div.addEventListener(`mouseenter`, DRMng.UI.infoEvent);
-                let list = document.getElementById(`DRMng_RaidList`);
+                r.isFull && cls.push(`full`);
 
-                if (idx === undefined) list.appendChild(div);
+                const hp = ifo && ifo.isEvent ? `\u221e` : `HP: ${(r.hp * 100).toPrecision(3).slice(0,4)}%`;
+
+                // main elem
+                const div = new DRMng.Node(`div`)
+                    .attr({id: `DRMng_${r.id}`, class: cls.join(` `)})
+                    .data(new DRMng.Node(`span`).txt(ifo ? ifo.sName : r.boss.replace(/_/g,` `)))
+                    .data(new DRMng.Node(`span`).txt(hp))
+                    .on(`mouseenter`, DRMng.UI.infoEvent);
+
+                const list = document.getElementById(`DRMng_RaidList`);
+                if (idx === undefined) list.appendChild(div.node);
                 else {
-                    let chLen = list.children.length;
-                    if (idx === chLen) list.appendChild(div);
-                    else list.insertBefore(div, list.children[idx]);
+                    const chLen = list.childNodes.length;
+                    if (idx === chLen) list.appendChild(div.node);
+                    else list.insertBefore(div.node, list.childNodes[idx]);
                 }
-
-                if (list.scrollTop < 30) list.scrollTop = 0;
+                if (list.scrollTop < 20) list.scrollTop = 0;
             },
             removeRaidField: function(id) {
                 let r = document.getElementById(`DRMng_` + id);
@@ -3090,12 +3307,12 @@ function main()
                 let statusContainer = document.getElementById(`DRMng_status`);
                 if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
                     if (DRMng.Raids.joinLen > 0)
-                        statusContainer.innerHTML = server + ` | ` + DRMng.Raids.count + ` raids, ` + DRMng.Raids.joinLen + ` selected`;
-                    else statusContainer.innerHTML = server + ` | ` + DRMng.Raids.count + ` raids in list`;
+                        statusContainer.innerHTML = server + ` :: ` + DRMng.Raids.count + ` raids, ` + DRMng.Raids.joinLen + ` selected`;
+                    else statusContainer.innerHTML = server + ` :: ` + DRMng.Raids.count + ` raids in list`;
                     this.statusTimer = null;
                 }
                 else if (msg) {
-                    statusContainer.innerHTML = server + ` | ` + msg;
+                    statusContainer.innerHTML = server + ` :: ` + msg;
                     if (this.statusTimer) this.statusTimer.restart();
                     else this.statusTimer = new DRMng.Timer(DRMng.UI.displayStatus.bind(this), 4000);
                 }
@@ -3120,6 +3337,12 @@ function main()
             },
             createCSS: function() {
                 let content = `\
+                @font-face {\
+                    font-family: 'Material-Design';\
+                    src: url('https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/fonts/Material-Design-Iconic-Font.woff2') format('woff2'), url('https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/fonts/Material-Design-Iconic-Font.woff') format('woff');\
+                    font-weight: normal;\
+                    font-style: normal;\
+                  }\
             #DRMng_main {\
                 height: 100%;\
                 position: fixed;\
@@ -3151,11 +3374,10 @@ function main()
             #DRMng_onoff {\
                 flex-grow: 0;\
                 flex-shrink: 0;\
-                font-family: 'KongIco', sans-serif;\
-                font-size: 11px;\
-                padding: 7px 9px;\
+                font-family: 'Material-Design', sans-serif;\
+                font-size: 21px;\
+                padding: 6px 9px;\
                 cursor: pointer;\
-                border-left: 1px solid #444;\
             }\
             #DRMng_onoff:hover { background-color: #222; }\
             #DRMng_onoff > div {\
@@ -3271,8 +3493,9 @@ function main()
             #DRMng_RaidList > div {\
                 width: 100%;\
                 height: 23px;\
+                box-sizing: border-box;\
                 background-color: #404040;\
-                border-width: 1px 0;\
+                border-width: 1px 0 1px 4px;\
                 border-style: solid;\
                 border-top-color: transparent;\
                 border-bottom-color: #2c2c2c;\
@@ -3285,24 +3508,37 @@ function main()
                 white-space: nowrap;\
                 cursor: pointer;\
             }\
-            #DRMng_RaidList > div.visited > span:first-child:before { content: '* '; }\
-            /*#DRMng_RaidList > div:nth-child(odd) {\
-                background-color: #404040;\
-            }*/\
+            #DRMng_RaidList > div.nm {\
+                border-left-color: #759;\
+            }\
+            #DRMng_RaidList > div.l {\
+                border-left-color: #855;\
+            }\
+            #DRMng_RaidList > div.h {\
+                border-left-color: #984;\
+            }\
+            #DRMng_RaidList > div.n {\
+                border-left-color: #795;\
+            }\
+            #DRMng_RaidList > div.visited > span:first-child:before,\
+            #DRMng_RaidList > div.full > span:first-child:before {\
+                font: normal 15px 'Material-Design';\
+                margin-right: 5px;\
+                color: #ccc;\
+                vertical-align: middle;\
+            }\
+            #DRMng_RaidList > div.visited > span:first-child:before {\
+                content: '\uf15c';\
+            }\
+            #DRMng_RaidList > div.full > span:first-child:before {\
+                content: '\uf135';\
+            }\
+            #DRMng_RaidList > div.visited.full > span:first-child:before {\
+                content: '\uf15c\xa0\xa0\uf135';\
+            }\
             #DRMng_RaidList > div:hover {\
                 color: #f0f0f0;\
-            }\
-            #DRMng_RaidList > div.nm:hover {\
-                background: linear-gradient(to right,#435,#333 25%);\
-            }\
-            #DRMng_RaidList > div.l:hover {\
-                background: linear-gradient(to right,#533,#333 25%);\
-            }\
-            #DRMng_RaidList > div.h:hover {\
-                background: linear-gradient(to right,#553,#333 25%);\
-            }\
-            #DRMng_RaidList > div.n:hover {\
-                background: linear-gradient(to right,#353,#333 25%);\
+                background: #333;\
             }\
             #DRMng_RaidList > div > span:first-child {\
                 margin-left: 6px;\
@@ -3505,7 +3741,7 @@ function main()
             #DRMng_Sidebar {\
                 display: flex;\
                 flex-direction: column;\
-                width: 34px;\
+                width: 40px;\
                 background: #4c4c4c;\
                 border-left: 1px solid #000;\
             }\
@@ -3599,6 +3835,133 @@ function main()
                 box-shadow: 0 0 10px -4px #000;\
             }\
             #alliance_chat_sbs div.users_in_room { height: 145px; }\
+            .drmng_scroll_wrapper {\
+                overflow: hidden;\
+                width: 100%;\
+                height: 100%;\
+                position: relative;\
+                z-index: 1;\
+                float: left;\
+            }\
+            .drmng_scroll_content {\
+                height: 100%;\
+                width: 100%;\
+                padding: 0 32px 0 0;\
+                position: relative;\
+                right: -18px;\
+                overflow: auto;\
+                box-sizing: border-box;\
+            }\
+            .drmng_scroll_bar {\
+                position: relative;\
+                background: rgba(0, 0, 0, 0.1);\
+                width: 9px;\
+                border-radius: 4px;\
+                top: 0;\
+                z-index: 2;\
+                cursor: pointer;\
+                opacity: 0;\
+                transition: opacity 0.25s linear;\
+            }\
+            .drmng_scroll_hidden {\
+                display: none;\
+            }\
+            .drmng_scroll_container:hover .drmng_scroll_bar {\
+                opacity: 1;\
+            }\
+            .drmng_scroll_grabbed {\
+                -o-user-select: none;\
+                -ms-user-select: none;\
+                -moz-user-select: none;\
+                -webkit-user-select: none;\
+                user-select: none;\
+            }\
+            #DRMng_main div.drmng_config_sb {\
+                margin: 7px;\
+                border: 1px solid #303030;\
+            }\
+            #DRMng_main div.drmng_config_sb > div {\
+                display: flex;\
+                align-items: center;\
+                padding: 0 3px;\
+                background: #555;\
+                border-bottom: 1px solid #444;\
+            }\
+            #DRMng_main div.drmng_config_sb > div:first-child {\
+                background: #3a3a3a;\
+                border-bottom: 1px solid #333;\
+            }\
+            #DRMng_main div.drmng_config_sb > div:last-child {\
+                border: 0;\
+            }\
+            #DRMng_main div.drmng_config_sb span {\
+                font-family: 'Material-Design';\
+                font-size: 15px;\
+                text-align: center;\
+                padding: 0;\
+                width: 14px;\
+                color: #fff;\
+                cursor: default;\
+            }\
+            #DRMng_main div.drmng_config_sb span.del_grp,\
+            #DRMng_main div.drmng_config_sb span.add_grp {\
+                margin: 0 5px;\
+                color: #ddd;\
+            }\
+            #DRMng_main div.drmng_config_sb span:hover {\
+                color: #4f7;\
+            }\
+            #DRMng_main div.drmng_config_sb span.red:hover {\
+                color: #f42;\
+            }\
+            #DRMng_main div.drmng_config_sb span:last-child {\
+                width: 20px;\
+                text-align: right;\
+            }\
+            #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:first-child,\
+            #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:first-child,\
+            #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:nth-child(2),\
+            #DRMng_main div.drmng_config_sb > div:last-child > span:nth-child(2) {\
+                padding-right: 14px;\
+            }\
+            #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:nth-child(2),\
+            #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:nth-child(2),\
+            #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:first-child,\
+            #DRMng_main div.drmng_config_sb > div:last-child > span:first-child,\
+            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:first-child,\
+            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:nth-child(2),\
+            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span.red {\
+                display: none;\
+            }\
+            #DRMng_main div.drmng_config_sb input {\
+                background: transparent;\
+                border: 0;\
+                font-size: 11px;\
+                color: #fff;\
+                font-family: 'Open Sans';\
+                width: 45px;\
+                outline: none;\
+            }\
+            #DRMng_main div.drmng_config_sb input:hover,\
+            #DRMng_main div.drmng_config_sb input:focus {\
+                background: #4a4a4a\
+            }\
+            #DRMng_main div.drmng_config_sb input.inp_grp {\
+                padding: 1px;\
+                width: 60px;\
+                margin: 0 auto;\
+            }\
+            #DRMng_main div.drmng_config_sb input.inp_fld {\
+                padding: 0;\
+                margin-left: 3px;\
+            }\
+            #DRMng_main div.drmng_config_sb input.inp_cmd {
+                padding: 0 0 0 5px;\
+                flex-grow: 1;\
+                flex-shrink: 1;\
+                text-align: left;\
+                border-left: 1px solid #444;\
+            }\
             `;
 
                 DRMng.Util.cssStyle(`DRMng_CSS`, content);
@@ -3716,49 +4079,10 @@ function main()
             },
             setupSidebar: function() {
                 let left = true;
-                let sb = document.createElement(`div`);
-                let scData = {
-                    groups: [
-                        { 	name: `Raids`, hidden: false,
-                            buttons: [
-                                {name: `Emall`, action: `chat`, command: `/raid elite mall`},
-                                {name: `Cecil`, action: `chat`, command: `/raid elite cecil`},
-                                {name: `Mang`, action: `chat`, command: `/raid elite manger`},
-                                {name: `Whisp`, action: `chat`, command: `/raid elite whisp`}
-                            ]
-                        },
-                        {	name: `Sheet`, hidden: true,
-                            buttons: [
-                                {
-                                    name: `Proc`, action: `www`,
-                                    command: `https://docs.google.com/spreadsheets/d/1YTbJ0wgJUygdmix6a8BzLThrHhDINX943aadjboOTj8`
-                                },
-                                {
-                                    name: `Magic`, action: `www`,
-                                    command: `https://docs.google.com/spreadsheets/d/1O0eVSnzlACP9XJDq0VN4kN51ESUusec3-gD4dKPHRNU`
-                                },
-                                {
-                                    name: `TiersI`, action: `www`,
-                                    command: `https://docs.google.com/spreadsheets/d/10a8qCq5zgyR-kAOq-kuKuttADfU16aVWxgTCf9Eu4b8`
-                                },
-                                {
-                                    name: `TiersII`, action: `www`,
-                                    command: `https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ`
-                                },
-                                {
-                                    name: `Keyki`, action: `www`,
-                                    command: `https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI`
-                                }
-                            ]
-                        }
-                    ],
-                    buttons: [
-                        {name: `Join`, action: `func`, command: `DRMng.Raids.joinAll`},
-                        {name: `Kill`, action: `chat`, command: `/kill`},
-                        {name: `Server`, action: `func`, command: `DRMng.Engine.changeServer`}
-                    ]
-                };
-                sb.id = `DRMng_Sidebar`;
+                let sb = document.getElementById(`DRMng_Sidebar`);
+                if (sb) new DRMng.Node(sb).clear();
+                else sb = new DRMng.Node(`div`).attr({id: `DRMng_Sidebar`}).node;
+                const scData = DRMng.Config.local.sidebar.data;
 
                 // sidebar buttons routine
                 let div, button;
@@ -3835,29 +4159,24 @@ function main()
                 group = new this.Group(`kongui`, `Kongregate`, true);
 
                 opt = new this.Option();
-                opt.setup(`kongui_stickyHeader`, `Sticky header`, true)
+                opt.setup(`kongui_stickyHeader`, `Sticky header`, `bool`, true)
                     .desc(`Makes top header always visible on screen.`)
                     .event(function () {
                         if (this.conf[this.field]) {
                             new DRMng.Node(`#headerwrap`).detach().attach(`before`, `primarywrap`);
                             DRMng.CSS.del(this.field);
                             DRMng.CSS.del(this.field + `b`);
-                            //DRMng.CSS.add(this.field, `div#headerwrap`, `position: fixed`);
-                            //DRMng.CSS.add(this.field + `b`, `body#play div#primarywrap`, `padding-top: 55px`);
-                            //DRMng.CSS.add(this.field + `c`, `body#play.slim div#primarywrap`, `padding-top: 28px`);
                         }
                         else {
                             new DRMng.Node(`#headerwrap`).detach().attach(`before`, `tr8n_language_selector_trigger`);
                             DRMng.CSS.add(this.field, `div#headerwrap`, `width: 100% !important`);
                             DRMng.CSS.add(this.field + `b`, `div#primarywrap`, `height: 100% !important`);
-                            //DRMng.CSS.del(this.field + `b`);
-                            //DRMng.CSS.del(this.field + `c`);
                         }
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideToolbar`, `Hide game toolbar`, false)
+                opt.setup(`kongui_hideToolbar`, `Hide game toolbar`, `bool`, false)
                     .desc(`Hides toolbar located above game window (cinematic mode, rating, etc).`)
                     .event(function () {
                         if (this.conf[this.field])
@@ -3867,7 +4186,7 @@ function main()
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideFrame`, `Hide game frame`, false)
+                opt.setup(`kongui_hideFrame`, `Hide game frame`, `bool`, false)
                     .desc(`Hides 7px wide frame around game window.`)
                     .event(function () {
                         if (this.conf[this.field])
@@ -3877,7 +4196,7 @@ function main()
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideGameDetails`, `Hide game details`, false)
+                opt.setup(`kongui_hideGameDetails`, `Hide game details`, `bool`, false)
                     .desc(`Hides game details part located just below game window.`)
                     .event(function () {
                         if (this.conf[this.field])
@@ -3887,7 +4206,7 @@ function main()
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideForum`, `Hide forum area`, true)
+                opt.setup(`kongui_hideForum`, `Hide forum area`, `bool`, true)
                     .desc(`Hides forum part located below game window.`)
                     .event(function () {
                         if (this.conf[this.field])
@@ -3897,12 +4216,12 @@ function main()
                     .make(group);
 
                 /**
-                   * RaidsManager UI
-                   */
+                 * RaidsManager UI
+                 */
                 group = new this.Group(`drmui`, `RaidsManager`);
 
                 opt = new this.Option();
-                opt.setup(`drmui_disableTransitions`, `Disable transitions`, false)
+                opt.setup(`drmui_disableTransitions`, `Disable transitions`, `bool`, false)
                     .desc(`Disables animated transitions for various UI elements to improve performance on` +
                         ` low-end hardware.`)
                     .event(function () {
@@ -3914,8 +4233,8 @@ function main()
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`drmui_hideSideBar`, `Hide sidebar`, false)
-                    .desc(`HIdes sidebar which is located between game window and kongregate chat.`)
+                opt.setup(`drmui_hideSideBar`, `Hide sidebar`, `bool`, false)
+                    .desc(`Hides sidebar which is located between game window and kongregate chat.`)
                     .event(function () {
                         if (this.conf[this.field])
                             DRMng.CSS.add(this.field, `div#DRMng_Sidebar`, `display: none`);
@@ -3924,12 +4243,12 @@ function main()
                     .make(group);
 
                 /** 
-                   * Alliance UI
-                   */
+                 * Alliance UI
+                 */
                 group = new this.Group(`alliance`, `Alliance`);
 
                 opt = new this.Option();
-                opt.setup(`alliance_sbs`, `Side by side`, false)
+                opt.setup(`alliance_sbs`, `Side by side`, `bool`, false)
                     .desc(`Makes alliance chat visible all the time along with regular kongregate chats` +
                         ` (doubles width taken by chat area).`)
                     .event(function() {
@@ -3947,12 +4266,12 @@ function main()
                     .make(group, true);
 
                 /**
-                   * Game frame UI
-                   */
+                 * Game frame UI
+                 */
                 group = new this.Group(`gameFrame`, `Game`);
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_removeWChat`, `Disable World Chat`, false)
+                opt.setup(`gameFrame_removeWChat`, `Disable World Chat`, `bool`, false)
                     .desc(`Disables World Chat located next to game window.`)
                     .event(function(){
                         DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
@@ -3961,19 +4280,96 @@ function main()
                     .make(group, true);
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_leftWChat`, `World Chat on left side`, false)
+                opt.setup(`gameFrame_leftWChat`, `World Chat on left side`, `bool`, false)
                     .desc(`Moves World Chat to the left side of game window.`)
                     .event(DRMng.postGameMessage.bind(this, `chatSettings`, DRMng.Config.local.gameFrame))
                     .make(group, true);
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_hideWChat`, `Hide World Chat`, false)
+                opt.setup(`gameFrame_hideWChat`, `Hide World Chat`, `bool`, false)
                     .desc(`Hides World Chat (without disabling it completely).`)
                     .event(function(){
                         DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
                         DRMng.Kong.hideWorldChat();
                     })
                     .make(group, true);
+
+                group = new this.Group(`sidebar`, `Sidebar`);
+
+                new this.Option()
+                    .setup(`sidebar_apply`, `Apply changes`, `action`)
+                    .desc(`Applies sidebar layout changes as defined below.`)
+                    .event(function(){
+                        const sb = document.getElementsByClassName(`drmng_config_sb`);
+                        const dat = { groups: [], buttons: [] };
+                        for (let i = 0; i < sb.length; ++i) {
+                            const inp = [...sb[i].getElementsByTagName(`input`)];
+                            const grp = { name: inp.shift().value, hidden: i > 0, buttons: [] };
+                            while (inp.length) {
+                                const btn = { name: inp.shift().value, command: inp.shift().value, action: `func` };
+                                if (btn.command.indexOf(`/`) === 0) btn.action = `chat`;
+                                else if (btn.command.indexOf(`http`) === 0) btn.action = `www`;
+                                if (i < sb.length - 1) grp.buttons.push(btn);
+                                else dat.buttons.push(btn);
+                            }
+                            if (i < sb.length - 1) dat.groups.push(grp);
+                        }
+                        DRMng.Config.local.sidebar.data = dat;
+                        DRMng.Config.saveLocal();
+                        DRMng.UI.setupSidebar();
+                        DRMng.log(`debug`, dat);
+                    })
+                    .make(group, true);
+
+                new this.Option()
+                    .setup(`sidebar_export`, `Export configuration`, `action`)
+                    .desc(`Exports sidebar configuration to JSON file.`)
+                    .event(() => {
+                        const a = document.createElement(`a`);
+                        a.setAttribute(`href`, `data:text,${JSON.stringify(DRMng.Config.local.sidebar.data)}`);
+                        a.setAttribute(`download`, `sidebar_config.json`);
+                        a.dispatchEvent(new MouseEvent(`click`));
+                    })
+                    .make(group, true, `Export`);
+
+                new this.Option()
+                    .setup(`sidebar_import`, `Import configuration`, `action`)
+                    .desc(`Imports sidebar configuration from JSON file.`)
+                    .event(() => {
+                        const a = document.createElement(`input`);
+                        a.setAttribute(`type`, `file`);
+                        a.setAttribute(`accept`, `.json`);
+                        a.addEventListener(`change`, e => {
+                            if (e.target.files instanceof FileList && e.target.files.length > 0) {
+                                const reader = new FileReader();
+                                reader.addEventListener(`load`, e => {
+                                    const res = `${e.target.result}`;
+                                    let data = null;
+                                    try { data = JSON.parse(res); }
+                                    catch (e) { DRMng.log(`error`, `{Sidebar::Import} Wrong data format ::`, res); }
+                                    if (data && data.groups && data.buttons) {
+                                        DRMng.Config.local.sidebar.data = data;
+                                        DRMng.Config.saveLocal();
+                                        DRMng.log(`debug`, `{Sidebar::Import} Data ::`, data);
+                                        // clear old fields
+                                        group.fields = group.fields.filter(fld => {
+                                            if (fld.html.className === `drmng_config_sb`) {
+                                                fld.html.parentNode.removeChild(fld.html);
+                                                return false;
+                                            }
+                                            return true;
+                                        });
+                                        // recreate sidebar ui and config fields
+                                        new DRMng.UI.SidebarConfig().make(group);
+                                    }
+                                });
+                                reader.readAsText(e.target.files[0]);
+                            }
+                        });
+                        a.dispatchEvent(new MouseEvent(`click`));
+                    })
+                    .make(group, true, `Import`);
+                new this.SidebarConfig().make(group);
 
                 DRMng.Kong.hideWorldChat();
 
@@ -4141,7 +4537,7 @@ function main()
                     e = e.parentNode;
                     e.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px), ` + 
                         `url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${data ? data.banner : ``}.jpg)`;
-                    e.className += ` raidinfo`;
+                    e.classList.add(`raidinfo`);
                     e.innerHTML = DRMng.UI.raidInfo(raid);
                     setTimeout(() => e.parentNode.parentNode.scrollTop = 500000, 10); //131072
                 }
@@ -4178,14 +4574,14 @@ function main()
                 });
 
                 // Script Hide automation
-                new DRMng.Node(`#DRMng_main`)
+                /*new DRMng.Node(`#DRMng_main`)
                     .on(`mouseleave`, () =>
                         DRMng.UI.hideUITimeout = setTimeout(() => {
                             new DRMng.Node(`#DRMng_main`).attr({class: `hidden`});
                             new DRMng.Node(`#DRMng_onoff`).attr({class: `hidden`});
                             DRMng.Kong.setWrapperWidth();
                         }, 2500))
-                    .on(`mouseenter`, () => clearTimeout(DRMng.UI.hideUITimeout));
+                    .on(`mouseenter`, () => clearTimeout(DRMng.UI.hideUITimeout));*/
 
                 // menu buttons
                 [...document.getElementById(`DRMng_nav`).children].forEach(mnuItem => {
@@ -4297,7 +4693,7 @@ function main()
                     .on(`blur`, e => {
                         e.target.value = e.target.value.trim();
                         const sv = e.target.value;
-                        if (e.target.value == ``) {
+                        if (e.target.value === ``) {
                             e.target.setAttribute(`class`, `default`);
                             e.target.value = `Channel`;
                         }
@@ -4314,7 +4710,7 @@ function main()
                     .on(`blur`, e => {
                         e.target.value = e.target.value.trim();
                         const sv = e.target.value;
-                        if (e.target.value == ``) {
+                        if (e.target.value === ``) {
                             e.target.setAttribute(`class`, `default`);
                             e.target.setAttribute(`type`, `text`);
                             e.target.value = `Password`;
@@ -4478,10 +4874,10 @@ function main()
 
                 // info dialog
                 new DRMng.Node(`div`).attr({id: `DRMng_info`}).attach(`to`, document.body);
-                new DRMng.Node(`#headerwrap`).data(`<div id="DRMng_header"><div id="DRMng_status">Raids Manager next gen is loading...</div><div id="DRMng_onoff" class="hidden"><div>p</div></div></div>`);
+                new DRMng.Node(`#headerwrap`).data(`<div id="DRMng_header"><div id="DRMng_status">Raids Manager next gen is loading...</div><div id="DRMng_onoff" class="hidden"><div>\uf1cc</div></div></div>`);
 
                 // load Sidebar
-                this.setupSidebar();
+                //this.setupSidebar();
 
                 // load default values
                 this.loadDefaults();
@@ -4494,16 +4890,15 @@ function main()
             }
         },
         /**
-          * Timer class
-          */
+         * Timer class
+         */
         Timer: class {
             /**
-              * Creates a timer
-              * @param {function(...args)} callback Function to invoke after timer completes
-              * @param {number} delay Timer duration 
-              */
+             * Creates a timer
+             * @param {function(...args)} callback Function to invoke after timer completes
+             * @param {number} delay Timer duration
+             */
             constructor (callback, delay) {
-                this.id;
                 this.started = null;
                 this.remaining = delay;
                 this.running = false;
@@ -4597,11 +4992,11 @@ function main()
     setTimeout(() => {
         const s = document.getElementById(`DRMng_TempScriptField`);
         s.parentNode.removeChild(s);
-    }, 3000);
+    }, 10000);
 }
 
 function load () {
-    DRMng = {
+    window.DRMng = {
         config: {
             version: {
                 game: `0`,
@@ -4627,33 +5022,40 @@ function load () {
         save: () => {
             localStorage[`DRMng`] = JSON.stringify(DRMng.config);
         },
-        getParamObject: function () {
+        getParamObject: () => {
             const u = DRMng.config.user;
-            const textVars = `kongregate_username=${u.name}` +
-                `&kongregate_user_id=${u.id}` +
-                `&kongregate_game_auth_token=${u.auth}` +
-                `&kongregate_game_id=138636&kongregate_host=https%3A%2F%2Fwww.kongregate.com` +
-                `&kongregate_game_url=https%3A%2F%2Fwww.kongregate.com%2Fgames%2F5thPlanetGames%2Fdawn-of-the-dragons&kongregate_api_host=https%3A%2F%2Fapi.kongregate.com` +
-                `&kongregate_channel_id=1f6ce602-7a09-44db-9cc6-f3f10ff6229f` +
-                `&kongregate_api_path=https%3A%2F%2Fchat.kongregate.com%2Fflash%2FAPI_AS3_9dd7566dd62ffc3204bfbf6e2781ce2e.swf` +
-                `&kongregate_ansible_path=%2F%2Fchat.kongregate.com%2Fflash%2Fansible_0b5a05cc72a9f3825734754f66100645.swf` +
-                `&kongregate_preview=false` +
-                `&kongregate_game_version=${u.version}` +
-                `&kongregate_language=en` +
-                `&kongregate_split_treatments=dawn-of-the-dragons-skin%252Ccontrol` +
-                `&kongregate=true` +
-                `&kongregate_svid=7cc0eaba-d07e-4e85-8d7c-09a4f2f5fcfa` +
-                `&user_id=kong_${u.name}` +
-                `&server_xml_url=https://web1.dawnofthedragons.com/kong/` +
-                `&content_url=https://5thplanetdawn.insnw.net/dotd_live/` +
-                `&xml_content_url=https://5thplanetdawn.insnw.net/dotd_live/xml/` +
-                `&app_id=138636&page_url=https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons` +
-                `&auth_url=https://web1.dawnofthedragons.com/kong/lib/authenticate.php&action_type=` +
-                `&raid_id=&hash=&queueid=&charter_id=&trk=&retrk=&fbuid=`;
+            const vars = {
+                kongregate_username: u.name,
+                kongregate_user_id: u.id,
+                kongregate_game_auth_token: u.auth,
+                kongregate_game_id: 138636,
+                kongregate_host: `https://www.kongregate.com`,
+                kongregate_game_url: `https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons`,
+                kongregate_api_host: `https://api.kongregate.com`,
+                kongregate_channel_id: `b1388511-e7e4-4c62-92fa-e6852fea27aa`,
+                kongregate_api_path: `https://chat.kongregate.com/flash/API_AS3_c1822959535ef5eff514ac20899abf96.swf`,
+                kongregate_ansible_path: `https://chat.kongregate.com/flash/ansible_68b66936d53ca6dd18a685bfcb55b2cf.swf`,
+                kongregate_preview: false,
+                kongregate_game_version: u.version,
+                kongregate_language: `en`,
+                kongregate_split_treatments: `dawn-of-the-dragons-skin%2Ccontrol`,
+                kongregate: true,
+                kongregate_svid: `7cc0eaba-d07e-4e85-8d7c-09a4f2f5fcfa`,
+                kongregate_js_api: true,
+                kongregate_flash_postmessage: true,
+                user_id: `kong_${u.name}`,
+                server_xml_url: `https://web1.dawnofthedragons.com/kong/`,
+                content_url: `https://5thplanetdawn.insnw.net/dotd_live/`,
+                xml_content_url: `https://5thplanetdawn.insnw.net/dotd_live/xml/`,
+                app_id: 138636,
+                page_url: `https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons`,
+                auth_url: `https://web1.dawnofthedragons.com/kong/lib/authenticate.php`,
+                action_type: ``, raid_id: ``, hash: ``, queueid: ``, charter_id: ``, trk: ``, retrk: ``, fbuid: ``
+            };
             return {
                 wmode: `transparent`,
                 allowscriptaccess: `always`,
-                flashvars: textVars
+                flashvars: Object.keys(vars).reduce((a,v) => `${a}&${v}=${encodeURIComponent(vars[v])}`, ``)
             };
         },
         createSwf: function (data, id, width, height) {

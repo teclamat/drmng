@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.3
+// @version         2.1.4
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -51,7 +51,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `3`,
+            build: `4`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` + 
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
@@ -2300,6 +2300,8 @@ function main()
                 DRMng.Raids.processFilter(``, true);
                 DRMng.UI.setupFilterBox();
                 DRMng.UI.setupFilterTab();
+                document.getElementById(`DRMng_server`).innerText = server;
+                DRMng.UI.displayStatus(`Loading...`);
                 setTimeout(DRMng.Engine.client.connect.bind(DRMng.Engine.client), 1000);
             },
             reconnect: () => {
@@ -3303,16 +3305,15 @@ function main()
             clearRaidList: function() { document.getElementById(`DRMng_RaidList`).innerHTML = ``; },
             statusTimer: null,
             displayStatus: function(msg) {
-                let server = DRMng.Config.local.server;
-                let statusContainer = document.getElementById(`DRMng_status`);
+                const status = document.getElementById(`DRMng_status`);
                 if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
                     if (DRMng.Raids.joinLen > 0)
-                        statusContainer.innerHTML = server + ` :: ` + DRMng.Raids.count + ` raids, ` + DRMng.Raids.joinLen + ` selected`;
-                    else statusContainer.innerHTML = server + ` :: ` + DRMng.Raids.count + ` raids in list`;
+                        status.textContent = DRMng.Raids.count + ` raids, ` + DRMng.Raids.joinLen + ` selected`;
+                    else status.textContent = DRMng.Raids.count + ` raids in list`;
                     this.statusTimer = null;
                 }
                 else if (msg) {
-                    statusContainer.innerHTML = server + ` :: ` + msg;
+                    status.innerText = msg;
                     if (this.statusTimer) this.statusTimer.restart();
                     else this.statusTimer = new DRMng.Timer(DRMng.UI.displayStatus.bind(this), 4000);
                 }
@@ -3371,6 +3372,9 @@ function main()
                 z-index: 9999;\
                 font-family: 'Open Sans', sans-serif;\
             }\
+            #DRMng_header > div {\
+                background-color: #333;
+            }\
             #DRMng_onoff {\
                 flex-grow: 0;\
                 flex-shrink: 0;\
@@ -3378,24 +3382,29 @@ function main()
                 font-size: 21px;\
                 padding: 6px 9px;\
                 cursor: pointer;\
+                margin-left: 1px;\
             }\
-            #DRMng_onoff:hover { background-color: #222; }\
             #DRMng_onoff > div {\
                 transition: transform .3s;\
             }\
             #DRMng_onoff.hidden > div {\
-                transform: rotate(180deg);\
+                transform: scale(-1,1);\
             }\
+            #DRMng_server {\
+                font-size: 12px;\
+                font-weight: 600;\
+                padding: 6px 15px;\
+                cursor: default;\
+                user-select: none\
+            }\
+            #DRMng_onoff:hover,\
+            #DRMng_server:hover { background-color: #444; }\
             #DRMng_status {\
+                margin-left: 1px;\
                 flex-grow: 1;\
                 font-size: 12px;\
                 font-weight: 600;\
                 padding: 6px 10px;\
-                text-align: center;\
-                white-space: nowrap;\
-                overflow: hidden;\
-                text-overflow: ellipsis;\
-                text-shadow: 0 0 8px #000;\
             }\
             #DRMng_main.active #DRMng_status { text-align: center; }\
             #DRMng_wrapper { height: 100%; }\
@@ -4557,22 +4566,6 @@ function main()
                 document.addEventListener(`DRMng.joinRaids`, DRMng.Raids.joinMultiResponse, false);
                 document.addEventListener(`DRMng.lightShot`, DRMng.Gate.lightShotCb, false);
 
-                // Script Hide/Show button
-                new DRMng.Node(`#DRMng_onoff`).on(`click`, () => {
-                    clearTimeout(DRMng.UI.hideUITimeout);
-                    const el = document.getElementById(`DRMng_main`);
-                    if (el.className.indexOf(`hidden`) === -1) {
-                        el.className = `hidden`;
-                        new DRMng.Node(`#DRMng_onoff`).attr({class: `hidden`});
-                        DRMng.Kong.setWrapperWidth();
-                    }
-                    else {
-                        el.removeAttribute(`class`);
-                        new DRMng.Node(`#DRMng_onoff`).remove(`class`);
-                        DRMng.Kong.setWrapperWidth(DRMng.Config.get(`scriptWidth`));
-                    }
-                });
-
                 // Script Hide automation
                 /*new DRMng.Node(`#DRMng_main`)
                     .on(`mouseleave`, () =>
@@ -4872,12 +4865,31 @@ function main()
                     </div>`)
                     .attach(`to`, document.body);
 
-                // info dialog
+                // Info dialog
                 new DRMng.Node(`div`).attr({id: `DRMng_info`}).attach(`to`, document.body);
-                new DRMng.Node(`#headerwrap`).data(`<div id="DRMng_header"><div id="DRMng_status">Raids Manager next gen is loading...</div><div id="DRMng_onoff" class="hidden"><div>\uf1cc</div></div></div>`);
 
-                // load Sidebar
-                //this.setupSidebar();
+                // Status bar
+                new DRMng.Node(`#headerwrap`)
+                    .data(new DRMng.Node(`div`).attr({id: `DRMng_header`})
+                        .data(new DRMng.Node(`div`).attr({id: `DRMng_server`})
+                            .txt(DRMng.Config.local.server).on(`click`, DRMng.Engine.changeServer))
+                        .data(new DRMng.Node(`div`).attr({id: `DRMng_status`}).txt(`DRMng Loading...`))
+                        .data(new DRMng.Node(`div`).attr({id: `DRMng_onoff`, class: `hidden`})
+                            .data(new DRMng.Node(`div`).txt(`\uf1cc`))
+                            .on(`click`, () => {
+                                clearTimeout(DRMng.UI.hideUITimeout);
+                                const el = document.getElementById(`DRMng_main`);
+                                if (el.className === `hidden`) {
+                                    el.removeAttribute(`class`);
+                                    new DRMng.Node(`#DRMng_onoff`).remove(`class`);
+                                    DRMng.Kong.setWrapperWidth(DRMng.Config.get(`scriptWidth`));
+                                }
+                                else {
+                                    el.className = `hidden`;
+                                    new DRMng.Node(`#DRMng_onoff`).attr({class: `hidden`});
+                                    DRMng.Kong.setWrapperWidth();
+                                }
+                            })));
 
                 // load default values
                 this.loadDefaults();

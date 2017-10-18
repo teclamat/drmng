@@ -13,7 +13,7 @@ Main features are:
 * automatic keywords update
 * UI theming
 * alliance chat
-* sidebar (configuration not implemented yet)
+* sidebar
 
 ## Installation
 
@@ -24,6 +24,5 @@ Main features are:
 
 ## TODO
 
-* Sidebar configuration
 * Options framework (partially implemented)
 * Configuration stored on server

@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.2
+// @version         2.1.3
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         http://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -51,7 +51,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `2`,
+            build: `3`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` + 
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
@@ -2950,7 +2950,7 @@ function main()
                                 setTimeout(DRMng.Gate.lightShot.bind(DRMng.Gate,l[1],id), 1);
                             }
                             else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1])))
-                                link = `<iframe width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" sandbox="allow-scripts" frameborder="0"></iframe>`;
+                                link = `<iframe width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
                             else
                                 link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, ``)}</a>`;
                             start = msg.substr(0, reg.lastIndex - l[1].length);

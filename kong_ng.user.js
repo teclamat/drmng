@@ -3,10 +3,10 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.5
+// @version         2.1.6
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
-// @include         https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
+// @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
 // @include         *50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
 // @include         *dotd-web1.5thplanetgames.com/kong/?DO_NOT_SHARE_THIS_LINK*
 // @connect         50.18.191.15
@@ -51,14 +51,14 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `5`,
+            build: `6`,
             version: function () {
-                return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` + 
+                return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` +
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
             }
         },
         /**
-         * DOM Nodes manipulation class
+         * DOM Node manipulation class
          */
         Node: class {
             /**
@@ -204,7 +204,7 @@ function main()
 
                 const crc = new Uint32Array(1);
                 crc[0] = 0xffffffff;
-                str = (typeof str !== `string` ? JSON.stringify(str) : str).split(``); 
+                str = (typeof str !== `string` ? JSON.stringify(str) : str).split(``);
                 str.forEach(c => crc[0] = (crc[0] >>> 8) ^ DRMng.Util.crcTbl[(crc[0] ^ c.charCodeAt(0)) & 0xff]);
                 crc[0] ^= 0xffffffff;
                 return crc[0].toString(16);
@@ -213,7 +213,7 @@ function main()
              * Creates raid object from join url
              * @param {string} url Raid join url
              * @param {string} [poster] Optional poster of peocessed raid
-             * @return {raidObject} Filled raid object or null if parsing failed
+             * @return {?raidObject} Filled raid object or null if parsing failed
              */
             static getRaidFromUrl (url, poster = ``) {
                 const r = { createtime: new Date().getTime(), poster: poster };
@@ -385,7 +385,7 @@ function main()
                 if (this.right || this.left) document.body.style.cursor = `ew-resize`;
                 //if (this.right || this.left) this.pane.style.cursor = `ew-resize`;
                 //else this.pane.style.cursor = `default`;
-                
+
 
 
                 this.ev = e;
@@ -468,7 +468,7 @@ function main()
                 this.wrapper = new DRMng.Node(`div`).attr({class: `drmng_scroll_wrapper`}).node;
                 this.el = new DRMng.Node(`div`).attr({class: `drmng_scroll_content`}).attach(`to`, this.wrapper)
                     .on(`scroll`, this.moveBar.bind(this)).on(`mouseenter`, this.moveBar.bind(this)).node;
-            
+
                 while (this.target.firstChild) this.el.appendChild(this.target.firstChild);
                 this.target.appendChild(this.wrapper);
                 this.target.appendChild(this.bar);
@@ -476,7 +476,7 @@ function main()
                 //this.target.insertAdjacentHTML('beforeend', this.bar);
                 //this.bar = this.target.lastChild;
                 this.bar.style.right = (this.target.clientWidth - this.bar.clientWidth) * -1 + `px`;
-            
+
                 //DRMng.Scrollbar.dragDealer(this.bar, this);
                 this.bar.addEventListener(`mousedown`, e => {
                     DRMng.Scrollbar.lastPageY = e.pageY;
@@ -488,10 +488,10 @@ function main()
                 });
 
                 this.moveBar();
-            
+
                 //this.el.addEventListener(`scroll`, this.moveBar.bind(this));
                 //this.el.addEventListener(`mouseenter`, this.moveBar.bind(this));
-            
+
                 const css = window.getComputedStyle(el);
                 if (css[`height`] === `0px` && css[`max-height`] !== `0px`) el.style.height = css[`max-height`];
             }
@@ -1186,7 +1186,7 @@ function main()
                             d.pm.any = d.pm.sent || d.pm.recv;
 
                             const msg = new DRMng.Message(b, a, d); // b.a.d message :)
-                            
+
                             this.insert(msg.html, null, d.history ? {timestamp: msg.ts} : null);
                             this._messages_count++;
                         }
@@ -1229,7 +1229,7 @@ function main()
                             if (opts && opts.timestamp) {
                                 const newer = [...chat.querySelectorAll(`div > p`)]
                                     .filter(node => node.getAttribute(`timestamp`) > opts.timestamp);
-                                
+
                                 if (newer.length > 0) {
                                     chat.insertBefore(msg, newer[0].parentNode);
                                     doScroll = false;
@@ -1646,12 +1646,12 @@ function main()
                         href: `https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800`,
                         rel: `stylesheet`})
                     .attach(`to`, document.head);
-                
+
                 // Kong theme
                 new DRMng.Node(`link`)
                     .attr({
                         id: `DRMng_kongCSS`,
-                        href: `http://mutik.erley.org/kong_dark.css`,
+                        href: `https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_dark.css`,
                         rel: `stylesheet`})
                     .on(`load`, DRMng.Kong.setHeaderWidth)
                     .attach(`to`, document.head);
@@ -1709,7 +1709,7 @@ function main()
                 const deadThr = new Date().getTime() - 129600000; // 3 days old
 
                 Object.keys(dead).forEach(d => (dead[d] < deadThr) && delete dead[d]);
-                
+
                 setTimeout(this.cleanDeadCache.bind(this), 3600000); // run each 1h
             },
             /**
@@ -1734,7 +1734,7 @@ function main()
                             `&serverid=${r.sid || (DRMng.Config.get(`server`) === `Elyssa` ? `1` : `2`)}`;
                         const data = {
                             eventName: `DRMng.joinRaid${multi ? `s` : ``}`,
-                            url: `http://50.18.191.15/kong/raidjoin.php?${authData}${raidData}`,
+                            url: `https://50.18.191.15/kong/raidjoin.php?${authData}${raidData}`,
                             method: `GET`, ext: r, timeout: 10000
                         };
                         DRMng.postMessage(data);
@@ -1861,7 +1861,7 @@ function main()
             },
             joinResponse: e => {
                 const data = JSON.parse(e.data);
-                
+
                 if (data && data.status === 200 && data.responseText && data.url) {
                     let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
                     let name = DRMng.Config.local.raidData[data.ext.boss];
@@ -1933,7 +1933,7 @@ function main()
                             raids = DRMng.Config.get(`raidData`);
                             reg = new RegExp(p[2], `ig`);
                             diff = this.getDiff(p[3]);
-                            Object.keys(raids).forEach(r => 
+                            Object.keys(raids).forEach(r =>
                                 `${r} ${raids[r].sName}`.search(reg) > -1 && flt[mode].raid.push([r, diff]));
                             break;
                         }
@@ -2038,7 +2038,7 @@ function main()
                 this._setComp(field);
                 DRMng.Config.set({sortBy: field});
                 this.sort();
-                
+
                 DRMng.UI.clearRaidList();
                 this.all.forEach(r => DRMng.UI.addRaidField(r));
 
@@ -2161,7 +2161,7 @@ function main()
                 // visited strip
                 i = cfg.visited[this.srv].indexOf(id);
                 i > -1 && cfg.visited[this.srv].splice(i, 1);
-                
+
                 this.setChat(id, `dead`);
                 this.setVisited(id, true);
                 DRMng.UI.displayStatus();
@@ -2175,7 +2175,7 @@ function main()
                 }
                 this.locked = true;
 
-                const cfg = DRMng.Config.local; 
+                const cfg = DRMng.Config.local;
 
                 let r = this.get(raid.id);
                 if (r && !this.getDead(raid.id))
@@ -2184,7 +2184,7 @@ function main()
                     full && keys.push(`mnum`, `size`);
 
                     const rd = cfg.raidData[r.boss];
-                    
+
                     r = DRMng.Util.copyFields(raid, r, keys);
 
                     if (r.isFull !== true) r.isFull = rd && r.participants && rd.maxPlayers === r.participants;
@@ -2211,7 +2211,7 @@ function main()
 
                 if (len === 0) return -1;
                 if (end === undefined) end = len;
-                
+
                 const pos = (start + end) >> 1;
                 const c = this.comp(val, this.all[pos]);
 
@@ -2312,7 +2312,9 @@ function main()
             init: () => {
                 if (typeof io === `function` && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
-                        .connect(`http://remote.erley.org:3000/` + DRMng.Config.local.server, { multiplex: false })
+                        .connect(`http://remote.erley.org:3000/` + DRMng.Config.local.server, {
+                            transports: [`websocket`],
+                            multiplex: false })
                         .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
                         .on(`msg`, DRMng.Engine.handleMessage)
                         .on(`service`, DRMng.Engine.handleService)
@@ -2693,8 +2695,11 @@ function main()
 
                     if (this.client && this.client.connected) this.client.disconnect();
                     else this.client =
-                        io.connect(`http://remote.erley.org:3000/${ch}`,
-                            { query: `token=${ DRMng.Util.crc32(pass) }`, multiplex: false });
+                        io.connect(`http://remote.erley.org:3000/${ch}`, {
+                            query: `token=${ DRMng.Util.crc32(pass) }`,
+                            transports: [`websocket`],
+                            multiplex: false
+                        });
 
                     this.client.on(`error`, function(d) {
                         console.warn(`[DRMng] {Alliance} Chat client error:`, d);
@@ -2952,7 +2957,7 @@ function main()
                                 setTimeout(DRMng.Gate.lightShot.bind(DRMng.Gate,l[1],id), 1);
                             }
                             else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1])))
-                                link = `<iframe width="480" height="auto" src="http://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
+                                link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
                             else
                                 link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, ``)}</a>`;
                             start = msg.substr(0, reg.lastIndex - l[1].length);
@@ -3999,7 +4004,7 @@ function main()
                     document.getElementById(`DRMng_filterGigantic`)
                 ];
                 fltDivs.forEach(div => { if (div) while (div.firstChild) div.removeChild(div.firstChild); });
-                
+
                 Object.keys(raids).forEach(k => {
                     const r = raids[k];
                     if (!r.isEvent || r.isGuild) {
@@ -4009,7 +4014,7 @@ function main()
                             .data(new DRMng.Node(`span`).txt(r.fName))
                             .on(`click`, DRMng.UI.applyFilter)
                             .attach(`to`, fltDivs[r.isGuild ? 5 : r.size]);
-                        
+
                         new Array(4).fill(0).forEach((_,d) => new DRMng.Node(`button`)
                             .attr({class: `${[`n`,`h`,`l`,`nm`][d]} ${flt[k][d] ? `off` : `on`}`})
                             .txt(flt[k][d] ? `Off` : `On`).attach(`to`, el));
@@ -4251,7 +4256,7 @@ function main()
                     })
                     .make(group);
 
-                /** 
+                /**
                  * Alliance UI
                  */
                 group = new this.Group(`alliance`, `Alliance`);
@@ -4460,7 +4465,7 @@ function main()
                 const data = {
                     nam: rd.boss.replace(/_/g,` `), mag: ``, rac: ``, sta: `Healthy`, ptm: 1.0, hpi: `?`, tmi: `?`
                 };
-                
+
                 if (ri) {
                     // Name
                     data.nam = ri.fName;
@@ -4490,11 +4495,11 @@ function main()
                 // Time text
                 data.tmi = `timer ${ri ? `${Math.round(data.ptm * ri.timer)}h / ${ri.timer}h ` : ``}` +
                     `(${Math.ceil(data.ptm * 100)}%)`;
-                
+
                 // Generate info field
                 ifo.className = [``,`n`,`h`,`l`,`nm`][rd.diff];
                 ifo.innerHTML = `<div><span class="title">${data.nam}</span>${data.mag}</div><div>${data.rac}</div>` +
-                    `<div class="status">Status: ${data.sta}</div>` + 
+                    `<div class="status">Status: ${data.sta}</div>` +
                     `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
                     `<progress class="hp" id="DRMng_progHP" value="${rd.hp}"></progress></div>`+
                     `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
@@ -4511,7 +4516,7 @@ function main()
                 const ifo = document.getElementById(`DRMng_info`);
                 ifo.style.display = `block`;
                 ifo.style.left = d.left - ifo.offsetWidth + `px`;
-                
+
                 if (d.top + ifo.offsetHeight > rdl.top + rdl.height / 2) {
                     ifo.style.top = ``;
                     ifo.style.bottom = Math.max(wnd - d.bottom, 0) + `px`;
@@ -4544,7 +4549,7 @@ function main()
                     if (!data) return false;
 
                     e = e.parentNode;
-                    e.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px), ` + 
+                    e.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px), ` +
                         `url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${data ? data.banner : ``}.jpg)`;
                     e.classList.add(`raidinfo`);
                     e.innerHTML = DRMng.UI.raidInfo(raid);
@@ -4668,7 +4673,7 @@ function main()
                             e.target.innerHTML = `Paste raid link here`;
                             e.target.className = `default`;
                         }});
-                        
+
                 document.querySelectorAll(`[group=DRMng_submitDelay]`).forEach(flt => {
                     flt.addEventListener(`click`, e => {
                         document.querySelectorAll(`[group=DRMng_submitDelay]`).forEach(item => item.className = ``);
@@ -4996,7 +5001,7 @@ function main()
 
     // include socket.io engine
     new DRMng.Node(`script`)
-        .attr({type: `text/javascript`, async: ``, src: `http://cdn.socket.io/socket.io-1.3.6.js`})
+        .attr({type: `text/javascript`, async: ``, src: `https://cdn.socket.io/socket.io-1.3.6.js`})
         .attach(`to`, document.head);
 
     DRMng.init();
@@ -5229,7 +5234,7 @@ if (window.location.host === `www.kongregate.com`) {
         });
 
         console.log(`%c[DotD Raids Manager] Bootstrap`, `color: #108030`);
- 
+
         const scr = document.createElement(`script`);
         scr.id = `DRMng_TempScriptField`;
         scr.appendChild(document.createTextNode(`(${main})()`));

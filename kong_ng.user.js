@@ -3,13 +3,14 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.6
+// @version         2.1.7
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
 // @include         *50.18.191.15/kong/?DO_NOT_SHARE_THIS_LINK*
 // @include         *dotd-web1.5thplanetgames.com/kong/?DO_NOT_SHARE_THIS_LINK*
 // @connect         50.18.191.15
+// @connect         dotd-web1.5thplanetgames.com
 // @connect         prnt.sc
 // @hompage         http://mutik.erley.org
 // ==/UserScript==
@@ -51,7 +52,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `6`,
+            build: `7`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` +
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
@@ -1734,7 +1735,7 @@ function main()
                             `&serverid=${r.sid || (DRMng.Config.get(`server`) === `Elyssa` ? `1` : `2`)}`;
                         const data = {
                             eventName: `DRMng.joinRaid${multi ? `s` : ``}`,
-                            url: `https://50.18.191.15/kong/raidjoin.php?${authData}${raidData}`,
+                            url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
                             method: `GET`, ext: r, timeout: 10000
                         };
                         DRMng.postMessage(data);

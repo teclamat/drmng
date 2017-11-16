@@ -10,6 +10,7 @@ div.gamepage_categories_outer,
 div.ad,
 div.tracking_pixel_ad,
 #play #gamespotlight,
+#play .game_page_admindev_controls,
 div#kong_bumper_preroll_600x400-ad-slot,
 #kong_game_ui div.room_description_rollover_container,
 #kong_game_ui div#chat_default_content {
@@ -101,7 +102,7 @@ div#header {
 }
 div#header_logo {
     display: none;
-} 
+}
 ul#nav_welcome_box {
     left: 0;
     right: initial;
@@ -229,25 +230,25 @@ form#search dd input {
 }
 ::-webkit-scrollbar:horizontal {
     border-width: 1px 0 0 0;
-} 
+}
 ::-webkit-scrollbar-thumb {
     min-height: 30px;
     min-width: 30px;
 }
-::-webkit-scrollbar-track { 
+::-webkit-scrollbar-track {
     background-color: rgba(0,0,0,0.2);
 }
-::-webkit-scrollbar-thumb { 
-    background-color: rgba(0,0,0,0.2); 
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
 }
-::-webkit-scrollbar-thumb:hover { 
-    background-color: rgba(0,0,0,0.3); 
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,0.3);
 }
-::-webkit-scrollbar-corner { 
-    background-color: transparent; 
+::-webkit-scrollbar-corner {
+    background-color: transparent;
 }
-::-webkit-resizer { 
-    background-color: transparent; 
+::-webkit-resizer {
+    background-color: transparent;
 }
 
 div#maingame,
@@ -256,13 +257,13 @@ div.game_page_wrap {
     background-image: none;
     background-color: rgba(0,0,0,0.5) !important;
 }
-div#maingame { 
+div#maingame {
     border: 1px solid rgba(0,0,0,0.2);
     border-radius: 0;
-    padding: 7px; 
+    padding: 7px;
 }
 div.upper_gamepage {
-    padding: 0; 
+    padding: 0;
 }
 div#maingame div.user_connection .logged_in_user {
     color: #ddd;
@@ -368,7 +369,7 @@ div#kong_game_ui p.gameplays {
     text-overflow: ellipsis;
     overflow: hidden;
 }
-div#kong_game_ui div.tabpane div.collapsible_panel p.panel_handle { 
+div#kong_game_ui div.tabpane div.collapsible_panel p.panel_handle {
     margin: 0 !important;
     line-height: 24px;
     background: #404040 none;
@@ -628,7 +629,7 @@ div#game_info em {
     color: #aaa;
 }
 div#kong_game_ui a.show_more,
-div#kong_game_ui a.show_less { 
+div#kong_game_ui a.show_less {
     background: none;
 }
 div#kong_game_ui div#holodeck_chat_promotion {
@@ -699,7 +700,7 @@ div#kong_game_ui div.faye_disconnect_controls {
     color: #fff;
     font-size: 8pt;
     text-align: center;
-    height: 32px;
+    height: 49px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -767,7 +768,7 @@ div#kong_game_ui div.chat_message_window > div > p.l {
 div#kong_game_ui div.chat_message_window > div > p.h {
     border-right-color: #984
 }
-div#kong_game_ui div.chat_message_window > div > p.n { 
+div#kong_game_ui div.chat_message_window > div > p.n {
     border-right-color: #795
 }
 div#kong_game_ui div.chat_message_window > div > p.visited.nm {
@@ -883,7 +884,7 @@ div.game_details_outer {
     color: #fff;
     border: 0;
     padding: 15px 18px 0;
-    margin: 0 auto 20px;
+    margin: 20px auto;
 }
 div.game_details_outer div.game_user_rating,
 div.game_details_outer div.game_pub_plays {
@@ -893,11 +894,11 @@ div.game_details_outer div.game_pub_plays {
 }
 div.game_details_outer div.game_details_upper {
     border-bottom: 1px solid #bbb;
-} 
+}
 div.game_details_outer > ul.game_stats_cont {
-    right: 0; 
+    right: 0;
     top: 0;
-} 
+}
 div.game_details_outer li.game_stat {
     border: 0;
     margin: 0;

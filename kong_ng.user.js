@@ -462,73 +462,6 @@ function main()
                 }
             }
         },
-        Scrollbar: class {
-            constructor(el) {
-                this.target = el;
-                this.bar = new DRMng.Node(`div`).attr({class: `drmng_scroll_bar`}).node;
-                this.wrapper = new DRMng.Node(`div`).attr({class: `drmng_scroll_wrapper`}).node;
-                this.el = new DRMng.Node(`div`).attr({class: `drmng_scroll_content`}).attach(`to`, this.wrapper)
-                    .on(`scroll`, this.moveBar.bind(this)).on(`mouseenter`, this.moveBar.bind(this)).node;
-
-                while (this.target.firstChild) this.el.appendChild(this.target.firstChild);
-                this.target.appendChild(this.wrapper);
-                this.target.appendChild(this.bar);
-                this.target.classList.add(`drmng_scroll_container`);
-                //this.target.insertAdjacentHTML('beforeend', this.bar);
-                //this.bar = this.target.lastChild;
-                this.bar.style.right = (this.target.clientWidth - this.bar.clientWidth) * -1 + `px`;
-
-                //DRMng.Scrollbar.dragDealer(this.bar, this);
-                this.bar.addEventListener(`mousedown`, e => {
-                    DRMng.Scrollbar.lastPageY = e.pageY;
-                    this.bar.classList.add(`drmng_scroll_grabbed`);
-                    document.body.classList.add(`drmng_scroll_grabbed`);
-                    document.addEventListener(`mousemove`, this.drag.bind(this));
-                    document.addEventListener(`mouseup`, this.stop.bind(this));
-                    return false;
-                });
-
-                this.moveBar();
-
-                //this.el.addEventListener(`scroll`, this.moveBar.bind(this));
-                //this.el.addEventListener(`mouseenter`, this.moveBar.bind(this));
-
-                const css = window.getComputedStyle(el);
-                if (css[`height`] === `0px` && css[`max-height`] !== `0px`) el.style.height = css[`max-height`];
-            }
-            moveBar () {
-                //const right = (this.target.clientWidth - this.bar.clientWidth) * -1;
-                const totalHeight = this.el.scrollHeight;
-                const ownHeight = this.el.clientHeight;
-                const _this = this;
-                this.scrollRatio = ownHeight / totalHeight;
-                window.requestAnimationFrame(() => {
-                    // Hide scrollbar if no scrolling is possible
-                    if (_this.scrollRatio >= 1) _this.bar.classList.add(`drmng_scroll_hidden`);
-                    else {
-                        _this.bar.classList.remove(`drmng_scroll_hidden`);
-                        _this.bar.style.height = Math.max(_this.scrollRatio * 100, 10) + `%`;
-                        _this.bar.style.top = (_this.el.scrollTop / totalHeight ) * 100 + `%`;
-                        //_this.bar.style.right = (this.target.clientWidth - this.bar.clientWidth) * -1 + `px`;
-                    }
-                });
-            }
-            drag (e) {
-                const delta = e.pageY - DRMng.Scrollbar.lastPageY;
-                DRMng.Scrollbar.lastPageY = e.pageY;
-                window.requestAnimationFrame(() => this.el.scrollTop += delta / this.scrollRatio);
-            }
-            stop () {
-                this.bar.classList.remove(`drmng_scroll_grabbed`);
-                document.body.classList.remove(`drmng_scroll_grabbed`);
-                document.removeEventListener(`mousemove`, this.drag);
-                document.removeEventListener(`mouseup`, this.stop);
-            }
-        },
-        initScrollbar: el => {
-            if (el.hasOwnProperty(`drmng_scroll`)) return;
-            Object.defineProperty(el, `drmng_scroll`, new DRMng.Scrollbar(el));
-        },
         /**
          * XHR calls gateway
          */
@@ -2650,8 +2583,6 @@ function main()
                         this.body.appendChild(this.chat);
                         this.body.appendChild(inputDiv);
 
-                        //DRMng.initScrollbar(this.chat);
-
                         console.info(`[DRMng] {Alliance} Chat body created.`);
                     }
 
@@ -3705,7 +3636,7 @@ function main()
                 padding-right: 3px;\
             }\
             #DRMng_info div.magic {\
-                background-image: url('http://mutik.erley.org/img/magics.png?` + (new Date().getTime()) + `');\
+                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@latest/magic_sprite.png');\
                 width: 16px;\
                 height: 16px;\
                 flex-shrink: 0;\
@@ -4472,7 +4403,7 @@ function main()
                     data.nam = ri.fName;
                     // Magic
                     data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
-                        `${a}<div class="magic" style="background-position: -${rd[`m`+i]*16}px 0"></div>`,``);
+                        `${a}<div class="magic" style="background-position: 0 -${rd[`m`+i+1]*16}px"></div>`,``);
                     // Race
                     if (ri.race.length > 0)
                         data.rac = `Race: ` + ri.race.map(v => v.replace(/ /g,`&nbsp;`)).join(`, `);

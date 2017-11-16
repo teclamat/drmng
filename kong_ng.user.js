@@ -4403,7 +4403,7 @@ function main()
                     data.nam = ri.fName;
                     // Magic
                     data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
-                        `${a}<div class="magic" style="background-position: 0 -${rd[`m`+i+1]*16}px"></div>`,``);
+                        `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
                     // Race
                     if (ri.race.length > 0)
                         data.rac = `Race: ` + ri.race.map(v => v.replace(/ /g,`&nbsp;`)).join(`, `);

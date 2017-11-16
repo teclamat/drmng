@@ -1,3 +1,5 @@
+[![](https://data.jsdelivr.com/v1/package/gh/mutik/drmng/badge)](https://www.jsdelivr.com/package/gh/mutik/drmng)
+
 # DotD Raids Manager next gen
 
 DRMng is ongoing project which aims to aid Dawn of the Dragons players with raids management and sharing.

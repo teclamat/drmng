@@ -54,8 +54,11 @@ function main()
             minor: `1`,
             build: `8`,
             version: function () {
-                return `<b>${this.name}</b><br>version: <b>${this.major}.${this.minor}.${this.build}</b><br>` +
+                return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
+            },
+            ver: function () {
+                return `${this.major}.${this.minor}.${this.build}`;
             }
         },
         /**
@@ -1585,7 +1588,7 @@ function main()
                 new DRMng.Node(`link`)
                     .attr({
                         id: `DRMng_kongCSS`,
-                        href: `https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_dark.css`,
+                        href: `https://cdn.jsdelivr.net/gh/mutik/drmng@${DRMng.About.ver()}/kong_dark.css`,
                         rel: `stylesheet`})
                     .on(`load`, DRMng.Kong.setHeaderWidth)
                     .attach(`to`, document.head);
@@ -3636,7 +3639,7 @@ function main()
                 padding-right: 3px;\
             }\
             #DRMng_info div.magic {\
-                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@latest/magic_sprite.png');\
+                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@${DRMng.About.ver()}/magic_sprite.png');\
                 width: 16px;\
                 height: 16px;\
                 flex-shrink: 0;\

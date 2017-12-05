@@ -3474,7 +3474,7 @@ function main()
                 font: normal 15px 'Material-Design';\
                 margin-right: 5px;\
                 color: #ccc;\
-                vertical-align: middle;\
+                vertical-align: text-bottom;\
             }\
             #DRMng_RaidList > div.visited > span:first-child:before {\
                 content: '\uf15c';\
@@ -3529,7 +3529,6 @@ function main()
             #DRMng_main div.buttonStripe,\
             #DRMng_main div.txtInputStripe {\
                 display: flex;\
-                max-height: 22px;\
                 border-bottom: 1px solid #303030;\
                 cursor: pointer;\
             }\
@@ -3567,11 +3566,12 @@ function main()
             #DRMng_main div.buttonStripe > :first-child,\
             #DRMng_main div.txtInputStripe > :first-child { border-left: 0; }\
             #DRMng_main div.txtInputStripe > p {\
-                padding: 4px 6px 3px;\
+                padding: 4px 6px;\
                 text-align: center;\
                 word-break: break-all;\
                 background: #4c4c4c;\
-                max-height: 76px;\
+                min-height: 15px;\
+                max-height: 90px;\
             }\
             #DRMng_main div > button {\
                 height: 21px;\
@@ -4012,7 +4012,7 @@ function main()
                     switch (button.action) {
                         case `func`:
                             fn = button.command.split(`,`);
-                            th = fn[0].split(`.`).reduce((a,v,i,o) => i < o.length - 1 ? a[v] : a, window);
+                            th = fn[0].split(`.`).reduce((a,v,i,o) => (i < o.length - 1 ? a[v] : a), window);
                             btn.on(`click`, (fn[0].split(`.`).reduce((a,v) => a[v], window)).bind(th,...fn.slice(1)));
                             break;
                         case `chat`:
@@ -4393,7 +4393,10 @@ function main()
             hideUITimeout: 0,
             fillInfoTimeout: 0,
             fillInfo: id => {
+                // Get info div and clear its content
                 const ifo = document.getElementById(`DRMng_info`);
+                while (ifo.firstChild) ifo.removeChild(ifo.firstChild);
+
                 const rd = DRMng.Raids.get(id);
                 const ri = DRMng.Config.local.raidData[rd.boss];
                 const hpMax = ri ? ri.hp[rd.diff-1] * 1000 : Infinity;
@@ -4556,19 +4559,18 @@ function main()
                 // raids filtering field
                 new DRMng.Node(`#DRMng_txtFilter`)
                     .on(`focus`, e => {
-                        if (e.target.innerHTML === `Filter raids here`) {
-                            e.target.innerHTML = ``;
+                        if (e.target.textContent === `Filter raids here`) {
+                            e.target.textContent = ``;
                             e.target.className = ``;
                         }})
                     .on(`blur`, e => {
-                        if (e.target.innerHTML === ``) {
-                            e.target.innerHTML = `Filter raids here`;
+                        if (e.target.textContent === ``) {
+                            e.target.textContent = `Filter raids here`;
                             e.target.className = `default`;
                         }})
                     .on(`keyup`, e => {
                         if (window.filterTOut) clearTimeout(window.filterTOut);
-                        const data = e.target.innerText;
-                        if (e.target.innerHTML.charAt(0) === `<`) e.target.innerHTML = data;
+                        const data = e.target.textContent.replace(/[\n\r\t]/g, ``).trim();
                         window.filterTOut = setTimeout(DRMng.Raids.processFilter.bind(DRMng.Raids, data), 500);
                     });
 
@@ -4699,9 +4701,8 @@ function main()
                             <div class="active" id="DRMng_Raids">\
                                 <div class="group">\
                                     <div class="title">Searching & Joining</div>\
-                                    <div class="txtInputStripe" style="max-height: inherit;">\
+                                    <div class="txtInputStripe">\
                                         <p contenteditable="true" spellcheck="false" class="default" id="DRMng_txtFilter">Filter raids here</p>\
-                                        <!-- <input type="text" spellcheck="false" class="default" id="DRMng_txtFilter" value="Filter raids here"> -->\
                                     </div>\
                                     <div class="buttonStripe">\
                                         <button onclick="DRMng.Raids.joinAll()">Join</button>\

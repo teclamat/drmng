@@ -19,12 +19,20 @@ Main features are:
 
 ## Installation
 
-* Ensure you have userscripts manager addon installed. For Firefox it's **Greasemonkey**, for almost all other browsers (Chrome/Safari/Opera/Edge) you'll  be using **Tampermonkey**.
-* Open **kong_ng.user.js** file here on github and after that hit **RAW** button. Userscripts manager should intercept stream and allow installation/update.
-* Make sure you have **old script disabled** (they don't play nice when run together).
+* Ensure you have userscripts manager addon installed. For old Firefox it's **Greasemonkey**, for all other browsers (Firefox Quantum/Chrome/Safari/Opera/Edge) you'll  be using **Tampermonkey**.
+
+* Install script by opening **kong_ng.user.js** file. You have two options: 
+  * For stable release - go to [Script CDN site](https://www.jsdelivr.com/package/gh/mutik/drmng) and click said filename,
+  * For bleeding edge/experimental - open file on github from master branch and after that hit **RAW** button.
+  
+  In both scenarios userscripts manager should intercept URL and offer installation/update.
+  
+* Make sure you have **old script disabled** if you were still using it (they don't play nice when run together).
+
 * **Reload tab** with game for changes to take effect.
 
 ## TODO
 
-* Options framework (partially implemented)
-* Configuration stored on server
+- [x] Sidebar configuration
+- [ ] Options framework (partially implemented)
+- [ ] Configuration stored on server

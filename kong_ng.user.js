@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.8
+// @version         2.1.9
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -12,7 +12,7 @@
 // @connect         50.18.191.15
 // @connect         dotd-web1.5thplanetgames.com
 // @connect         prnt.sc
-// @hompage         http://mutik.erley.org
+// @hompage         https://mutik.erley.org
 // ==/UserScript==
 
 /**
@@ -52,7 +52,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `8`,
+            build: `9`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                     `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
@@ -1469,7 +1469,7 @@ function main()
                     });
                     self.addChatCommand(`enc`, (_, cmd) => {
                         const val = /^\/enc (.+)$/.exec(cmd);
-                        if (val) window.open(`http://mutik.erley.org/enc/#task=src_${encodeURI(`"${val[1]}"`)}`);
+                        if (val) window.open(`https://mutik.erley.org/enc/#task=src_${encodeURI(`"${val[1]}"`)}`);
                         return false;
                     });
                     self.addChatCommand([`ver`,`version`,`update`], chat => {
@@ -2249,9 +2249,9 @@ function main()
             init: () => {
                 if (typeof io === `function` && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
-                        .connect(`http://remote.erley.org:3000/` + DRMng.Config.local.server, {
+                        .connect(`//mutik.erley.org:3000/` + DRMng.Config.local.server, {
                             transports: [`websocket`],
-                            multiplex: false })
+                            multiplex: false, secure: true })
                         .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
                         .on(`msg`, DRMng.Engine.handleMessage)
                         .on(`service`, DRMng.Engine.handleService)
@@ -2630,10 +2630,10 @@ function main()
 
                     if (this.client && this.client.connected) this.client.disconnect();
                     else this.client =
-                        io.connect(`http://remote.erley.org:3000/${ch}`, {
+                        io.connect(`//mutik.erley.org:3000/${ch}`, {
                             query: `token=${ DRMng.Util.crc32(pass) }`,
                             transports: [`websocket`],
-                            multiplex: false
+                            multiplex: false, secure: true
                         });
 
                     this.client.on(`error`, function(d) {
@@ -4936,7 +4936,7 @@ function main()
 
     // include socket.io engine
     new DRMng.Node(`script`)
-        .attr({type: `text/javascript`, async: ``, src: `https://cdn.socket.io/socket.io-1.3.6.js`})
+        .attr({type: `text/javascript`, async: ``, src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js`})
         .attach(`to`, document.head);
 
     DRMng.init();

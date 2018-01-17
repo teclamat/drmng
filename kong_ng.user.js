@@ -55,7 +55,7 @@ function main()
             build: `9`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
-                    `<a href="https://github.com/mutik/drmng/raw/master/kong_ng.user.js">click me to update</a>`;
+                    `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js">click me to update</a>`;
             },
             ver: function () {
                 return `${this.major}.${this.minor}.${this.build}`;

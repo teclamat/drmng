@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.9
+// @version         2.1.10
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -52,7 +52,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `9`,
+            build: `10`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                     `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js">click me to update</a>`;
@@ -3639,7 +3639,7 @@ function main()
                 padding-right: 3px;\
             }\
             #DRMng_info div.magic {\
-                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@${DRMng.About.ver()}/magic_sprite.png');\
+                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@latest/magic_sprite.png');\
                 width: 16px;\
                 height: 16px;\
                 flex-shrink: 0;\
@@ -4998,8 +4998,8 @@ function load () {
                 kongregate_flash_postmessage: true,
                 user_id: `kong_${u.name}`,
                 server_xml_url: `https://web1.dawnofthedragons.com/kong/`,
-                content_url: `https://5thplanetdawn.insnw.net/dotd_live/`,
-                xml_content_url: `https://5thplanetdawn.insnw.net/dotd_live/xml/`,
+                content_url: `https://content.5thplanetgames.com/dotd_live/`,
+                xml_content_url: `https://content.5thplanetgames.com/dotd_live/xml/`,
                 app_id: 138636,
                 page_url: `https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons`,
                 auth_url: `https://web1.dawnofthedragons.com/kong/lib/authenticate.php`,
@@ -5069,7 +5069,7 @@ function load () {
         reloadChat: function () {
             if (this.config.version.chat)
                 this.createSwf(
-                    `https://5thplanetdawn.insnw.net/dotd_live/chat/` + this.config.version.chat + `/chatclient.swf`,
+                    `https://content.5thplanetgames.com/dotd_live/chat/` + this.config.version.chat + `/chatclient.swf`,
                     `chatdiv`, `265`, `690`
                 );
             setTimeout(this.applyChatSettings.bind(this), 100);
@@ -5077,7 +5077,7 @@ function load () {
         reloadGame: function () {
             if (this.config.version.game)
                 this.createSwf(
-                    `https://5thplanetdawn.insnw.net/dotd_live/swf/` + this.config.version.game + `/dotd.swf`,
+                    `https://content.5thplanetgames.com/dotd_live/swf/` + this.config.version.game + `/dotd.swf`,
                     `swfdiv`, `760`, `690`
                 );
         },

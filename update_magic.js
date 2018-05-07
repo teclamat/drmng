@@ -1,12 +1,13 @@
 const req = require(`request`);
 const Jimp = require(`jimp`);
+const Zip = require(`adm-zip`);
 
-const jsonURL = `http://mutik.erley.org/enc/sqlbridge.php?task=magic`;
-const magicURL = `https://5thplanetdawn.insnw.net/dotd_live/images/items/magic/`;
+const xmlURL = `https://content.5thplanetgames.com/dotd_live/xml/xml.zip?v=${new Date().getTime()}`;
+const magicURL = `https://content.5thplanetgames.com/dotd_live/images/items/magic/`;
 
 /**
  * Handle magic image resize and composite on canvas
- * @param {Array} imgs Array with image links
+ * @param {Array} imgs Array with image data
  * @param {Jimp} canvas Canvas for images
  */
 function addMagicSprite(imgs, canvas) {
@@ -18,17 +19,26 @@ function addMagicSprite(imgs, canvas) {
                 canvas.composite(img, 0, 16 * mag.id);
                 console.log(`${mag.id} => ${mag.name}`);
             }
+            else console.log(`Error reading online data <${magicURL + mag.img}>`);
             setTimeout(addMagicSprite, 0, imgs, canvas);
         });
     }
     else canvas.write(`magic_sprite.png`);
 }
 
+const magReg = /<item.*?id="(\d+?)".+name="(.+?)"[\s\S]+?<icon>(.+?)</gu;
+
 function handleResponse(data) {
-    if (data.status === 1) {
-        const imgs = data.data;
-        new Jimp(16, (imgs[imgs.length-1].id+5) * 16, (err, canv) => !err && addMagicSprite(imgs, canv));
-    }
+    const imgs = [];
+    new Zip(data).getEntries().forEach(entry => {
+        if (entry.entryName.includes(`magic_data`)) {
+            const magics = entry.getData().toString(); let magic;
+            while (magic = magReg.exec(magics)) imgs.push({ id: parseInt(magic[1]), name: magic[2], img: magic[3]});
+        }
+    });
+
+
+    new Jimp(16, (imgs[imgs.length-1].id+5) * 16, (err, canv) => !err && addMagicSprite(imgs, canv));
 }
 
-req({ url: jsonURL, json: true }, (err, res, body) => !err && res.statusCode === 200 && handleResponse(body));
+req({ url: xmlURL, encoding: null }, (err, res, body) => !err && res.statusCode === 200 && handleResponse(body));

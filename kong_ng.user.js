@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.10
+// @version         2.1.11
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -12,7 +12,7 @@
 // @connect         50.18.191.15
 // @connect         dotd-web1.5thplanetgames.com
 // @connect         prnt.sc
-// @hompage         https://mutik.erley.org
+// @hompage         https://mutikt.ml
 // ==/UserScript==
 
 /**
@@ -52,7 +52,7 @@ function main()
             name: `DotD Raids Manager next gen`,
             major: `2`,
             minor: `1`,
-            build: `10`,
+            build: `11`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                     `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js">click me to update</a>`;
@@ -1133,7 +1133,7 @@ function main()
                         const msg = new DRMng.Message(cont, null, {type: `service`});
                         if (raidInfo) {
                             msg._addClass = ` raidinfo`;
-                            msg._addStyle = `background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${raidInfo}.jpg);`;
+                            msg._addStyle = `background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://content.5thplanetgames.com/dotd_live/images/bosses/${raidInfo}.jpg);`;
                         }
                         this.insert(msg.html, null, null);
                         this._messages_count++;
@@ -1469,7 +1469,7 @@ function main()
                     });
                     self.addChatCommand(`enc`, (_, cmd) => {
                         const val = /^\/enc (.+)$/.exec(cmd);
-                        if (val) window.open(`https://mutik.erley.org/enc/#task=src_${encodeURI(`"${val[1]}"`)}`);
+                        if (val) window.open(`https://mutikt.ml/#task=src_${encodeURI(`"${val[1]}"`)}`);
                         return false;
                     });
                     self.addChatCommand([`ver`,`version`,`update`], chat => {
@@ -2249,9 +2249,7 @@ function main()
             init: () => {
                 if (typeof io === `function` && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
-                        .connect(`//mutik.erley.org:3000/` + DRMng.Config.local.server, {
-                            transports: [`websocket`],
-                            multiplex: false, secure: true })
+                        .connect(`wss://mutikt.ml:3000/` + DRMng.Config.local.server, { secure: true, transports: ['websocket'] })
                         .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
                         .on(`msg`, DRMng.Engine.handleMessage)
                         .on(`service`, DRMng.Engine.handleService)
@@ -2630,10 +2628,8 @@ function main()
 
                     if (this.client && this.client.connected) this.client.disconnect();
                     else this.client =
-                        io.connect(`//mutik.erley.org:3000/${ch}`, {
-                            query: `token=${ DRMng.Util.crc32(pass) }`,
-                            transports: [`websocket`],
-                            multiplex: false, secure: true
+                        io.connect(`wss://mutikt.ml:3000/${ch}`, {
+                            query: `token=${ DRMng.Util.crc32(pass) }`, secure: true, transports: ['websocket']
                         });
 
                     this.client.on(`error`, function(d) {
@@ -2811,7 +2807,7 @@ function main()
                     const p = new DRMng.Node(`div`).attr({class: `chat-message`});
                     new DRMng.Node(`div`)
                         .attr({class: `service${ri?` raidinfo`:``}`})
-                        .style(ri ? {'background-image': `linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${ri}.jpg)`} : {})
+                        .style(ri ? {'background-image': `linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)`} : {})
                         .data(msg).attach(`to`, p);
                     if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
                 }
@@ -4408,8 +4404,9 @@ function main()
                     // Name
                     data.nam = ri.fName;
                     // Magic
-                    data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
-                        `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
+                    data.mag = JSON.parse(rd.magic).reduce((a,v) => `${a}<div class="magic" style="background-position: 0 -${v*16}px"></div>`, ``)
+                    //data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
+                    //    `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
                     // Race
                     if (ri.race.length > 0)
                         data.rac = `Race: ` + ri.race.map(v => v.replace(/ /g,`&nbsp;`)).join(`, `);
@@ -4488,7 +4485,7 @@ function main()
 
                     e = e.parentNode;
                     e.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px), ` +
-                        `url(https://5thplanetdawn.insnw.net/dotd_live/images/bosses/${data ? data.banner : ``}.jpg)`;
+                        `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${data ? data.banner : ``}.jpg)`;
                     e.classList.add(`raidinfo`);
                     e.innerHTML = DRMng.UI.raidInfo(raid);
                     setTimeout(() => e.parentNode.parentNode.scrollTop = 500000, 10); //131072
@@ -4937,7 +4934,7 @@ function main()
 
     // include socket.io engine
     new DRMng.Node(`script`)
-        .attr({type: `text/javascript`, async: ``, src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js`})
+        .attr({type: `text/javascript`, async: ``, src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js`})
         .attach(`to`, document.head);
 
     DRMng.init();

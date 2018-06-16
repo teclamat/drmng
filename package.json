@@ -1,0 +1,31 @@
+{
+  "name": "drmng_client",
+  "version": "2.1.12",
+  "description": "DRMng Client Userscript",
+  "main": "update_magic.js",
+  "dependencies": {
+    "adm-zip": "^0.4.11",
+    "jimp": "^0.2.28",
+    "request": "^2.87.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "magics": "node update_magic.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mutik/drmng.git"
+  },
+  "keywords": [
+    "drmng",
+    "dotd",
+    "userscript"
+  ],
+  "author": "Mateusz Tecław",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mutik/drmng/issues"
+  },
+  "homepage": "https://github.com/mutik/drmng#readme"
+}

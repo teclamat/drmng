@@ -33,12 +33,12 @@ function handleResponse(data) {
     new Zip(data).getEntries().forEach(entry => {
         if (entry.entryName.includes(`magic_data`)) {
             const magics = entry.getData().toString(); let magic;
-            while (magic = magReg.exec(magics)) imgs.push({ id: parseInt(magic[1]), name: magic[2], img: magic[3]});
+            while ((magic = magReg.exec(magics))) imgs.push({ id: parseInt(magic[1]), name: magic[2], img: magic[3] });
         }
     });
 
 
-    new Jimp(16, (imgs[imgs.length-1].id+5) * 16, (err, canv) => !err && addMagicSprite(imgs, canv));
+    new Jimp(16, (imgs[imgs.length - 1].id + 5) * 16, (err, canv) => !err && addMagicSprite(imgs, canv));
 }
 
 req({ url: xmlURL, encoding: null }, (err, res, body) => !err && res.statusCode === 200 && handleResponse(body));

@@ -1484,10 +1484,20 @@
       "spOS": 3, "eOS": 3, "hasCURE": true, "sl": 0, "finished": true
     },
     "elite_balor": {
-
+      "ratio": [1,1,1,1],
+      "tiers": [125000, 500000],
+      "sp": [8800, 12600],
+      "t": [8800, 12600], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
     },
     "elite_funny_bones": {
-
+      "ratio": [1,1,1,1],
+      "tiers": [70000, 150000],
+      "sp": [4850, 8000],
+      "t": [4850, 8000], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
     },
     "deadly_bastion_of_blood": {
       "ratio": [1000,1000,1000,1000],
@@ -1510,13 +1520,63 @@
       "e": [0,1,2,3,4,5,8,20,30,40],
       "spOS": 7, "eOS": 7, "hasCURE": true, "sl": 0, "finished": true
     },
-    "elite_yydians_sanctuary": {},
-    "whitepelt_redoubt": {},
-    "elite_yule_present_bearer": {},
-    "winter_wyrms_den": {},
-    "elite_rannveig": {},
-    "black_hand_lieutenant": {},
-    "black_hand_pillagers": {},
+    "elite_yydians_sanctuary": {
+      "ratio": [1,1,1,1],
+      "tiers": [125000, 300000],
+      "sp": [8500, 11600],
+      "t": [8500, 11600], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "whitepelt_redoubt": {
+      "ratio": [1,1,1,1],
+      "tiers": [3000, 50000],
+      "sp": [60, 500],
+      "c": [110,350], "u": [110,350], "r": [60,700], "e": [15,120],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything" 
+    },
+    "elite_yule_present_bearer": {
+      "ratio": [1,1,1,1],
+      "tiers": [120000, 230000],
+      "sp": [8600, 10500],
+      "t": [8600, 10500], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "winter_wyrms_den": {
+      "ratio": [1,1,1,1],
+      "tiers": [25000, 500000],
+      "sp": [620, 2520],
+      "c": [0,2000], "u": [610,2500], "r": [610,2500], "e": [80,125],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "directSP": "c", "finished": false,
+      "todo": "Everything"
+    },
+    "elite_rannveig": {
+      "ratio": [1,1,1,1],
+      "tiers": [120000, 1000000],
+      "sp": [6000, 25000],
+      "t": [6000, 25000], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "black_hand_lieutenant": {
+      "ratio": [1,1,1,1],
+      "tiers": [100000, 900000],
+      "sp": [2460, 7720],
+      "s": [700,3000],
+      "t": [3340, 10085], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "s", "finished": false,
+      "todo": "Everything"
+    },
+    "black_hand_pillagers": {
+      "ratio": [1,1,1,1],
+      "tiers": [15000, 300000],
+      "sp": [336, 1512],
+      "c": [222,999], "u": [202,908], "r": [101,454], "e": [84,378],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
     "deadly_black_hand_lieutenant": {
       "ratio": [1000,1000,1000,1000],
       "tiers": [500,750,1000,1500,2000,2500,3000,4000,5000,7500,10000,15000,20000,30000,40000,50000,1000000],
@@ -1527,29 +1587,190 @@
       "spOS": 8, "eOS": -1, "hasCURE": true, "directSP": "c", "finished": false,
       "todo": "Check tiers below 500b, check drops from 10t+ tiers"
     },
-    "elite_draconic_dreams": {},
-    "elite_corrupted_wilds": {},
-    "elite_way_warden": {},
-    "deadly_horgrak": {},
-    "deadly_drakontos": {},
-    "thurmavus": {},
-    "garganoth_servant_of_hlaar": {},
-    "shadow_assassins": {},
-    "umbra_spider": {},
-    "lady_vasok": {},
-    "elite_centurion_marius": {},
-    "elite_umbra_spider": {},
-    "elite_shadow_assassins": {},
-    "shadow_elf_invaders": {},
-    "deadly_lady_vasok": {},
-    "pit_of_bone": {},
-    "demonic_gateway": {},
-    "lord_xaxzisz": {},
-    "elite_ghostly_alchemist": {},
-    "lord_rathanas": {},
-    "gate_of_the_underworld": {},
-    "dreadmaw": {},
-    "deadly_ragetalon": {},
-    "vathik": {}
+    "elite_draconic_dreams": {
+      "ratio": [1,1,1,1],
+      "tiers": [120000, 2000000],
+      "sp": [6150, 44120],
+      "t": [6150, 44120], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "elite_corrupted_wilds": {
+      "ratio": [1,1,1,1],
+      "tiers": [120000, 10000000],
+      "sp": [6150, 132740],
+      "t": [6150, 132740], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "elite_way_warden": {
+      "ratio": [1,1,1,1],
+      "tiers": [120000, 10000000],
+      "sp": [6150, 134530],
+      "t": [6150, 134530], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "deadly_horgrak": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [5000, 600000],
+      "sp": [240000, 1197840],
+      "t": [240000, 1197840], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "deadly_drakontos": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [5000, 600000],
+      "sp": [240000, 1222240],
+      "t": [240000, 1222240], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "thurmavus": {
+      "ratio": [1,1,1,1],
+      "tiers": [1000000],
+      "sp": [53980],
+      "c": [43978], "u": [3026], "r": [2751], "e": [2501],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "directSP": "c", "finished": false,
+      "todo": "Everything"
+    },
+    "garganoth_servant_of_hlaar": {
+      "ratio": [1,1,1,1],
+      "tiers": [80000,1000000],
+      "sp": [3740,20060],
+      "c": [411,2207], "u": [374,2006], "r": [340,1824], "e": [309,1658],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "shadow_assassins": {
+      "ratio": [1,1,1,1],
+      "tiers": [43000,2000000],
+      "sp": [2280,36810],
+      "c": [251,4049], "u": [228,3681], "r": [207,3346], "e": [188,3042],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "umbra_spider": {
+      "ratio": [1,1,1,1],
+      "tiers": [130000,3000000],
+      "sp": [6310,40330],
+      "c": [694,4458], "u": [631,4033], "r": [574,3684], "e": [522,3351],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "lady_vasok": {
+      "ratio": [1,1,1,1],
+      "tiers": [130000,15000000],
+      "sp": [6310,256580],
+      "c": [694,28224], "u": [631,25658], "r": [574,23325], "e": [522,21204],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "elite_centurion_marius": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [240, 20000],
+      "sp": [12060, 181270],
+      "t": [12060, 181270], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "elite_umbra_spider": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [500,30000],
+      "sp": [19870,271910],
+      "t": [19870,271910], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "elite_shadow_assassins": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [600,40000],
+      "sp": [23330,362540],
+      "t": [23330,362540], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "deadly_lady_vasok": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [6250,1000000],
+      "sp": [230130,2037070],
+      "t": [230130,2037070], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "pit_of_bone": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [5000,40000],
+      "sp": [291700,573910],
+      "s": [0,1000],
+      "t": [47326,92537], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "s", "finished": false,
+      "todo": "Everything"
+    },
+    "demonic_gateway": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [2000,20000],
+      "sp": [111180,698850],
+      "t": [17927,113228], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "lord_xaxzisz": {
+      "ratio": [1,1,1,1],
+      "tiers": [100000,500000],
+      "sp": [7004,22223],
+      "c": [5790,18372], "u": [5264,16702], "r": [4785,15184], "e": [4350,13804],
+      "spOS": 0, "eOS": 0, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "elite_ghostly_alchemist": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [10000,40000],
+      "sp": [410990,433220],
+      "t": [410990,433220], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "lord_rathanas": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [8000,15000],
+      "sp": [340200,365970],
+      "t": [563064,605702], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "gate_of_the_underworld": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [8000,30000],
+      "sp": [280910,515100],
+      "t": [31014,56850], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "dreadmaw": {
+      "ratio": [1,1,1,1],
+      "tiers": [100000,700000],
+      "sp": [7004,31114],
+      "c": [5790,25722], "u": [5264,23384], "r": [4785,21258], "e": [4350,19325],
+      "spOS": 0, "eOS": 0, "hasCURE": true, "finished": false,
+      "todo": "Everything"
+    },
+    "deadly_ragetalon": {
+      "ratio": [1000,1000,1000,1000],
+      "tiers": [40000,150000],
+      "sp": [397550,2994640],
+      "t": [397550,2994640], "u": null, "r": null, "e": null,
+      "spOS": 0, "eOS": -1, "hasCURE": false, "directSP": "t", "finished": false,
+      "todo": "Everything"
+    },
+    "vathik": {
+      "ratio": [1,1,1,1],
+      "tiers": [12000,70000000],
+      "sp": [468,279660],
+      "c": [468,279660], "u": [12,90], "r": [2,5], "e": [4,20],
+      "spOS": 0, "eOS": -1, "hasCURE": true, "directSP": "c", "finished": false,
+      "todo": "Everything"
+    }
   }
 }

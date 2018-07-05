@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.15
+// @version         2.1.16
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -50,10 +50,10 @@ function main() {
         },
         About: {
             name: `DotD Raids Manager next gen`,
-            major: `2`, minor: `1`, build: `15`,
+            major: `2`, minor: `1`, build: `16`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
-                    `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js">click me to update</a>`;
+                    `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js?${Date.now()}">click me to update</a>`;
             },
             ver: function () {
                 return `${this.major}.${this.minor}.${this.build}`;
@@ -2628,7 +2628,10 @@ function main() {
                     if (this.client && this.client.connected) this.client.disconnect();
                     else this.client =
                         io.connect(`wss://mutikt.ml:3000/${ch}`, {
-                            query: `token=${DRMng.Util.crc32(pass)}`,
+                            query: {
+                                user: DRMng.UM.user.name,
+                                token: DRMng.Util.crc32(pass)
+                            },
                             secure: true,
                             transports: [`websocket`]
                         });

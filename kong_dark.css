@@ -949,7 +949,7 @@ div#kong_game_ui div.chat_message_window div.raidinfo {
     background-size: cover;
     background-repeat: no-repeat;
     background-position-x: 50%;
-    background-blend-mode: saturation;
+    /* background-blend-mode: saturation; */
     border-left: 0 !important;
 }
 div.chat_message_window div.raidinfo div.name {

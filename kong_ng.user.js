@@ -1133,7 +1133,7 @@ function main() {
                         const msg = new DRMng.Message(cont, null, { type: `service` });
                         if (raidInfo) {
                             msg._addClass = ` raidinfo`;
-                            msg._addStyle = `background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), url(https://content.5thplanetgames.com/dotd_live/images/bosses/${raidInfo}.jpg);`;
+                            msg._addStyle = `background-image: url(https://content.5thplanetgames.com/dotd_live/images/bosses/${raidInfo}.jpg);`;
                         }
                         this.insert(msg.html, null, null);
                         this._messages_count++;
@@ -1468,7 +1468,7 @@ function main() {
                     });
                     self.addChatCommand(`enc`, (_, cmd) => {
                         const val = /^\/enc (.+)$/.exec(cmd);
-                        if (val) window.open(`https://mutikt.ml/#task=src_${encodeURI(`"${val[1]}"`)}`);
+                        if (val) window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(`${val[1]}`)}`, `_blank`);
                         return false;
                     });
                     self.addChatCommand([`ver`, `version`, `update`], chat => {
@@ -2811,7 +2811,7 @@ function main() {
                     const p = new DRMng.Node(`div`).attr({ class: `chat-message` });
                     new DRMng.Node(`div`)
                         .attr({ class: `service${ri ? ` raidinfo` : ``}` })
-                        .style(ri ? { 'background-image': /*`linear-gradient( rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 0.9) 100px ), */`url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } : {})
+                        .style(ri ? { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } : {})
                         .data(msg).attach(`to`, p);
                     if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
                 }

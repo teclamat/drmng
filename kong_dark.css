@@ -450,6 +450,7 @@ div#kong_game_ui div.room_name_container {
     border-bottom: 1px solid #202020;
     font-family: 'Open Sans', sans-serif;
     font-style: normal;
+    align-items: baseline;
 }
 div#kong_game_ui div.room_name_container span.room_name {
     margin-left: 3px;

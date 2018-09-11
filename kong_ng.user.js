@@ -763,11 +763,9 @@ function main() {
                     if (loc.alliance.rooms === undefined && loc.alliance.pass) {
                         loc.alliance.rooms = [];
                         loc.alliance.rooms.push({
-                            name: loc.alliance.channel.value.charAt(0).toUpperCase() +
-                                loc.alliance.channel.value.slice(1),
-                            color: `336699`, enabled: true,
-                            channel: loc.alliance.channel,
-                            pass: loc.alliance.pass
+                            name: loc.alliance.channel.charAt(0).toUpperCase() + loc.alliance.channel.slice(1),
+                            channel: loc.alliance.channel, pass: loc.alliance.pass,
+                            color: `336699`, enabled: true
                         });
                         delete loc.alliance.pass;
                         delete loc.alliance.channel;

@@ -763,11 +763,9 @@ function main() {
                     if (loc.alliance.rooms === undefined && loc.alliance.pass) {
                         loc.alliance.rooms = [];
                         loc.alliance.rooms.push({
-                            name: loc.alliance.channel.value.charAt(0).toUpperCase() +
-                                loc.alliance.channel.value.slice(1),
-                            color: `336699`, enabled: true,
-                            channel: loc.alliance.channel,
-                            pass: loc.alliance.pass
+                            name: loc.alliance.channel.charAt(0).toUpperCase() + loc.alliance.channel.slice(1),
+                            channel: loc.alliance.channel, pass: loc.alliance.pass,
+                            color: `336699`, enabled: true
                         });
                         delete loc.alliance.pass;
                         delete loc.alliance.channel;
@@ -2355,7 +2353,7 @@ function main() {
                     count: 0,
                     keys: [],
                     fields: {},
-                    add: function(user) {
+                    add: function (user) {
                         if (user.usr) {
                             const el = {
                                 html: null,
@@ -2776,12 +2774,13 @@ function main() {
                         this.userLock = false;
 
                         // load history
-                        this.messageLock = true;
-                        data.log.forEach(log => this.messageEvent(log, true));
-                        while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);
-                        this.messageLock = false;
-
-                        this.scrollToBottom(true);
+                        if (!this.chat.firstChild) {
+                            this.messageLock = true;
+                            data.log.forEach(log => this.messageEvent(log, true));
+                            while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);
+                            this.messageLock = false;
+                            setTimeout(() => this.scrollToBottom(true), 1000);
+                        }
 
                         break;
 
@@ -3055,9 +3054,9 @@ function main() {
                 const el = new DRMng.Node(`#${id}`);
                 if (el.notNull) el.node.firstChild.textContent = room.name;
                 else new DRMng.Node(`div`)
-                    .attr({ class: `buttonStripe`, id: id})
+                    .attr({ class: `buttonStripe`, id: id })
                     .data(new DRMng.Node(`span`).txt(room.name))
-                    .data(new DRMng.Node(`button`).attr({class: `l`}).txt(`Del`).on(`click`, () => this.removeChat(id)))
+                    .data(new DRMng.Node(`button`).attr({ class: `l` }).txt(`Del`).on(`click`, () => this.removeChat(id)))
                     .attach(`to`, `DRMng_privateChat`);
             }
 

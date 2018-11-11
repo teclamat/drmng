@@ -53,7 +53,7 @@ function main() {
             major: `2`, minor: `1`, build: `16`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
-                    `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@latest/kong_ng.user.js?${Date.now()}">click me to update</a>`;
+                    `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>`;
             },
             ver: function () {
                 return `${this.major}.${this.minor}.${this.build}`;
@@ -258,6 +258,7 @@ function main() {
             static getShortNum(num, p = 4) {
                 num = parseInt(num);
                 if (isNaN(num) || num < 0) return num;
+                if (num >= 1000000000000000) return (num / 1000000000000000).toPrecision(p) + `q`;
                 if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + `t`;
                 if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + `b`;
                 if (num >= 1000000) return (num / 1000000).toPrecision(p) + `m`;
@@ -272,7 +273,7 @@ function main() {
              */
             static getShortNumK(num, p = 4) {
                 num = parseInt(num);
-                if (isNaN(num) || num < 0) return num;
+                if (isNaN(num) || num < 0) return num + ``;
                 if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + `q`;
                 if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + `t`;
                 if (num >= 1000000) return (num / 1000000).toPrecision(p) + `b`;
@@ -5067,20 +5068,12 @@ function main() {
                         let race = r.race.join(`, `);
                         if (race) txt += `<div class="race">(` + race + `)</div>`;
                         let t = DRMng.Config.local.tiersData, rt;
+                        const Diff = [0,1,2,3];
 
                         txt += `<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>`;
-                        txt += `<tr><td>HP</td>` +
-                            `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * 1000, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * 1000, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * 1000, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000, 4) : `&mdash;`) + `</td></tr>`;
-                        txt += `<tr><td>FS</td>` +
-                            `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * 1000 / r.maxPlayers, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * 1000 / r.maxPlayers, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * 1000 / r.maxPlayers, 4) : `&mdash;`) + `</td>` +
-                            `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers, 4) : `&mdash;`) + `</td></tr>`;
-                        txt += `<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>` +
-                            `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : `&mdash;`) + `</td></tr>`;
+                        txt +=  Diff.reduce((acc, d) => acc + `<td>` + (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000, 4) : `&mdash;`) + `</td>`, `<tr><td>HP</td>`) + `</tr>`;
+                        txt +=  Diff.reduce((acc, d) => acc + `<td>` + (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : `&mdash;`) + `</td>`, `<tr><td>FS</td>`) + `</tr>`;
+                        txt += `<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>` + `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : `&mdash;`) + `</td></tr>`;
                         if (t.nonTiered && t.nonTiered.raids.indexOf(boss) !== -1) {
                             rt = t.nonTiered.ratio[r.size][3];
                             txt += `<tr><td>OS</td>` +
@@ -5103,18 +5096,18 @@ function main() {
                             txt += `<table class="raidinfo"><tr><td></td><td>Tier</td><td>Stats</td><td>dmg/SP</td><td>dmg/E</td></tr>`;
                             // Stats OS
                             if (t.spOS >= 0) txt += `<tr><td>Stats OS</td><td>` + DRMng.Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + `</td>` +
-                                `<td>` + t.sp[t.spOS] + `</td>` +
+                                `<td>` + DRMng.Util.getShortNum(t.sp[t.spOS]) + `</td>` +
                                 `<td>` + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) + `</td>` +
                                 `<td>` + (t.hasCURE && t.e ? (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) : `&mdash;`) + `</td>`;
                             // Epics OS
                             if (t.eOS >= 0) txt += `<tr><td>Epics OS</td><td>` + DRMng.Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + `</td>` +
-                                `<td>` + t.sp[t.eOS] + `</td>` +
+                                `<td>` + DRMng.Util.getShortNum(t.sp[t.eOS]) + `</td>` +
                                 `<td>` + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) + `</td>` +
                                 `<td>` + (t.hasCURE && t.e ? (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) : `&mdash;`) + `</td>`;
                             // Max Tier
                             let idx = t.tiers.length - 1;
                             txt += `<tr><td>Max Tier</td><td>` + DRMng.Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) + `</td>` +
-                                `<td>` + t.sp[idx] + `</td>` +
+                                `<td>` + DRMng.Util.getShortNum(t.sp[idx]) + `</td>` +
                                 `<td>` + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) + `</td>` +
                                 `<td>` + (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : `&mdash;`) + `</td>`;
                             txt += `</table>`;

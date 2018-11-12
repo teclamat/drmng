@@ -2775,7 +2775,7 @@ function main() {
                         this.userLock = false;
 
                         // load history
-                        if (!this.chat.firstChild) {
+                        if (data.log.length > 0 && this.chat.childElementCount < 2) {
                             this.messageLock = true;
                             data.log.forEach(log => this.messageEvent(log, true));
                             while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);

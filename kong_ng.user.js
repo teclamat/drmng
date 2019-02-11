@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.17
+// @version         2.1.18
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -51,7 +51,7 @@ function main() {
         },
         About: {
             name: `DotD Raids Manager next gen`,
-            major: `2`, minor: `1`, build: `17`,
+            major: `2`, minor: `1`, build: `18`,
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                        `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>`;
@@ -73,8 +73,8 @@ function main() {
                 this._el = null;
                 if (typeof element === `string`)
                     this._el = element.charAt(0) === `#` ?
-                               document.getElementById(element.slice(1)) :
-                               document.createElement(element);
+                        document.getElementById(element.slice(1)) :
+                        document.createElement(element);
                 else if (element instanceof Node) this._el = element;
             }
 
@@ -532,9 +532,9 @@ function main() {
                     img = d.responseType === `arraybuffer` ? `data:image/png;base64,${btoa(d.responseText)}` : img[1];
                     if (img && c)
                         i.on(`load`,
-                             () => { setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250); })
-                         .attr({ src: img })
-                         .remove(`id`);
+                            () => { setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250); })
+                            .attr({ src: img })
+                            .remove(`id`);
                     else i.detach();
                 }
             }
@@ -812,11 +812,11 @@ function main() {
                     if (loc.alliance.rooms === undefined && loc.alliance.pass) {
                         loc.alliance.rooms = [];
                         loc.alliance.rooms.push({
-                                                    name: loc.alliance.channel.charAt(0).toUpperCase() +
+                            name: loc.alliance.channel.charAt(0).toUpperCase() +
                                                           loc.alliance.channel.slice(1),
-                                                    channel: loc.alliance.channel, pass: loc.alliance.pass,
-                                                    color: `336699`, enabled: true
-                                                });
+                            channel: loc.alliance.channel, pass: loc.alliance.pass,
+                            color: `336699`, enabled: true
+                        });
                         delete loc.alliance.pass;
                         delete loc.alliance.channel;
                         delete loc.alliance.enabled;
@@ -934,8 +934,8 @@ function main() {
                     if (this._class.main.length > 0) p.attr({ class: this._class.main.join(` `) });
                     // Time field + raid link
                     new DRMng.Node(`span`).attr({ class: `timestamp` }).txt(this.time)
-                                          .data(this._raid ? new DRMng.Node(`span`).data(this._raid.link) : null)
-                                          .attach(`to`, p);
+                        .data(this._raid ? new DRMng.Node(`span`).data(this._raid.link) : null)
+                        .attach(`to`, p);
                     // Extra raid data field
                     if (this._raid && this._raid.extra) this._raid.extra.attach(`to`, p);
                     // User field
@@ -989,8 +989,8 @@ function main() {
                             extra: new DRMng.Node(`span`)
                                 .attr({ class: `extraid` })
                                 .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? `Guild ER` : `WR/ER`) :
-                                            `FS ${DRMng.Util.getShortNumK(
-                                                ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : ``)
+                                    `FS ${DRMng.Util.getShortNumK(
+                                        ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : ``)
                         };
 
                         if (this._room === `none` || this._type !== `game`) {
@@ -1015,8 +1015,8 @@ function main() {
                 let l, link, prefix, suffix;
                 while ((l = regLink.exec(msg))) {
                     link = regImg.test(l[2]) ?
-                           `<img src="${l[2]}" alt="${l[2]}" onclick="window.open(this.src)">` :
-                           `<a href="${l[2]}" target="_blank">${l[2].replace(/^https?:\/\//, ``)}</a>`;
+                        `<img src="${l[2]}" alt="${l[2]}" onclick="window.open(this.src)">` :
+                        `<a href="${l[2]}" target="_blank">${l[2].replace(/^https?:\/\//, ``)}</a>`;
                     prefix = msg.slice(0, regLink.lastIndex - l[2].length);
                     suffix = msg.slice(regLink.lastIndex);
                     msg = prefix + link + suffix;
@@ -1051,8 +1051,8 @@ function main() {
                 else {
                     DRMng.CSS.node.clear();
                     Object.keys(DRMng.CSS.rules || {}).forEach(r =>
-                                                                   DRMng.CSS.node.txt(
-                                                                       `${DRMng.CSS.rules[r].name} {${DRMng.CSS.rules[r].value}}\n`));
+                        DRMng.CSS.node.txt(
+                            `${DRMng.CSS.rules[r].name} {${DRMng.CSS.rules[r].value}}\n`));
                 }
             }
 
@@ -1137,18 +1137,18 @@ function main() {
                 if (document.getElementById(`DRMng_header`)) {
                     new DRMng.Node(`li`)
                         .data(new DRMng.Node(`a`)
-                                  .attr({ id: `DRMng_KongSlimHeader`, href: `` })
-                                  .txt(DRMng.Config.local.kong.kongSlimHeader ? `Full` : `Slim`)
-                                  .on(`click`, e => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      const isSlim = !DRMng.Config.get(`kong::kongSlimHeader`);
-                                      DRMng.Config.set({ 'kong::kongSlimHeader': isSlim });
-                                      if (isSlim) document.body.className += ` slim`;
-                                      else document.body.className = document.body.className.replace(/\s?slim/g, ``);
-                                      new DRMng.Node(`#DRMng_KongSlimHeader`).txt(isSlim ? `Full` : `Slim`, true);
-                                      return false;
-                                  }))
+                            .attr({ id: `DRMng_KongSlimHeader`, href: `` })
+                            .txt(DRMng.Config.local.kong.kongSlimHeader ? `Full` : `Slim`)
+                            .on(`click`, e => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const isSlim = !DRMng.Config.get(`kong::kongSlimHeader`);
+                                DRMng.Config.set({ 'kong::kongSlimHeader': isSlim });
+                                if (isSlim) document.body.className += ` slim`;
+                                else document.body.className = document.body.className.replace(/\s?slim/g, ``);
+                                new DRMng.Node(`#DRMng_KongSlimHeader`).txt(isSlim ? `Full` : `Slim`, true);
+                                return false;
+                            }))
                         .attach(`to`, `nav_welcome_box`);
                 }
                 else setTimeout(DRMng.Kong.addSlimButton, 1000);
@@ -1235,8 +1235,8 @@ function main() {
                     ChatDialogue.prototype.sendPrivateMessage = function (a, b) {
                         this._user_manager.sendPrivateMessage(a, b);
                         this.displayUnsanitizedMessage(a, b,
-                                                       { class: `whisper sent_whisper` },
-                                                       { private: true }
+                            { class: `whisper sent_whisper` },
+                            { private: true }
                         );
                     };
                     ChatDialogue.prototype.sameTimestamps = (a, b) => parseInt(a / 60000) === parseInt(b / 60000);
@@ -1249,7 +1249,7 @@ function main() {
                         holodeck.scheduleRender(() => {
                             if (opts && opts.timestamp) {
                                 const newer = Array.from(chat.querySelectorAll(`div > p`))
-                                                   .filter(node => node.getAttribute(`timestamp`) > opts.timestamp);
+                                    .filter(node => node.getAttribute(`timestamp`) > opts.timestamp);
 
                                 if (newer.length > 0) {
                                     chat.insertBefore(msg, newer[0].parentNode);
@@ -1317,17 +1317,17 @@ function main() {
                 if (FayeEventDispatcher) {
                     FayeEventDispatcher.prototype.message = function (a, b) {
                         this.checkDuplicateMessage(b) || this._holodeckEventDispatcher.fire({
-                                                                                                type: KonduitEvent.ROOM_MESSAGE,
-                                                                                                data: {
-                                                                                                    history: b.history,
-                                                                                                    message: b.text,
-                                                                                                    timestamp: b.timestamp *
+                            type: KonduitEvent.ROOM_MESSAGE,
+                            data: {
+                                history: b.history,
+                                message: b.text,
+                                timestamp: b.timestamp *
                                                                                                                1000,
-                                                                                                    room: a,
-                                                                                                    user: FayeUserTransformer.transformUser(
-                                                                                                        b)
-                                                                                                }
-                                                                                            });
+                                room: a,
+                                user: FayeUserTransformer.transformUser(
+                                    b)
+                            }
+                        });
                     };
                     DRMng.log(`debug`, `{Kong::FayeEventDispatcher} Patched`);
                 }
@@ -1577,8 +1577,8 @@ function main() {
 
                             if (fnd.length > 1) {
                                 const raidPicker = fnd.reduce((a, f) =>
-                                                                  `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`,
-                                                              ``);
+                                    `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`,
+                                ``);
                                 chat && chat.serviceMessage(`Multiple results found, pick one:` + raidPicker);
                             }
                             else if (fnd.length === 1)
@@ -1636,7 +1636,7 @@ function main() {
              */
             killIframes: () => {
                 document.querySelectorAll(`iframe`).forEach(ifr =>
-                                                                ifr.id !== `gameiframe` &&
+                    ifr.id !== `gameiframe` &&
                                                                 ifr.parentNode.removeChild(ifr));
                 DRMng.log(`debug`, `{Kong} Removed all redundant iFrames`);
             },
@@ -1666,18 +1666,18 @@ function main() {
                 // Open Sans font used by scripts theme
                 new DRMng.Node(`link`)
                     .attr({
-                              href: `https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800`,
-                              rel: `stylesheet`
-                          })
+                        href: `https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800`,
+                        rel: `stylesheet`
+                    })
                     .attach(`to`, document.head);
 
                 // Kong theme
                 new DRMng.Node(`link`)
                     .attr({
-                              id: `DRMng_kongCSS`,
-                              href: `https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css`,
-                              rel: `stylesheet`
-                          })
+                        id: `DRMng_kongCSS`,
+                        href: `https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css`,
+                        rel: `stylesheet`
+                    })
                     .on(`load`, DRMng.Kong.setHeaderWidth)
                     .attach(`to`, document.head);
 
@@ -1951,8 +1951,8 @@ function main() {
                                 if (d) raids = raids.concat(d);
                             }
                             else raids = p[2] === `all` ?
-                                         Object.keys(DRMng.Config.get(`raidData`)) :
-                                         DRMng.Config.get(`filterData::${p[2]}`);
+                                Object.keys(DRMng.Config.get(`raidData`)) :
+                                DRMng.Config.get(`filterData::${p[2]}`);
 
                             if (raids) {
                                 diff = this.getDiff(p[3]);
@@ -1964,7 +1964,7 @@ function main() {
                             reg = new RegExp(p[2], `ig`);
                             diff = this.getDiff(p[3]);
                             Object.keys(raids).forEach(r =>
-                                                           `${r} ${raids[r].sName}`.search(reg) > -1 &&
+                                `${r} ${raids[r].sName}`.search(reg) > -1 &&
                                                            flt[mode].raid.push([r, diff]));
                             break;
                     }
@@ -2298,7 +2298,7 @@ function main() {
                     if (holodeck._chat_window._rooms_by_type.guild) setTimeout(this.getUserNode.bind(this), 0);
                     else if (this.numTries++ <= 20) {
                         DRMng.log(`debug`, `{UserManager} Guild data missing, trying again in 2 sec (%d/20)`,
-                                  this.numTries);
+                            this.numTries);
                         setTimeout(this.getExtendedUserData.bind(this), 2000);
                     }
                     else {
@@ -2344,11 +2344,11 @@ function main() {
                 if (typeof io === `function` && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
                         .connect(`${DRMng.ServerWS}/${DRMng.Config.local.server}`,
-                                 {
-                                     secure: true,
-                                     transports: [`websocket`],
-                                     query: { user: DRMng.UM.user.name }
-                                 })
+                            {
+                                secure: true,
+                                transports: [`websocket`],
+                                query: { user: DRMng.UM.user.name }
+                            })
                         .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
                         .on(`msg`, DRMng.Engine.handleMessage)
                         .on(`service`, DRMng.Engine.handleService)
@@ -2383,9 +2383,9 @@ function main() {
                                               `<${config.get(
                                                   `checkSums::raidData`)}> | New hash <${data.raidDataHash}>`);
                             config.set({
-                                           raidData: data.raidData,
-                                           'checkSums::raidData': data.raidDataHash
-                                       });
+                                raidData: data.raidData,
+                                'checkSums::raidData': data.raidDataHash
+                            });
                         }
                         setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 0);
                         break;
@@ -2396,20 +2396,20 @@ function main() {
                                               `<${config.get(
                                                   `checkSums::filterData`)}> | New hash <${data.filterDataHash}>`);
                             config.set({
-                                           filterData: data.filterData,
-                                           'checkSums::filterData': data.filterDataHash
-                                       });
+                                filterData: data.filterData,
+                                'checkSums::filterData': data.filterDataHash
+                            });
                         }
                         break;
                     case `tiersData`:
                         if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
                             d.data.tiersDataHash.length > 6) {
                             DRMng.log(`info`, `{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>`,
-                                      config.get(`checkSums::tiersData`), data.tiersDataHash);
+                                config.get(`checkSums::tiersData`), data.tiersDataHash);
                             config.set({
-                                           tiersData: JSON.parse(data.tiersData),
-                                           'checkSums::tiersData': data.tiersDataHash
-                                       });
+                                tiersData: JSON.parse(data.tiersData),
+                                'checkSums::tiersData': data.tiersDataHash
+                            });
                         }
                         break;
                     case `bootStrap`:
@@ -2833,9 +2833,18 @@ function main() {
                         holodeck._chat_window._rooms_by_type.guild.show();
                     else holodeck._chat_window._rooms_by_type.game.show();
                 }
+
                 this.client.disconnect();
                 this.tabs.removeChild(this.tab);
                 DRMng.PrivateChat.container.removeChild(this.body);
+
+                for (let i = 0, len = DRMng.Config.local.alliance.rooms.length; i < len; ++i) {
+                    if (DRMng.Config.local.alliance.rooms[i].channel === this.conf.channel) {
+                        DRMng.Config.local.alliance.rooms.splice(i, 1);
+                        DRMng.Config.saveLocal();
+                        break;
+                    }
+                }
             }
 
             static sbsEvent(e) {
@@ -2952,19 +2961,19 @@ function main() {
                             reg.lastIndex += link.length - l[1].length;
                         }
                         content = DRMng.PrivateChat.getMessageHTML({
-                                                                       mainCls: g.join(` `),
-                                                                       ts: new Date(data.ts).format(
-                                                                           `mmm d, HH:MM`),
-                                                                       pfx: h,
-                                                                       user: data.usr.usr,
-                                                                       userCls: e.join(` `),
-                                                                       ign: data.usr.ign || ``,
-                                                                       ignCls: data.usr.ign ? `guildname truncate` :
-                                                                               ``,
-                                                                       tag: DRMng.PrivateChat.getGuildTag(
-                                                                           t === 2 ? u.guild : data.usr.gld) || `???`,
-                                                                       msg: msg
-                                                                   });
+                            mainCls: g.join(` `),
+                            ts: new Date(data.ts).format(
+                                `mmm d, HH:MM`),
+                            pfx: h,
+                            user: data.usr.usr,
+                            userCls: e.join(` `),
+                            ign: data.usr.ign || ``,
+                            ignCls: data.usr.ign ? `guildname truncate` :
+                                ``,
+                            tag: DRMng.PrivateChat.getGuildTag(
+                                t === 2 ? u.guild : data.usr.gld) || `???`,
+                            msg: msg
+                        });
                     }
                     const msg = document.createElement(`div`);
                     msg.setAttribute(`class`, `chat-message`);
@@ -2983,8 +2992,8 @@ function main() {
                     new DRMng.Node(`div`)
                         .attr({ class: `service${ri ? ` raidinfo` : ``}` })
                         .style(ri ?
-                                   { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
-                                   {})
+                            { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
+                            {})
                         .data(msg).attach(`to`, p);
                     if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
                 }
@@ -3067,7 +3076,7 @@ function main() {
                                         <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
                                         <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
                                         <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(
-                            ` `)}</a>
+    ` `)}</a>
                                     </span>
                                     <span style="display: flex">
                                         <span username="${u}" class="${uc.join(` `)}">${pfx}${u}</span>
@@ -3129,7 +3138,7 @@ function main() {
                     channel: elChannel.value,
                     pass: elPasswd.value,
                     name: elName.classList.contains(`default`) ?
-                          elChannel.value.charAt(0).toUpperCase() + elChannel.value.slice(1) : elName.value,
+                        elChannel.value.charAt(0).toUpperCase() + elChannel.value.slice(1) : elName.value,
                     color: elColor.classList.contains(`default`) ? `#336699` : elColor.value,
                     enabled: true
                 };
@@ -3951,27 +3960,27 @@ function main() {
                     const el = new DRMng.Node(`div`)
                         .attr({ class: `drmng_config_sb` })
                         .data(new DRMng.Node(`div`)
-                                  .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
-                                      const el = e.target.parentNode.parentNode;
-                                      el.parentNode.insertBefore(el.nextSibling, el);
-                                  }))
-                                  .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
-                                      const el = e.target.parentNode.parentNode;
-                                      el.parentNode.insertBefore(el, el.previousSibling);
-                                  }))
-                                  .data(
-                                      new DRMng.Node(`input`).attr({ type: `text`, value: grp.name, class: `inp_grp` }))
-                                  .data(new DRMng.Node(`span`).attr({ class: `del_grp red` }).txt(`\uf272`)
-                                                              .on(`click`, e => {
-                                                                  const el = e.target.parentNode.parentNode;
-                                                                  el.parentNode.removeChild(el);
-                                                              }))
-                                  .data(new DRMng.Node(`span`).attr({ class: `add_grp` }).txt(`\uf277`)
-                                                              .on(`click`, e => this.makeSbGroup().attach(`before`,
-                                                                                                          e.target.parentNode.parentNode)))
-                                  .data(new DRMng.Node(`span`).txt(`\uf275`)
-                                                              .on(`click`, e => this.makeSbButton().attach(`to`,
-                                                                                                           e.target.parentNode.parentNode)))
+                            .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
+                                const el = e.target.parentNode.parentNode;
+                                el.parentNode.insertBefore(el.nextSibling, el);
+                            }))
+                            .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
+                                const el = e.target.parentNode.parentNode;
+                                el.parentNode.insertBefore(el, el.previousSibling);
+                            }))
+                            .data(
+                                new DRMng.Node(`input`).attr({ type: `text`, value: grp.name, class: `inp_grp` }))
+                            .data(new DRMng.Node(`span`).attr({ class: `del_grp red` }).txt(`\uf272`)
+                                .on(`click`, e => {
+                                    const el = e.target.parentNode.parentNode;
+                                    el.parentNode.removeChild(el);
+                                }))
+                            .data(new DRMng.Node(`span`).attr({ class: `add_grp` }).txt(`\uf277`)
+                                .on(`click`, e => this.makeSbGroup().attach(`before`,
+                                    e.target.parentNode.parentNode)))
+                            .data(new DRMng.Node(`span`).txt(`\uf275`)
+                                .on(`click`, e => this.makeSbButton().attach(`to`,
+                                    e.target.parentNode.parentNode)))
                         );
                     if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn)));
                     else el.data(this.makeSbButton());
@@ -4853,7 +4862,7 @@ function main() {
             },
             sidebarLabelOpen: e => {
                 document.querySelectorAll(`#DRMng_Sidebar > div.label:not(.hidden)`)
-                        .forEach(lbl => lbl.className += ` hidden`);
+                    .forEach(lbl => lbl.className += ` hidden`);
                 e.target.className = `label`;
             },
             setupSidebarButton: button => {
@@ -4958,60 +4967,60 @@ function main() {
 
                 opt = new this.Option();
                 opt.setup(`kongui_stickyHeader`, `Sticky header`, `bool`, true)
-                   .desc(`Makes top header always visible on screen.`)
-                   .event(function () {
-                       if (this.conf[this.field]) {
-                           new DRMng.Node(`#headerwrap`).detach().attach(`before`, `primarywrap`);
-                           DRMng.CSS.del(this.field);
-                           DRMng.CSS.del(this.field + `b`);
-                       }
-                       else {
-                           new DRMng.Node(`#headerwrap`).detach().attach(`before`, `tr8n_language_selector_trigger`);
-                           DRMng.CSS.add(this.field, `div#headerwrap`, `width: 100% !important`);
-                           DRMng.CSS.add(this.field + `b`, `div#primarywrap`, `height: 100% !important`);
-                       }
-                   })
-                   .make(group);
+                    .desc(`Makes top header always visible on screen.`)
+                    .event(function () {
+                        if (this.conf[this.field]) {
+                            new DRMng.Node(`#headerwrap`).detach().attach(`before`, `primarywrap`);
+                            DRMng.CSS.del(this.field);
+                            DRMng.CSS.del(this.field + `b`);
+                        }
+                        else {
+                            new DRMng.Node(`#headerwrap`).detach().attach(`before`, `tr8n_language_selector_trigger`);
+                            DRMng.CSS.add(this.field, `div#headerwrap`, `width: 100% !important`);
+                            DRMng.CSS.add(this.field + `b`, `div#primarywrap`, `height: 100% !important`);
+                        }
+                    })
+                    .make(group);
 
                 opt = new this.Option();
                 opt.setup(`kongui_hideToolbar`, `Hide game toolbar`, `bool`, false)
-                   .desc(`Hides toolbar located above game window (cinematic mode, rating, etc).`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `table.game_table > tbody > tr:first-child`, `display: none`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                    .desc(`Hides toolbar located above game window (cinematic mode, rating, etc).`)
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `table.game_table > tbody > tr:first-child`, `display: none`);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 opt = new this.Option();
                 opt.setup(`kongui_hideFrame`, `Hide game frame`, `bool`, false)
-                   .desc(`Hides 7px wide frame around game window.`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `div#maingame`, `padding: 0`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                    .desc(`Hides 7px wide frame around game window.`)
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `div#maingame`, `padding: 0`);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 opt = new this.Option();
                 opt.setup(`kongui_hideGameDetails`, `Hide game details`, `bool`, false)
-                   .desc(`Hides game details part located just below game window.`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `div.game_details_outer`, `display: none`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                    .desc(`Hides game details part located just below game window.`)
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `div.game_details_outer`, `display: none`);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 opt = new this.Option();
                 opt.setup(`kongui_hideForum`, `Hide forum area`, `bool`, true)
-                   .desc(`Hides forum part located below game window.`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `#below_fold_content div.game_page_wrap`, `display: none`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                    .desc(`Hides forum part located below game window.`)
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `#below_fold_content div.game_page_wrap`, `display: none`);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 /**
                  * RaidsManager UI
@@ -5020,25 +5029,25 @@ function main() {
 
                 opt = new this.Option();
                 opt.setup(`drmui_disableTransitions`, `Disable transitions`, `bool`, false)
-                   .desc(`Disables animated transitions for various UI elements to improve performance on` +
+                    .desc(`Disables animated transitions for various UI elements to improve performance on` +
                          ` low-end hardware.`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `div#DRMng_main, div#DRMng_main *, div#DRMng_info,` +
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `div#DRMng_main, div#DRMng_main *, div#DRMng_info,` +
                                                      ` div#DRMng_info *`, `transition: initial !important`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 opt = new this.Option();
                 opt.setup(`drmui_hideSideBar`, `Hide sidebar`, `bool`, false)
-                   .desc(`Hides sidebar which is located between game window and kongregate chat.`)
-                   .event(function () {
-                       if (this.conf[this.field])
-                           DRMng.CSS.add(this.field, `div#DRMng_Sidebar`, `display: none`);
-                       else DRMng.CSS.del(this.field);
-                   })
-                   .make(group);
+                    .desc(`Hides sidebar which is located between game window and kongregate chat.`)
+                    .event(function () {
+                        if (this.conf[this.field])
+                            DRMng.CSS.add(this.field, `div#DRMng_Sidebar`, `display: none`);
+                        else DRMng.CSS.del(this.field);
+                    })
+                    .make(group);
 
                 /**
                  * Alliance UI
@@ -5047,21 +5056,21 @@ function main() {
 
                 opt = new this.Option();
                 opt.setup(`alliance_sbs`, `Side by side`, `bool`, false)
-                   .desc(`Makes alliance chat visible all the time along with regular kongregate chats` +
+                    .desc(`Makes alliance chat visible all the time along with regular kongregate chats` +
                          ` (doubles width taken by chat area).`)
-                   .event(function () {
-                       // make sure initial variable setting wont fire this
-                       if (DRMng.Alliance.tab) {
-                           const a = DRMng.Alliance;
-                           if (this.conf[this.field]) a.body.style.removeProperty(`display`);
-                           else a.tab.className = `chat_room_tab`;
-                           DRMng.UI.setChatWidth();
-                           a.active = false;
-                           holodeck._chat_window.showActiveRoom();
-                           a.initBody.call(a);
-                       }
-                   })
-                   .make(group, true);
+                    .event(function () {
+                        // make sure initial variable setting wont fire this
+                        if (DRMng.Alliance.tab) {
+                            const a = DRMng.Alliance;
+                            if (this.conf[this.field]) a.body.style.removeProperty(`display`);
+                            else a.tab.className = `chat_room_tab`;
+                            DRMng.UI.setChatWidth();
+                            a.active = false;
+                            holodeck._chat_window.showActiveRoom();
+                            a.initBody.call(a);
+                        }
+                    })
+                    .make(group, true);
 
                 /**
                  * Game frame UI
@@ -5070,27 +5079,27 @@ function main() {
 
                 opt = new this.Option();
                 opt.setup(`gameFrame_removeWChat`, `Disable World Chat`, `bool`, false)
-                   .desc(`Disables World Chat located next to game window.`)
-                   .event(function () {
-                       DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
-                       DRMng.Kong.hideWorldChat();
-                   })
-                   .make(group, true);
+                    .desc(`Disables World Chat located next to game window.`)
+                    .event(function () {
+                        DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
+                        DRMng.Kong.hideWorldChat();
+                    })
+                    .make(group, true);
 
                 opt = new this.Option();
                 opt.setup(`gameFrame_leftWChat`, `World Chat on left side`, `bool`, false)
-                   .desc(`Moves World Chat to the left side of game window.`)
-                   .event(DRMng.postGameMessage.bind(this, `chatSettings`, DRMng.Config.local.gameFrame))
-                   .make(group, true);
+                    .desc(`Moves World Chat to the left side of game window.`)
+                    .event(DRMng.postGameMessage.bind(this, `chatSettings`, DRMng.Config.local.gameFrame))
+                    .make(group, true);
 
                 opt = new this.Option();
                 opt.setup(`gameFrame_hideWChat`, `Hide World Chat`, `bool`, false)
-                   .desc(`Hides World Chat (without disabling it completely).`)
-                   .event(function () {
-                       DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
-                       DRMng.Kong.hideWorldChat();
-                   })
-                   .make(group, true);
+                    .desc(`Hides World Chat (without disabling it completely).`)
+                    .event(function () {
+                        DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
+                        DRMng.Kong.hideWorldChat();
+                    })
+                    .make(group, true);
 
                 group = new this.Group(`sidebar`, `Sidebar`);
 
@@ -5187,7 +5196,7 @@ function main() {
                         txt += `<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>`;
                         txt += Diff.reduce((acc, d) => acc + `<td>` +
                                (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000, 4) : `&mdash;`) + `</td>`,
-                                           `<tr><td>HP</td>`) + `</tr>`;
+                        `<tr><td>HP</td>`) + `</tr>`;
                         txt += Diff.reduce((acc, d) => acc + `<td>` +
                                (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : `&mdash;`) +
                                `</td>`, `<tr><td>FS</td>`) + `</tr>`;
@@ -5198,23 +5207,23 @@ function main() {
                             rt = t.nonTiered.ratio[r.size][3];
                             txt += `<tr><td>OS</td>` +
                                    `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td></tr>`;
+                                `&mdash;`) + `</td></tr>`;
                             rt = t.nonTiered.ratio[r.size][6];
                             txt += `<tr><td>MS</td>` +
                                    `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td>` +
+                                `&mdash;`) + `</td>` +
                                    `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                                             `&mdash;`) + `</td></tr>`;
+                                `&mdash;`) + `</td></tr>`;
                         }
                         txt += `</table>`;
 
@@ -5229,8 +5238,8 @@ function main() {
                                                     `<td>` + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
                                                     `</td>` +
                                                     `<td>` + (t.hasCURE && t.e ?
-                                                              (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
-                                                              `&mdash;`) + `</td>`;
+                                (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
+                                `&mdash;`) + `</td>`;
                             // Epics OS
                             if (t.eOS >= 0) txt += `<tr><td>Epics OS</td><td>` +
                                                    DRMng.Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + `</td>` +
@@ -5238,8 +5247,8 @@ function main() {
                                                    `<td>` + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
                                                    `</td>` +
                                                    `<td>` + (t.hasCURE && t.e ?
-                                                             (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
-                                                             `&mdash;`) + `</td>`;
+                                (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
+                                `&mdash;`) + `</td>`;
                             // Max Tier
                             let idx = t.tiers.length - 1;
                             txt += `<tr><td>Max Tier</td><td>` + DRMng.Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
@@ -5290,7 +5299,7 @@ function main() {
 
                 // Status
                 data.sta += rd.isFull ? `, Full (${rd.participants})` :
-                            `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ``}`;
+                    `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ``}`;
                 data.sta += rd.visited ? `, Visited` : ``;
 
                 // Health text
@@ -5355,8 +5364,8 @@ function main() {
 
                     e = e.parentNode;
                     e.style.backgroundImage = `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${data ?
-                                                                                                                data.banner :
-                                                                                                                ``}.jpg)`;
+                        data.banner :
+                        ``}.jpg)`;
                     e.classList.add(`raidinfo`);
                     e.innerHTML = DRMng.UI.raidInfo(raid);
                     setTimeout(() => e.parentNode.parentNode.scrollTop = 500000, 10); //131072
@@ -5553,11 +5562,11 @@ function main() {
                 DRMng.hResize.regPanes.push(`chat_container`);
                 DRMng.hResize.regSide.push(0);
                 document.getElementById(`chat_container`)
-                        .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                    .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
                 DRMng.hResize.regPanes.push(`DRMng_main`);
                 DRMng.hResize.regSide.push(1);
                 document.getElementById(`DRMng_main`)
-                        .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                    .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
             },
             roll: function (elem) {
                 const gr = elem ? elem.parentNode : null;
@@ -5693,7 +5702,7 @@ function main() {
                                         <input type="text" spellcheck="false" class="default" size="1"\
                                             id="DRMng_allianceChnl" value="Channel">\
                                         <input type="text" spellcheck="false" class="default" size="1"\
-                                            id="DRMng_alliancePass" value="Password">\                    
+                                            id="DRMng_alliancePass" value="Password">\
                                     </div>\
                                     <div class="buttonStripe">\
                                         <input type="text" spellcheck="false" class="default" size="1"\
@@ -5710,7 +5719,7 @@ function main() {
                             <div class="" id="DRMng_Options"></div>\
                         </div>\
                     </div>`)
-                                     .attach(`to`, document.body);
+                    .attach(`to`, document.body);
 
                 // Info dialog
                 new DRMng.Node(`div`).attr({ id: `DRMng_info` }).attach(`to`, document.body);
@@ -5718,31 +5727,31 @@ function main() {
                 // Status bar
                 new DRMng.Node(`#headerwrap`)
                     .data(new DRMng.Node(`div`).attr({ id: `DRMng_header` })
-                                               .data(new DRMng.Node(`div`).attr({ id: `DRMng_server` })
-                                                                          .txt(DRMng.Config.local.server)
-                                                                          .on(`click`, DRMng.Engine.changeServer))
-                                               .data(new DRMng.Node(`div`).attr({ id: `DRMng_status` })
-                                                                          .txt(`DRMng Loading...`))
-                                               .data(new DRMng.Node(`div`).attr({ id: `DRMng_onoff`, class: `hidden` })
-                                                                          .data(new DRMng.Node(`div`).txt(`\uf1cc`))
-                                                                          .on(`click`, () => {
-                                                                              clearTimeout(DRMng.UI.hideUITimeout);
-                                                                              const el = document.getElementById(
-                                                                                  `DRMng_main`);
-                                                                              if (el.className === `hidden`) {
-                                                                                  el.removeAttribute(`class`);
-                                                                                  new DRMng.Node(`#DRMng_onoff`).remove(
-                                                                                      `class`);
-                                                                                  DRMng.Kong.setWrapperWidth(
-                                                                                      DRMng.Config.get(`scriptWidth`));
-                                                                              }
-                                                                              else {
-                                                                                  el.className = `hidden`;
-                                                                                  new DRMng.Node(`#DRMng_onoff`).attr(
-                                                                                      { class: `hidden` });
-                                                                                  DRMng.Kong.setWrapperWidth();
-                                                                              }
-                                                                          })));
+                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_server` })
+                            .txt(DRMng.Config.local.server)
+                            .on(`click`, DRMng.Engine.changeServer))
+                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_status` })
+                            .txt(`DRMng Loading...`))
+                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_onoff`, class: `hidden` })
+                            .data(new DRMng.Node(`div`).txt(`\uf1cc`))
+                            .on(`click`, () => {
+                                clearTimeout(DRMng.UI.hideUITimeout);
+                                const el = document.getElementById(
+                                    `DRMng_main`);
+                                if (el.className === `hidden`) {
+                                    el.removeAttribute(`class`);
+                                    new DRMng.Node(`#DRMng_onoff`).remove(
+                                        `class`);
+                                    DRMng.Kong.setWrapperWidth(
+                                        DRMng.Config.get(`scriptWidth`));
+                                }
+                                else {
+                                    el.className = `hidden`;
+                                    new DRMng.Node(`#DRMng_onoff`).attr(
+                                        { class: `hidden` });
+                                    DRMng.Kong.setWrapperWidth();
+                                }
+                            })));
 
                 // load default values
                 this.loadDefaults();
@@ -5856,10 +5865,10 @@ function main() {
     // include socket.io engine
     new DRMng.Node(`script`)
         .attr({
-                  type: `text/javascript`,
-                  async: ``,
-                  src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js`
-              })
+            type: `text/javascript`,
+            async: ``,
+            src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js`
+        })
         .attach(`to`, document.head);
 
     DRMng.init();
@@ -6026,8 +6035,8 @@ function load() {
                     this.config.user.version = data.kongregate_game_version;
                 }
                 console.log(`%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>`,
-                            `color: #108030`, this.config.version.game, this.config.version.chat,
-                            this.config.user.name, this.config.user.id
+                    `color: #108030`, this.config.version.game, this.config.version.chat,
+                    this.config.user.name, this.config.user.id
                 );
                 this.save();
                 this.applyChatSettings();

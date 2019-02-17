@@ -1736,7 +1736,12 @@ function main() {
                 const dead = DRMng.Config.get(`dead::${this.srv}`);
                 const deadThr = Date.now() - 129600000; // 3 days old
 
-                Object.keys(dead).forEach(d => (dead[d] < deadThr) && delete dead[d]);
+                Object.keys(dead).forEach(d => {
+                    if (dead[d] < deadThr) {
+                        delete dead[d];
+                        this.setVisited(d, true);
+                    }
+                });
 
                 setTimeout(() => this.cleanDeadCache(), 3600000); // run each 1h
 
@@ -2099,7 +2104,6 @@ function main() {
 
                 const vis = DRMng.Config.get(`visited::${this.srv}`);
                 const rDat = DRMng.Config.get(`raidData`);
-                const newVis = [];
                 let rd, hf;
 
                 raids.forEach(r => {
@@ -2107,7 +2111,6 @@ function main() {
                     if (hf === null || !hf[r.diff - 1]) {
                         r.createtime = new Date(r.createtime).getTime();
                         if (vis.indexOf(r.id) > -1) {
-                            newVis.push(r.id);
                             r.visited = true;
                             this.setChat(r.id, `visited`);
                         }
@@ -2116,8 +2119,6 @@ function main() {
                         DRMng.Raids.all.push(r);
                     }
                 });
-
-                DRMng.Config.set({ [`visited::${this.srv}`]: newVis });
 
                 this._setComp(DRMng.Config.get(`sortBy`));
                 this.all.sort(this.comp);

@@ -553,7 +553,7 @@ function main() {
             Hug: {
                 generate: () => {
                     let txt = ``;
-                    switch (DRMng.Util.getRand(5)) {
+                    switch (DRMng.Util.getRand(3)) {
                         case 0:
                             txt = `@from hugs @who until turn ${DRMng.Util.getRandText([`blue`, `purple`])}`;
                             break;

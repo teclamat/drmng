@@ -318,7 +318,7 @@ function main() {
 
             static getRandText(textArray) {
                 if (textArray instanceof Array) {
-                    return textArray[DRMng.Util.getRand(textArray.length() - 1)];
+                    return textArray[this.getRand(textArray.length - 1)];
                 }
                 return textArray;
             }

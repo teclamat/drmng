@@ -316,6 +316,13 @@ function main() {
                 return Math.floor(min + Math.random() * (max + 1));
             }
 
+            static getRandText(textArray) {
+                if (textArray instanceof Array) {
+                    return textArray[this.getRand(textArray.length() - 1)];
+                }
+                return textArray;
+            }
+
             /**
              * Converts Roman numbers to Arabic
              * @param {string} roman String with roman number
@@ -543,6 +550,26 @@ function main() {
          * Gestures class
          */
         Gestures: {
+            Hug: {
+                generate: () => {
+                    let txt = ``;
+                    switch (DRMng.Util.getRand(5)) {
+                        case 0:
+                            txt = `@from hugs @who until turn ${DRMng.Util.getRandText([`blue`, `purple`])}`;
+                            break;
+                        case 1:
+                            txt = `@from hugs @who like a ${DRMng.Util.getRandText([`teddybear`, `dog`, `cat`, `crocodile`])} and takes it a walk`;
+                            break;
+                        case 2:
+                            txt = `@from surprises @who with a hug`;
+                            break;
+                        default:
+                            txt = `@from needs a hug...`;
+                            break;
+                    }
+                    return txt;
+                }
+            },
             Kiss: {
                 smittenAdjective: [`smitten`, `enamored`, `infatuated`, `taken`, `in love`, `inflamed`],
                 getSmittenAdjective: function () { return this.smittenAdjective[DRMng.Util.getRand(5)]; },
@@ -1411,8 +1438,8 @@ function main() {
                 const self = DRMng.Kong;
                 if (holodeck && holodeck.ready) {
                     /* Gestures Commands */
-                    self.addChatCommand([`kiss`, `hit`, `poke`, `slap`], (chat, cmd) => {
-                        const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
+                    self.addChatCommand([`hug`,`kiss`, `hit`, `poke`, `slap`], (chat, cmd) => {
+                        const part = /^\/(hug|kiss|hit|poke|slap) (\w+)$/.exec(cmd);
                         if (part) {
                             const gesture = `** ${DRMng.Gestures[part[1].charAt(0).toUpperCase() + part[1].slice(1)]
                                 .generate().replace(`@from`, DRMng.UM.user.name).replace(`@who`, part[2])} **`;

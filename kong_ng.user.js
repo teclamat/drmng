@@ -2459,13 +2459,10 @@ function main() {
                             };
 
                             el.html = document.createElement(`div`);
-                            el.html.setAttribute(`style`, `display: flex; margin: 1px 2px; align-items: center;`);
+                            el.html.setAttribute(`class`, `userlist`);
 
                             let span = document.createElement(`span`);
-                            span.setAttribute(`style`, `font-size: 9px; background-color: #4a4a4a; color: #ddd;` +
-                                                       ` line-height: 11px; padding: 1px 0 0; font-weight: 700; width: 30px;` +
-                                                       ` text-align: center; text-shadow: 0 0 5px #333; flex-grow: 0; flex-shrink: 0;` +
-                                                       ` margin-right: 5px; border: 1px solid #363636;`);
+                            span.setAttribute(`class`, `guildtag`);
                             span.textContent = el.guild ? DRMng.PrivateChat.getGuildTag(el.guild) : `???`;
                             el.html.appendChild(span);
 
@@ -4141,638 +4138,672 @@ function main() {
                     font-weight: normal;\
                     font-style: normal;\
                   }\
-            #DRMng_main {\
-                height: 100%;\
-                position: fixed;\
-                top: 0;\
-                right: 0;\
-                border-left: 1px solid #222;\
-                background-color: #3a3a3a;\
-                font-family: 'Open Sans', sans-serif;\
-                z-index: 10001;\
-                overflow: hidden;\
-                box-shadow: 0 0 10px -2px #000;\
-                transition: width .3s, border .3s, box-shadow .3s;\
-            }\
-            #DRMng_main.hidden {\
-                width: 0 !important;\
-                border-left: 0;\
-                box-shadow: none;
-            }\
-            #DRMng_header {\
-                display: flex;\
-                color: #fff;\
-                height: 27px;\
-                position: absolute;\
-                top: 0;\
-                right: 0;\
-                z-index: 9999;\
-                font-family: 'Open Sans', sans-serif;\
-            }\
-            #DRMng_header > div {\
-                background-color: #333;
-            }\
-            #DRMng_onoff {\
-                flex-grow: 0;\
-                flex-shrink: 0;\
-                font-family: 'Material-Design', sans-serif;\
-                font-size: 21px;\
-                padding: 6px 9px;\
-                cursor: pointer;\
-                margin-left: 1px;\
-            }\
-            #DRMng_onoff > div {\
-                transition: transform .3s;\
-            }\
-            #DRMng_onoff.hidden > div {\
-                transform: scale(-1,1);\
-            }\
-            #DRMng_server {\
-                font-size: 12px;\
-                font-weight: 600;\
-                padding: 6px 15px;\
-                cursor: default;\
-                user-select: none\
-            }\
-            #DRMng_onoff:hover,\
-            #DRMng_server:hover { background-color: #444; }\
-            #DRMng_status {\
-                margin-left: 1px;\
-                flex-grow: 1;\
-                font-size: 12px;\
-                font-weight: 600;\
-                padding: 6px 10px;\
-            }\
-            #DRMng_main.active #DRMng_status { text-align: center; }\
-            #DRMng_wrapper { height: 100%; }\
-            #DRMng_nav {\
-                display: flex;\
-                font-size: 9pt;\
-            }\
-            #DRMng_nav > div {\
-                width: 60px;\
-                flex-shrink: 1;\
-                flex-grow: 1;\
-                text-align: center;\
-                background-color: #303030;\
-                padding: 6px 8px 5px;\
-                border: 1px solid #444;\
-                border-left: 0;\
-                border-top: 0;\
-                border-color: #101010;\
-                color: #d0d0d0;\
-                cursor: pointer;\
-                -webkit-user-select: none;\
-                -moz-user-select: none;\
-            }\
-            #DRMng_nav > div:last-child {\
-                border-right-width: 0;\
-            }\
-            #DRMng_nav > div:hover {\
-                background-color: #353535;\
-            }\
-            #DRMng_nav > div.active {\
-                text-transform: uppercase;\
-                background-color: #404040;\
-                border-bottom-color: #404040;\
-                color: #e0e0e0;\
-            }\
-            #DRMng_spacer {\
-                height: 3px;\
-                border-bottom: 1px solid #101010;\
-                background-color: #404040;\
-            }\
-            #DRMng_content {\
-                display: flex;\
-                background-color: #555;\
-                height: calc(100% - 31px);\
-            }\
-            #DRMng_content > div {\
-                height: 100%;\
-                width: 0;\
-                overflow-y: auto;\
-                overflow-x: hidden;\
-                flex-grow: 0;\
-                transition: flex-grow .3s ease-in;\
-                display: flex;\
-                flex-direction: column;\
-            }\
-            #DRMng_content div.group {\
-                margin: 0 6px 6px;\
-                box-shadow: 0 0 10px -4px #000;\
-                border: 1px solid #151515 !important;\
-                background-color: #4a4a4a;\
-                overflow: hidden;\
-                flex-grow: 0;\
-                flex-shrink: 0;\
-                max-height: 110%;\
-            }\
-            #DRMng_content div.group.flex {\
-                flex-shrink: 1;\
-                display: flex;\
-                flex-direction: column;\
-            }\
-            #DRMng_content div.group.hide {\
-                max-height: 23px;\
-                flex-shrink: 0;\
-            }\
-            #DRMng_content div.group.flexible {\
-                flex-grow: 1;\
-                overflow: auto;\
-            }\
-            #DRMng_content div.group:first-of-type {\
-                margin-top: 6px\
-            }\
-            #DRMng_content div.group.flex > div:last-child {\
-                overflow-y: auto;\
-            }\
-            #DRMng_content > div.active {\
-                flex-grow: 1;\
-            }\
-            #DRMng_RaidList {\
-                overflow-x: hidden;\
-                overflow-y: auto;\
-                height: 100px;\
-                display: flex;\
-                flex-direction: column;\
-            }\
-            #DRMng_RaidList > div {\
-                width: 100%;\
-                height: 23px;\
-                box-sizing: border-box;\
-                background-color: #404040;\
-                border-width: 1px 0 1px 4px;\
-                border-style: solid;\
-                border-top-color: transparent;\
-                border-bottom-color: #2c2c2c;\
-                color: #ddd;\
-                display: none;\
-                flex-shrink: 0;\
-                flex-grow: 0;\
-                justify-content: space-between;\
-                align-items: center;\
-                white-space: nowrap;\
-                cursor: pointer;\
-            }\
-            #DRMng_RaidList > div.nm {\
-                border-left-color: #759;\
-            }\
-            #DRMng_RaidList > div.l {\
-                border-left-color: #855;\
-            }\
-            #DRMng_RaidList > div.h {\
-                border-left-color: #984;\
-            }\
-            #DRMng_RaidList > div.n {\
-                border-left-color: #795;\
-            }\
-            #DRMng_RaidList > div.visited > span:first-child:before,\
-            #DRMng_RaidList > div.full > span:first-child:before {\
-                font: normal 15px 'Material-Design';\
-                margin-right: 5px;\
-                color: #ccc;\
-                vertical-align: text-bottom;\
-            }\
-            #DRMng_RaidList > div.visited > span:first-child:before {\
-                content: '\uf15c';\
-            }\
-            #DRMng_RaidList > div.full > span:first-child:before {\
-                content: '\uf135';\
-            }\
-            #DRMng_RaidList > div.visited.full > span:first-child:before {\
-                content: '\uf15c\xa0\xa0\uf135';\
-            }\
-            #DRMng_RaidList > div:hover {\
-                color: #f0f0f0;\
-                background: #333;\
-            }\
-            #DRMng_RaidList > div > span:first-child {\
-                margin-left: 6px;\
-                margin-right: 3px;\
-                text-overflow: ellipsis;\
-                overflow: hidden;\
-            }\
-            #DRMng_RaidList > div > span:last-child {\
-                margin-right: 7px;\
-            }\
-            \
-            #DRMng_main div.group > div.title {\
-                border-bottom: 1px solid #222;\
-                text-align: center;\
-                color: #ccc;\
-                font-weight: 600;\
-                font-size: 10pt;\
-                padding: 4px 0;\
-                background-color: #333;\
-                white-space: nowrap;\
-                cursor: pointer;\
-                height: 15px;\
-            }\
-            #DRMng_main div.group.hide > div.title {\
-                background-color: #3a3a3a;\
-            }\
-            #DRMng_main div.group > div.title:hover {\
-                background-color: #303030;\
-            }\
-            #DRMng_main div.textField {\
-                display: none;\
-                text-align: center;\
-                padding: 4px 5px;\
-                color: #ccc;\
-            }\
-            #DRMng_main div.textField.regular { background: #3c3c3c; display:block; }\
-            #DRMng_main div.textField.success { background: #404a40; display:block; }\
-            #DRMng_main div.textField.error { background: #504040; display:block; }\
-            #DRMng_main div.buttonStripe,\
-            #DRMng_main div.txtInputStripe {\
-                display: flex;\
-                border-bottom: 1px solid #303030;\
-                cursor: pointer;\
-            }\
-            #DRMng_main div.buttonStripe:last-child,\
-            #DRMng_main div.txtInputStripe:last-child {\
-                border: 0;\
-            }\
-            #DRMng_main div.buttonStripe > *,\
-            #DRMng_main div.txtInputStripe > * {\
-                min-width: 24px;\
-                flex-grow: 1;\
-                border: 0;\
-                border-left: 1px solid #303030;\
-                background: #454545;\
-                font-family: 'Open Sans', sans-serif;\
-                font-size: 8pt;\
-                color: #e0e0e0;\
-                outline: none;\
-                overflow: hidden;\
-            }\
-            #DRMng_main div.buttonStripe > span {\
-                flex-grow: 2;\
-                width: 50%;\
-                color: #eee;\
-                padding: 4px 5px 2px;\
-                white-space: nowrap;\
-                overflow: hidden;\
-                text-overflow: ellipsis;\
-                background: transparent;\
-            }\
-            #DRMng_main div.buttonStripe:hover { background-color: #404040 }\
-            #DRMng_main div.txtInputStripe > input[type=text] { flex-grow: 2; }\
-            #DRMng_main div.buttonStripe > input[type=text],\
-            #DRMng_main div.buttonStripe > input[type=password] { flex-grow: 1; }\
-            #DRMng_main div.buttonStripe > :first-child,\
-            #DRMng_main div.txtInputStripe > :first-child { border-left: 0; }\
-            #DRMng_main div.txtInputStripe > p {\
-                padding: 4px 6px;\
-                text-align: center;\
-                word-break: break-all;\
-                background: #4c4c4c;\
-                min-height: 15px;\
-                max-height: 90px;\
-            }\
-            #DRMng_main div > button {\
-                height: 21px;\
-                cursor: pointer;\
-            }\
-            #DRMng_main div > button:hover {\
-                background: #404040;\
-            }\
-            #DRMng_main div > button.active {\
-                background: #3a3a3a\
-            }\
-            #DRMng_main div > button.crimson {\
-                background: #533\
-            }\
-            #DRMng_main div > button.double {\
-                flex-grow: 2;\
-            }\
-            #DRMng_main div.buttonStripe > button.n { background-color: #405040; }\
-            #DRMng_main div.buttonStripe > button.h { background-color: #555040; }\
-            #DRMng_main div.buttonStripe > button.l { background-color: #504040; }\
-            #DRMng_main div.buttonStripe > button.nm { background-color: #504055; }\
-            #DRMng_main div.buttonStripe > button.off { background-color: #404040; }\
-            #DRMng_main div.buttonStripe > button.n:hover { background-color: #463; }\
-            #DRMng_main div.buttonStripe > button.h:hover { background-color: #763; }\
-            #DRMng_main div.buttonStripe > button.l:hover { background-color: #743; }\
-            #DRMng_main div.buttonStripe > button.nm:hover { background-color: #648; }\
-            #DRMng_main div.buttonStripe > button.single:hover { background-color: #353; }\
-            #DRMng_main div > input[type=text], #DRMng_main div > input[type=password] {\
-                height: 19px;\
-                padding: 1px 7px;\
-                text-align: center;\
-            }\
-            #DRMng_main div > input[type=text]:hover, #DRMng_main div > input[type=password]:hover,\
-            #DRMng_main div.txtInputStripe > p:hover { background: #404040; cursor: text }\
-            #DRMng_main div > input[type=text]:focus, #DRMng_main div > input[type=password]:focus,\
-            #DRMng_main div.txtInputStripe > p:focus { background: #3a3a3a; }\
-            #DRMng_main div > input[type=text].default,\
-            #DRMng_main div.txtInputStripe > p.default { font-style: italic; }\
-            #DRMng_info {\
-                width: 200px;\
-                border: 1px solid #111;\
-                background: #333;\
-                position: fixed;\
-                z-index: 10002;\
-                box-shadow: -2px 0 6px -1px #1a1a1a;\
-                transition: top .1s ease-out, bottom .1s ease-out;\
-                font: 10px 'Open Sans', sans-serif;\
-                color: #eee;\
-                text-shadow: 0 0 3px #111;\
-                padding: 3px 7px 4px;\
-            }\
-            #DRMng_info.nm { background: linear-gradient(186deg,#435,#333 40%); }\
-            #DRMng_info.l { background: linear-gradient(186deg,#533,#333 40%); }\
-            #DRMng_info.h { background: linear-gradient(186deg,#553,#333 40%); }\
-            #DRMng_info.n { background: linear-gradient(186deg,#353,#333 40%); }\
-            #DRMng_info > div:first-child { display: flex; }\
-            #DRMng_info span.title {\
-                font-size: 12px;\
-                font-weight: 600;\
-                flex-shrink:1;\
-                white-space: nowrap;\
-                text-overflow: ellipsis;\
-                overflow: hidden;\
-                margin-right: auto;\
-                padding-right: 3px;\
-            }\
-            #DRMng_info div.magic {\
-                background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@latest/magic_sprite.png');\
-                width: 16px;\
-                height: 16px;\
-                flex-shrink: 0;\
-                flex-grow: 0;\
-                margin-left: 2px;\
-                background-color: rgba(0,0,0,.15);\
-            }\
-            #DRMng_info div.status {\
-                border-top: 1px solid #555;\
-                margin-top: 3px;\
-                padding-top: 1px;\
-            }\
-            #DRMng_info label {\
-                position: relative;\
-                z-index: 1;\
-                font-size: 7pt;\
-                font-weight: 300;\
-                color: #fff;\
-            }\
-            #DRMng_info progress {\
-                border: 0;\
-                height: 13px;\
-                width: 100%;\
-                position: relative;\
-                margin-top: -13px;\
-                display: block;\
-                background: linear-gradient(to Bottom, #111, transparent 1px, transparent 3px, #262626 12px, #090909);\
-            }\
-            span.DRMng_info_picker:hover {\
-                cursor: pointer;\
-                text-decoration: underline;\
-            }\
-            #DRMng_info progress::-webkit-progress-bar {\
-                background: linear-gradient(to Bottom, #111, transparent 1px, transparent 3px, #262626 12px, #090909);\
-            }\
-            #DRMng_info progress.hp::-webkit-progress-value {\
-                background: linear-gradient(to Bottom, #b11, #522 1px, transparent 11px);\
-            }\
-            #DRMng_info progress.hp::-moz-progress-bar {\
-                background: linear-gradient(to Bottom, #b11, #522 1px, transparent 11px);\
-            }\
-            #DRMng_info progress.time::-moz-progress-bar {\
-                background: linear-gradient(to Bottom, #09f, #146 1px, transparent 11px);\
-            }\
-            #DRMng_info progress.time::-webkit-progress-value {\
-                background: linear-gradient(to Bottom, #09f, #146 1px, transparent 11px);\
-            }\
-            #DRMng_Sidebar {\
-                display: flex;\
-                flex-direction: column;\
-                width: 40px;\
-                background: #4c4c4c;\
-                border-left: 1px solid #000;\
-            }\
-            #DRMng_Sidebar.flex {\
-                height: 690px;\
-            }\
-            #DRMng_Sidebar * {\
-                font: 10px 'Open Sans', sans-serif;\
-                -webkit-user-select: none;\
-                -moz-user-select: none;\
-                user-select: none;\
-            }\
-            #DRMng_Sidebar > div.label {\
-                background: #303030;\
-                flex-grow: 0;\
-                flex-shrink: 0;\
-                border-bottom: 1px solid #111;\
-                color: #ddd;\
-                padding: 7px 0 6px;\
-                cursor: default;\
-                text-transform: uppercase;\
-            }\
-            #DRMng_Sidebar.flex > div.label.hidden {\
-                background: #333;\
-                color: #aaa;\
-                cursor: pointer;\
-            }\
-            #DRMng_Sidebar > div:first-child {\
-                border-top: 1px solid #111;\
-            }\
-            #DRMng_Sidebar > div.group {\
-                display: flex;\
-                flex-direction: column;\
-                border-bottom: 1px solid #111;\
-            }\
-            #DRMng_Sidebar.flex > div.group {\
-                border: 0;\
-                max-height: 700px;\
-                transition: max-height .2s ease-out;\
-            }\
-            #DRMng_Sidebar.flex > div.label.hidden + div.group {\
-                max-height: 0;\
-                overflow: hidden;\
-                border: 0;\
-            }\
-            #DRMng_Sidebar button {\
-                height: 22px;\
-                background: #444;\
-                color: #ccc;\
-                cursor: pointer;\
-                border: 0;\
-                outline: none;\
-            }\
-            #DRMng_Sidebar.flex > div > button {\
-                height: 29px;\
-            }\
-            #DRMng_Sidebar > div > button {\
-                flex-shrink: 1;\
-                border-bottom: 1px solid #2c2c2c;\
-            }\
-            #DRMng_Sidebar > div > button:last-child {\
-                border: 0;\
-            }\
-            #DRMng_Sidebar.flex > div > button:last-child {\
-                border-bottom: 1px solid #111;\
-            }\
-            #DRMng_Sidebar > div > button:hover {\
-                color: #ddd;\
-                background: #363636;\
-            }\
-            #DRMng_Sidebar > button {\
-                height: 25px;\
-                background: #3a3a3a;\
-                flex-grow: 0;\
-                flex-shrink: 0;\
-                border-bottom: 1px solid #111;\
-            }\
-            #DRMng_Sidebar > button:hover {\
-                background: #2a2a2a;\
-                color: #ddd;\
-            }\
-            #DRMng_Sidebar > button:first-of-type {\
-                margin-top: auto;\
-                border-top: 1px solid #111;\
-            }\
-            div#chat_room_tabs > div.drmng_room_tab:nth-last-child(2) {\
-                border-right: 0;\
-            }\
-            #alliance_chat_sbs {\
-                border: 1px solid #222;\
-                display: flex;\
-                align-items: flex-end;\
-                margin-left: 7px;\
-                box-shadow: 0 0 10px -4px #000;\
-            }\
-            #alliance_chat_sbs div.users_in_room { height: 145px; }\
-            .drmng_scroll_wrapper {\
-                overflow: hidden;\
-                width: 100%;\
-                height: 100%;\
-                position: relative;\
-                z-index: 1;\
-                float: left;\
-            }\
-            .drmng_scroll_content {\
-                height: 100%;\
-                width: 100%;\
-                padding: 0 32px 0 0;\
-                position: relative;\
-                right: -18px;\
-                overflow: auto;\
-                box-sizing: border-box;\
-            }\
-            .drmng_scroll_bar {\
-                position: relative;\
-                background: rgba(0, 0, 0, 0.1);\
-                width: 9px;\
-                border-radius: 4px;\
-                top: 0;\
-                z-index: 2;\
-                cursor: pointer;\
-                opacity: 0;\
-                transition: opacity 0.25s linear;\
-            }\
-            .drmng_scroll_hidden {\
-                display: none;\
-            }\
-            .drmng_scroll_container:hover .drmng_scroll_bar {\
-                opacity: 1;\
-            }\
-            .drmng_scroll_grabbed {\
-                -o-user-select: none;\
-                -ms-user-select: none;\
-                -moz-user-select: none;\
-                -webkit-user-select: none;\
-                user-select: none;\
-            }\
-            #DRMng_main div.drmng_config_sb {\
-                margin: 7px;\
-                border: 1px solid #303030;\
-            }\
-            #DRMng_main div.drmng_config_sb > div {\
-                display: flex;\
-                align-items: center;\
-                padding: 0 3px;\
-                background: #555;\
-                border-bottom: 1px solid #444;\
-            }\
-            #DRMng_main div.drmng_config_sb > div:first-child {\
-                background: #3a3a3a;\
-                border-bottom: 1px solid #333;\
-            }\
-            #DRMng_main div.drmng_config_sb > div:last-child {\
-                border: 0;\
-            }\
-            #DRMng_main div.drmng_config_sb span {\
-                font-family: 'Material-Design';\
-                font-size: 15px;\
-                text-align: center;\
-                padding: 0;\
-                width: 14px;\
-                color: #fff;\
-                cursor: default;\
-            }\
-            #DRMng_main div.drmng_config_sb span.del_grp,\
-            #DRMng_main div.drmng_config_sb span.add_grp {\
-                margin: 0 5px;\
-                color: #ddd;\
-            }\
-            #DRMng_main div.drmng_config_sb span:hover {\
-                color: #4f7;\
-            }\
-            #DRMng_main div.drmng_config_sb span.red:hover {\
-                color: #f42;\
-            }\
-            #DRMng_main div.drmng_config_sb span:last-child {\
-                width: 20px;\
-                text-align: right;\
-            }\
-            #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:first-child,\
-            #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:first-child,\
-            #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:nth-child(2),\
-            #DRMng_main div.drmng_config_sb > div:last-child > span:nth-child(2) {\
-                padding-right: 14px;\
-            }\
-            #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:nth-child(2),\
-            #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:nth-child(2),\
-            #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:first-child,\
-            #DRMng_main div.drmng_config_sb > div:last-child > span:first-child,\
-            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:first-child,\
-            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:nth-child(2),\
-            #DRMng_main div.drmng_config_sb:last-child > div:first-child > span.red {\
-                display: none;\
-            }\
-            #DRMng_main div.drmng_config_sb input {\
-                background: transparent;\
-                border: 0;\
-                font-size: 11px;\
-                color: #fff;\
-                font-family: 'Open Sans';\
-                width: 45px;\
-                outline: none;\
-            }\
-            #DRMng_main div.drmng_config_sb input:hover,\
-            #DRMng_main div.drmng_config_sb input:focus {\
-                background: #4a4a4a\
-            }\
-            #DRMng_main div.drmng_config_sb input.inp_grp {\
-                padding: 1px;\
-                width: 60px;\
-                margin: 0 auto;\
-            }\
-            #DRMng_main div.drmng_config_sb input.inp_fld {\
-                padding: 0;\
-                margin-left: 3px;\
-            }\
-            #DRMng_main div.drmng_config_sb input.inp_cmd {
-                padding: 0 0 0 5px;\
-                flex-grow: 1;\
-                flex-shrink: 1;\
-                text-align: left;\
-                border-left: 1px solid #444;\
-            }\
-            `;
-
+                #DRMng_main {\
+                    height: 100%;\
+                    position: fixed;\
+                    top: 0;\
+                    right: 0;\
+                    border-left: 1px solid #222;\
+                    background-color: #3a3a3a;\
+                    font-family: 'Open Sans', sans-serif;\
+                    z-index: 10001;\
+                    overflow: hidden;\
+                    box-shadow: 0 0 10px -2px #000;\
+                    transition: width .3s, border .3s, box-shadow .3s;\
+                }\
+                #DRMng_main.hidden {\
+                    width: 0 !important;\
+                    border-left: 0;\
+                    box-shadow: none;
+                }\
+                #DRMng_header {\
+                    display: flex;\
+                    color: #fff;\
+                    height: 27px;\
+                    position: absolute;\
+                    top: 0;\
+                    right: 0;\
+                    z-index: 9999;\
+                    font-family: 'Open Sans', sans-serif;\
+                }\
+                #DRMng_header > div {\
+                    background-color: #333;
+                }\
+                #DRMng_onoff {\
+                    flex-grow: 0;\
+                    flex-shrink: 0;\
+                    font-family: 'Material-Design', sans-serif;\
+                    font-size: 21px;\
+                    padding: 6px 9px;\
+                    cursor: pointer;\
+                    margin-left: 1px;\
+                }\
+                #DRMng_onoff > div {\
+                    transition: transform .3s;\
+                }\
+                #DRMng_onoff.hidden > div {\
+                    transform: scale(-1,1);\
+                }\
+                #DRMng_server {\
+                    font-size: 12px;\
+                    font-weight: 600;\
+                    padding: 6px 15px;\
+                    cursor: default;\
+                    user-select: none\
+                }\
+                #DRMng_onoff:hover,\
+                #DRMng_server:hover { background-color: #444; }\
+                #DRMng_status {\
+                    margin-left: 1px;\
+                    flex-grow: 1;\
+                    font-size: 12px;\
+                    font-weight: 600;\
+                    padding: 6px 10px;\
+                }\
+                #DRMng_main.active #DRMng_status { text-align: center; }\
+                #DRMng_wrapper { height: 100%; }\
+                #DRMng_nav {\
+                    display: flex;\
+                    font-size: 9pt;\
+                }\
+                #DRMng_nav > div {\
+                    width: 60px;\
+                    flex-shrink: 1;\
+                    flex-grow: 1;\
+                    text-align: center;\
+                    background-color: #303030;\
+                    padding: 6px 8px 5px;\
+                    border: 1px solid #444;\
+                    border-left: 0;\
+                    border-top: 0;\
+                    border-color: #101010;\
+                    color: #d0d0d0;\
+                    cursor: pointer;\
+                    -webkit-user-select: none;\
+                    -moz-user-select: none;\
+                }\
+                #DRMng_nav > div:last-child {\
+                    border-right-width: 0;\
+                }\
+                #DRMng_nav > div:hover {\
+                    background-color: #353535;\
+                }\
+                #DRMng_nav > div.active {\
+                    text-transform: uppercase;\
+                    background-color: #404040;\
+                    border-bottom-color: #404040;\
+                    color: #e0e0e0;\
+                }\
+                #DRMng_spacer {\
+                    height: 3px;\
+                    border-bottom: 1px solid #101010;\
+                    background-color: #404040;\
+                }\
+                #DRMng_content {\
+                    display: flex;\
+                    background-color: #555;\
+                    height: calc(100% - 31px);\
+                }\
+                #DRMng_content > div {\
+                    height: 100%;\
+                    width: 0;\
+                    overflow-y: auto;\
+                    overflow-x: hidden;\
+                    flex-grow: 0;\
+                    transition: flex-grow .3s ease-in;\
+                    display: flex;\
+                    flex-direction: column;\
+                }\
+                #DRMng_content div.group {\
+                    margin: 0 6px 6px;\
+                    box-shadow: 0 0 10px -4px #000;\
+                    border: 1px solid #151515 !important;\
+                    background-color: #4a4a4a;\
+                    overflow: hidden;\
+                    flex-grow: 0;\
+                    flex-shrink: 0;\
+                    max-height: 110%;\
+                }\
+                #DRMng_content div.group.flex {\
+                    flex-shrink: 1;\
+                    display: flex;\
+                    flex-direction: column;\
+                }\
+                #DRMng_content div.group.hide {\
+                    max-height: 23px;\
+                    flex-shrink: 0;\
+                }\
+                #DRMng_content div.group.flexible {\
+                    flex-grow: 1;\
+                    overflow: auto;\
+                }\
+                #DRMng_content div.group:first-of-type {\
+                    margin-top: 6px\
+                }\
+                #DRMng_content div.group.flex > div:last-child {\
+                    overflow-y: auto;\
+                }\
+                #DRMng_content > div.active {\
+                    flex-grow: 1;\
+                }\
+                #DRMng_RaidList {\
+                    overflow-x: hidden;\
+                    overflow-y: auto;\
+                    height: 100px;\
+                    display: flex;\
+                    flex-direction: column;\
+                }\
+                #DRMng_RaidList > div {\
+                    width: 100%;\
+                    height: 23px;\
+                    box-sizing: border-box;\
+                    background-color: #404040;\
+                    border-width: 1px 0 1px 4px;\
+                    border-style: solid;\
+                    border-top-color: transparent;\
+                    border-bottom-color: #2c2c2c;\
+                    color: #ddd;\
+                    display: none;\
+                    flex-shrink: 0;\
+                    flex-grow: 0;\
+                    justify-content: space-between;\
+                    align-items: center;\
+                    white-space: nowrap;\
+                    cursor: pointer;\
+                }\
+                #DRMng_RaidList > div.nm {\
+                    border-left-color: #759;\
+                }\
+                #DRMng_RaidList > div.l {\
+                    border-left-color: #855;\
+                }\
+                #DRMng_RaidList > div.h {\
+                    border-left-color: #984;\
+                }\
+                #DRMng_RaidList > div.n {\
+                    border-left-color: #795;\
+                }\
+                #DRMng_RaidList > div.visited > span:first-child:before,\
+                #DRMng_RaidList > div.full > span:first-child:before {\
+                    font: normal 15px 'Material-Design';\
+                    margin-right: 5px;\
+                    color: #ccc;\
+                    vertical-align: text-bottom;\
+                }\
+                #DRMng_RaidList > div.visited > span:first-child:before {\
+                    content: '\uf15c';\
+                }\
+                #DRMng_RaidList > div.full > span:first-child:before {\
+                    content: '\uf135';\
+                }\
+                #DRMng_RaidList > div.visited.full > span:first-child:before {\
+                    content: '\uf15c\xa0\xa0\uf135';\
+                }\
+                #DRMng_RaidList > div:hover {\
+                    color: #f0f0f0;\
+                    background: #333;\
+                }\
+                #DRMng_RaidList > div > span:first-child {\
+                    margin-left: 6px;\
+                    margin-right: 3px;\
+                    text-overflow: ellipsis;\
+                    overflow: hidden;\
+                }\
+                #DRMng_RaidList > div > span:last-child {\
+                    margin-right: 7px;\
+                }\
+                \
+                #DRMng_main div.group > div.title {\
+                    border-bottom: 1px solid #222;\
+                    text-align: center;\
+                    color: #ccc;\
+                    font-weight: 600;\
+                    font-size: 10pt;\
+                    padding: 4px 0;\
+                    background-color: #333;\
+                    white-space: nowrap;\
+                    cursor: pointer;\
+                    height: 15px;\
+                }\
+                #DRMng_main div.group.hide > div.title {\
+                    background-color: #3a3a3a;\
+                }\
+                #DRMng_main div.group > div.title:hover {\
+                    background-color: #303030;\
+                }\
+                #DRMng_main div.textField {\
+                    display: none;\
+                    text-align: center;\
+                    padding: 4px 5px;\
+                    color: #ccc;\
+                }\
+                #DRMng_main div.textField.regular { background: #3c3c3c; display:block; }\
+                #DRMng_main div.textField.success { background: #404a40; display:block; }\
+                #DRMng_main div.textField.error { background: #504040; display:block; }\
+                #DRMng_main div.buttonStripe,\
+                #DRMng_main div.txtInputStripe {\
+                    display: flex;\
+                    border-bottom: 1px solid #303030;\
+                    cursor: pointer;\
+                }\
+                #DRMng_main div.buttonStripe:last-child,\
+                #DRMng_main div.txtInputStripe:last-child {\
+                    border: 0;\
+                }\
+                #DRMng_main div.buttonStripe > *,\
+                #DRMng_main div.txtInputStripe > * {\
+                    min-width: 24px;\
+                    flex-grow: 1;\
+                    border: 0;\
+                    border-left: 1px solid #303030;\
+                    background: #454545;\
+                    font-family: 'Open Sans', sans-serif;\
+                    font-size: 8pt;\
+                    color: #e0e0e0;\
+                    outline: none;\
+                    overflow: hidden;\
+                }\
+                #DRMng_main div.buttonStripe > span {\
+                    flex-grow: 2;\
+                    width: 50%;\
+                    color: #eee;\
+                    padding: 4px 5px 2px;\
+                    white-space: nowrap;\
+                    overflow: hidden;\
+                    text-overflow: ellipsis;\
+                    background: transparent;\
+                }\
+                #DRMng_main div.buttonStripe:hover { background-color: #404040 }\
+                #DRMng_main div.txtInputStripe > input[type=text] { flex-grow: 2; }\
+                #DRMng_main div.buttonStripe > input[type=text],\
+                #DRMng_main div.buttonStripe > input[type=password] { flex-grow: 1; }\
+                #DRMng_main div.buttonStripe > :first-child,\
+                #DRMng_main div.txtInputStripe > :first-child { border-left: 0; }\
+                #DRMng_main div.txtInputStripe > p {\
+                    padding: 4px 6px;\
+                    text-align: center;\
+                    word-break: break-all;\
+                    background: #4c4c4c;\
+                    min-height: 15px;\
+                    max-height: 90px;\
+                }\
+                #DRMng_main div > button {\
+                    height: 21px;\
+                    cursor: pointer;\
+                }\
+                #DRMng_main div > button:hover {\
+                    background: #404040;\
+                }\
+                #DRMng_main div > button.active {\
+                    background: #3a3a3a\
+                }\
+                #DRMng_main div > button.crimson {\
+                    background: #533\
+                }\
+                #DRMng_main div > button.double {\
+                    flex-grow: 2;\
+                }\
+                #DRMng_main div.buttonStripe > button.n { background-color: #405040; }\
+                #DRMng_main div.buttonStripe > button.h { background-color: #555040; }\
+                #DRMng_main div.buttonStripe > button.l { background-color: #504040; }\
+                #DRMng_main div.buttonStripe > button.nm { background-color: #504055; }\
+                #DRMng_main div.buttonStripe > button.off { background-color: #404040; }\
+                #DRMng_main div.buttonStripe > button.n:hover { background-color: #463; }\
+                #DRMng_main div.buttonStripe > button.h:hover { background-color: #763; }\
+                #DRMng_main div.buttonStripe > button.l:hover { background-color: #743; }\
+                #DRMng_main div.buttonStripe > button.nm:hover { background-color: #648; }\
+                #DRMng_main div.buttonStripe > button.single:hover { background-color: #353; }\
+                #DRMng_main div > input[type=text], #DRMng_main div > input[type=password] {\
+                    height: 19px;\
+                    padding: 1px 7px;\
+                    text-align: center;\
+                }\
+                #DRMng_main div > input[type=text]:hover, #DRMng_main div > input[type=password]:hover,\
+                #DRMng_main div.txtInputStripe > p:hover { background: #404040; cursor: text }\
+                #DRMng_main div > input[type=text]:focus, #DRMng_main div > input[type=password]:focus,\
+                #DRMng_main div.txtInputStripe > p:focus { background: #3a3a3a; }\
+                #DRMng_main div > input[type=text].default,\
+                #DRMng_main div.txtInputStripe > p.default { font-style: italic; }\
+                #DRMng_info {\
+                    width: 200px;\
+                    border: 1px solid #111;\
+                    background: #333;\
+                    position: fixed;\
+                    z-index: 10002;\
+                    box-shadow: -2px 0 6px -1px #1a1a1a;\
+                    transition: top .1s ease-out, bottom .1s ease-out;\
+                    font: 10px 'Open Sans', sans-serif;\
+                    color: #eee;\
+                    text-shadow: 0 0 3px #111;\
+                    padding: 3px 7px 4px;\
+                }\
+                #DRMng_info.nm { background: linear-gradient(186deg,#435,#333 40%); }\
+                #DRMng_info.l { background: linear-gradient(186deg,#533,#333 40%); }\
+                #DRMng_info.h { background: linear-gradient(186deg,#553,#333 40%); }\
+                #DRMng_info.n { background: linear-gradient(186deg,#353,#333 40%); }\
+                #DRMng_info > div:first-child { display: flex; }\
+                #DRMng_info span.title {\
+                    font-size: 12px;\
+                    font-weight: 600;\
+                    flex-shrink:1;\
+                    white-space: nowrap;\
+                    text-overflow: ellipsis;\
+                    overflow: hidden;\
+                    margin-right: auto;\
+                    padding-right: 3px;\
+                }\
+                #DRMng_info div.magic {\
+                    background-image: url('https://cdn.jsdelivr.net/gh/mutik/drmng@latest/magic_sprite.png');\
+                    width: 16px;\
+                    height: 16px;\
+                    flex-shrink: 0;\
+                    flex-grow: 0;\
+                    margin-left: 2px;\
+                    background-color: rgba(0,0,0,.15);\
+                }\
+                #DRMng_info div.status {\
+                    border-top: 1px solid #555;\
+                    margin-top: 3px;\
+                    padding-top: 1px;\
+                }\
+                #DRMng_info label {\
+                    position: relative;\
+                    z-index: 1;\
+                    font-size: 7pt;\
+                    font-weight: 300;\
+                    color: #fff;\
+                }\
+                #DRMng_info progress {\
+                    border: 0;\
+                    height: 13px;\
+                    width: 100%;\
+                    position: relative;\
+                    margin-top: -13px;\
+                    display: block;\
+                    background: linear-gradient(to Bottom, #111, transparent 1px, transparent 3px, #262626 12px, #090909);\
+                }\
+                span.DRMng_info_picker:hover {\
+                    cursor: pointer;\
+                    text-decoration: underline;\
+                }\
+                #DRMng_info progress::-webkit-progress-bar {\
+                    background: linear-gradient(to Bottom, #111, transparent 1px, transparent 3px, #262626 12px, #090909);\
+                }\
+                #DRMng_info progress.hp::-webkit-progress-value {\
+                    background: linear-gradient(to Bottom, #b11, #522 1px, transparent 11px);\
+                }\
+                #DRMng_info progress.hp::-moz-progress-bar {\
+                    background: linear-gradient(to Bottom, #b11, #522 1px, transparent 11px);\
+                }\
+                #DRMng_info progress.time::-moz-progress-bar {\
+                    background: linear-gradient(to Bottom, #09f, #146 1px, transparent 11px);\
+                }\
+                #DRMng_info progress.time::-webkit-progress-value {\
+                    background: linear-gradient(to Bottom, #09f, #146 1px, transparent 11px);\
+                }\
+                #DRMng_Sidebar {\
+                    display: flex;\
+                    flex-direction: column;\
+                    width: 40px;\
+                    background: #4c4c4c;\
+                    border-left: 1px solid #000;\
+                }\
+                #DRMng_Sidebar.flex {\
+                    height: 690px;\
+                }\
+                #DRMng_Sidebar * {\
+                    font: 10px 'Open Sans', sans-serif;\
+                    -webkit-user-select: none;\
+                    -moz-user-select: none;\
+                    user-select: none;\
+                }\
+                #DRMng_Sidebar > div.label {\
+                    background: #303030;\
+                    flex-grow: 0;\
+                    flex-shrink: 0;\
+                    border-bottom: 1px solid #111;\
+                    color: #ddd;\
+                    padding: 7px 0 6px;\
+                    cursor: default;\
+                    text-transform: uppercase;\
+                }\
+                #DRMng_Sidebar.flex > div.label.hidden {\
+                    background: #333;\
+                    color: #aaa;\
+                    cursor: pointer;\
+                }\
+                #DRMng_Sidebar > div:first-child {\
+                    border-top: 1px solid #111;\
+                }\
+                #DRMng_Sidebar > div.group {\
+                    display: flex;\
+                    flex-direction: column;\
+                    border-bottom: 1px solid #111;\
+                }\
+                #DRMng_Sidebar.flex > div.group {\
+                    border: 0;\
+                    max-height: 700px;\
+                    transition: max-height .2s ease-out;\
+                }\
+                #DRMng_Sidebar.flex > div.label.hidden + div.group {\
+                    max-height: 0;\
+                    overflow: hidden;\
+                    border: 0;\
+                }\
+                #DRMng_Sidebar button {\
+                    height: 22px;\
+                    background: #444;\
+                    color: #ccc;\
+                    cursor: pointer;\
+                    border: 0;\
+                    outline: none;\
+                }\
+                #DRMng_Sidebar.flex > div > button {\
+                    height: 29px;\
+                }\
+                #DRMng_Sidebar > div > button {\
+                    flex-shrink: 1;\
+                    border-bottom: 1px solid #2c2c2c;\
+                }\
+                #DRMng_Sidebar > div > button:last-child {\
+                    border: 0;\
+                }\
+                #DRMng_Sidebar.flex > div > button:last-child {\
+                    border-bottom: 1px solid #111;\
+                }\
+                #DRMng_Sidebar > div > button:hover {\
+                    color: #ddd;\
+                    background: #363636;\
+                }\
+                #DRMng_Sidebar > button {\
+                    height: 25px;\
+                    background: #3a3a3a;\
+                    flex-grow: 0;\
+                    flex-shrink: 0;\
+                    border-bottom: 1px solid #111;\
+                }\
+                #DRMng_Sidebar > button:hover {\
+                    background: #2a2a2a;\
+                    color: #ddd;\
+                }\
+                #DRMng_Sidebar > button:first-of-type {\
+                    margin-top: auto;\
+                    border-top: 1px solid #111;\
+                }\
+                div#chat_room_tabs > div.drmng_room_tab:nth-last-child(2) {\
+                    border-right: 0;\
+                }\
+                #alliance_chat_sbs {\
+                    border: 1px solid #222;\
+                    display: flex;\
+                    align-items: flex-end;\
+                    margin-left: 7px;\
+                    box-shadow: 0 0 10px -4px #000;\
+                }\
+                #alliance_chat_sbs div.users_in_room { height: 145px; }\
+                .drmng_scroll_wrapper {\
+                    overflow: hidden;\
+                    width: 100%;\
+                    height: 100%;\
+                    position: relative;\
+                    z-index: 1;\
+                    float: left;\
+                }\
+                .drmng_scroll_content {\
+                    height: 100%;\
+                    width: 100%;\
+                    padding: 0 32px 0 0;\
+                    position: relative;\
+                    right: -18px;\
+                    overflow: auto;\
+                    box-sizing: border-box;\
+                }\
+                .drmng_scroll_bar {\
+                    position: relative;\
+                    background: rgba(0, 0, 0, 0.1);\
+                    width: 9px;\
+                    border-radius: 4px;\
+                    top: 0;\
+                    z-index: 2;\
+                    cursor: pointer;\
+                    opacity: 0;\
+                    transition: opacity 0.25s linear;\
+                }\
+                .drmng_scroll_hidden {\
+                    display: none;\
+                }\
+                .drmng_scroll_container:hover .drmng_scroll_bar {\
+                    opacity: 1;\
+                }\
+                .drmng_scroll_grabbed {\
+                    -o-user-select: none;\
+                    -ms-user-select: none;\
+                    -moz-user-select: none;\
+                    -webkit-user-select: none;\
+                    user-select: none;\
+                }\
+                #DRMng_main div.drmng_config_sb {\
+                    margin: 7px;\
+                    border: 1px solid #303030;\
+                }\
+                #DRMng_main div.drmng_config_sb > div {\
+                    display: flex;\
+                    align-items: center;\
+                    padding: 0 3px;\
+                    background: #555;\
+                    border-bottom: 1px solid #444;\
+                }\
+                #DRMng_main div.drmng_config_sb > div:first-child {\
+                    background: #3a3a3a;\
+                    border-bottom: 1px solid #333;\
+                }\
+                #DRMng_main div.drmng_config_sb > div:last-child {\
+                    border: 0;\
+                }\
+                #DRMng_main div.drmng_config_sb span {\
+                    font-family: 'Material-Design';\
+                    font-size: 15px;\
+                    text-align: center;\
+                    padding: 0;\
+                    width: 14px;\
+                    color: #fff;\
+                    cursor: default;\
+                }\
+                #DRMng_main div.drmng_config_sb span.del_grp,\
+                #DRMng_main div.drmng_config_sb span.add_grp {\
+                    margin: 0 5px;\
+                    color: #ddd;\
+                }\
+                #DRMng_main div.drmng_config_sb span:hover {\
+                    color: #4f7;\
+                }\
+                #DRMng_main div.drmng_config_sb span.red:hover {\
+                    color: #f42;\
+                }\
+                #DRMng_main div.drmng_config_sb span:last-child {\
+                    width: 20px;\
+                    text-align: right;\
+                }\
+                #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:first-child,\
+                #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:first-child,\
+                #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:nth-child(2),\
+                #DRMng_main div.drmng_config_sb > div:last-child > span:nth-child(2) {\
+                    padding-right: 14px;\
+                }\
+                #DRMng_main div.drmng_config_sb:nth-child(4) > div:first-child > span:nth-child(2),\
+                #DRMng_main div.drmng_config_sb > div:nth-child(2) > span:nth-child(2),\
+                #DRMng_main div.drmng_config_sb:nth-last-child(2) > div:first-child > span:first-child,\
+                #DRMng_main div.drmng_config_sb > div:last-child > span:first-child,\
+                #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:first-child,\
+                #DRMng_main div.drmng_config_sb:last-child > div:first-child > span:nth-child(2),\
+                #DRMng_main div.drmng_config_sb:last-child > div:first-child > span.red {\
+                    display: none;\
+                }\
+                #DRMng_main div.drmng_config_sb input {\
+                    background: transparent;\
+                    border: 0;\
+                    font-size: 11px;\
+                    color: #fff;\
+                    font-family: 'Open Sans';\
+                    width: 45px;\
+                    outline: none;\
+                }\
+                #DRMng_main div.drmng_config_sb input:hover,\
+                #DRMng_main div.drmng_config_sb input:focus {\
+                    background: #4a4a4a\
+                }\
+                #DRMng_main div.drmng_config_sb input.inp_grp {\
+                    padding: 1px;\
+                    width: 60px;\
+                    margin: 0 auto;\
+                }\
+                #DRMng_main div.drmng_config_sb input.inp_fld {\
+                    padding: 0;\
+                    margin-left: 3px;\
+                }\
+                #DRMng_main div.drmng_config_sb input.inp_cmd {
+                    padding: 0 0 0 5px;\
+                    flex-grow: 1;\
+                    flex-shrink: 1;\
+                    text-align: left;\
+                    border-left: 1px solid #444;\
+                }\
+                div.userlist {\
+                    display: flex;\
+                    margin: 1px 2px;\
+                    align-items: center;\
+                }\
+                div.userlist > span.guildtag {\
+                    font-size: 9px;\
+                    background-color: #4a4a4a;\
+                    color: #ddd;\
+                    line-height: 11px;\
+                    padding: 1px 0 0;\
+                    font-weight: 700;\
+                    width: 30px;\
+                    text-align: center;\
+                    text-shadow: 0 0 5px #333;\
+                    flex-grow: 0;\
+                    flex-shrink: 0;\
+                    margin-right: 5px;\
+                    border: 1px solid #363636;\
+                }\
+                `;
+                const isFF = navigator.userAgent.match(/Firefox\/(\d+)/);
+                if (isFF && parseInt(isFF[1]) > 64) {
+                    content += `\
+                    div#kong_game_ui div.chat_message_window,\
+                    div#kong_game_ui div.users_in_room,\
+                    div#kong_game_ui div.chat_controls textarea.chat_input,\
+                    #DRMng_content div.group.flex > div:last-child,\
+                    #DRMng_content div.group.flexible {\
+                        scrollbar-color: #444 #222;\
+                        scrollbar-width: thin;\
+                        margin-right: -1px;\
+                    }\
+                    `;
+                }
+                
                 DRMng.Util.cssStyle(`DRMng_CSS`, content);
 
                 // raid list filtering css

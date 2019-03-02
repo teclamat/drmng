@@ -31,30 +31,30 @@
 
 function main() {
     window.DRMng = {
-        ServerWS: `wss://mutikt.ml:3000`,
-        logColors: { debug: `purple`, info: `#1070f0`, log: `#108030` },
+        ServerWS: 'wss://mutikt.ml:3000',
+        logColors: { debug: 'purple', info: '#1070f0', log: '#108030' },
         log: function (...args) {
-            const type = [`info`, `warn`, `error`, `debug`].indexOf(args[0]) > -1 ? args[0] : `log`;
-            if (type !== `log`) args = args.slice(1);
-            if ([`warn`, `error`].indexOf(type) === -1) {
-                if (typeof args[0] === `string` && /%[csd]/.test(args[0])) {
+            const type = ['info', 'warn', 'error', 'debug'].indexOf(args[0]) > -1 ? args[0] : 'log';
+            if (type !== 'log') args = args.slice(1);
+            if (['warn', 'error'].indexOf(type) === -1) {
+                if (typeof args[0] === 'string' && /%[csd]/.test(args[0])) {
                     args[0] = `%c[DRMng] ${args[0]}`;
                     args.splice(1, 0, `color:${DRMng.logColors[type]}`);
                 }
                 else {
-                    const temp = [`%c[DRMng]`];
-                    while (typeof args[0] === `string`) temp.push(args.shift());
-                    args.unshift(temp.join(` `), `color:${DRMng.logColors[type]}`);
+                    const temp = ['%c[DRMng]'];
+                    while (typeof args[0] === 'string') temp.push(args.shift());
+                    args.unshift(temp.join(' '), `color:${DRMng.logColors[type]}`);
                 }
             }
             console[type].apply(console, args);
         },
         About: {
-            name: `DotD Raids Manager next gen`,
-            major: `2`, minor: `1`, build: `18`,
+            name: 'DotD Raids Manager next gen',
+            major: '2', minor: '1', build: '18',
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
-                       `<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>`;
+                       '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
             },
             ver: function () {
                 return `${this.major}.${this.minor}.${this.build}`;
@@ -71,8 +71,8 @@ function main() {
              */
             constructor(element) {
                 this._el = null;
-                if (typeof element === `string`)
-                    this._el = element.charAt(0) === `#` ?
+                if (typeof element === 'string')
+                    this._el = element.charAt(0) === '#' ?
                         document.getElementById(element.slice(1)) :
                         document.createElement(element);
                 else if (element instanceof Node) this._el = element;
@@ -103,15 +103,15 @@ function main() {
                 return this;
             }
 
-            txt(text = ``, overwrite = false) {
+            txt(text = '', overwrite = false) {
                 if (overwrite) this.clear();
                 this._el.appendChild(document.createTextNode(text));
                 return this;
             }
 
-            html(text = ``, overwrite = false) {
+            html(text = '', overwrite = false) {
                 if (overwrite) this.clear();
-                if (typeof text === `string`) this._el.innerHTML += text;
+                if (typeof text === 'string') this._el.innerHTML += text;
                 else {
                     if (text instanceof DRMng.Node) text = text.node;
                     if (text instanceof Node) this._el.appendChild(text);
@@ -121,7 +121,7 @@ function main() {
 
             data(data) {
                 if (data) {
-                    if (typeof data === `string` && /<.{3,}?>/.test(data) === false) this.txt(data);
+                    if (typeof data === 'string' && /<.{3,}?>/.test(data) === false) this.txt(data);
                     else this.html(data);
                 }
                 return this;
@@ -143,18 +143,18 @@ function main() {
             }
 
             attach(method, dst) {
-                if (typeof dst === `string`) dst = document.getElementById(dst);
+                if (typeof dst === 'string') dst = document.getElementById(dst);
                 else if (dst instanceof DRMng.Node) dst = dst._el;
                 if (!(dst instanceof Node)) {
-                    DRMng.log(`warn`, `{Node:attach} Invalid destination : ${dst}`);
+                    DRMng.log('warn', `{Node:attach} Invalid destination : ${dst}`);
                     return this;
                 }
                 if (!/^(?:to|before|after)$/i.test(method)) {
-                    DRMng.log(`warn`, `{Node:attach} Invalid method ${method}`);
+                    DRMng.log('warn', `{Node:attach} Invalid method ${method}`);
                     return this;
                 }
-                if (method === `to`) dst.appendChild(this._el);
-                else if (method === `before`) dst.parentNode.insertBefore(this._el, dst);
+                if (method === 'to') dst.appendChild(this._el);
+                else if (method === 'before') dst.parentNode.insertBefore(this._el, dst);
                 else if (dst.nextSibling === null) dst.parentNode.appendChild(this._el);
                 else dst.parentNode.insertBefore(this._el, dst.nextSibling);
                 return this;
@@ -173,9 +173,9 @@ function main() {
                 let s = new DRMng.Node(`#${id}`);
                 if (content !== null) {
                     if (!s.notNull)
-                        s = new DRMng.Node(`style`)
-                            .attr({ type: `text/css`, id: id })
-                            .attach(`to`, document.head);
+                        s = new DRMng.Node('style')
+                            .attr({ type: 'text/css', id: id })
+                            .attach('to', document.head);
                     s.txt(content, true);
                 }
                 else if (s.notNull) s.detach();
@@ -205,11 +205,11 @@ function main() {
             static getQueryVariable(field, query = window.location.search) {
                 const fldStart = query.indexOf(field);
                 if (fldStart > -1) {
-                    const valEnd = query.indexOf(`&`, fldStart);
+                    const valEnd = query.indexOf('&', fldStart);
                     if (valEnd < 0) return query.slice(fldStart + field.length + 1);
                     else return query.slice(fldStart + field.length + 1, valEnd);
                 }
-                return ``;
+                return '';
             }
 
             /**
@@ -217,13 +217,13 @@ function main() {
              * @param {Object} str Input data. Objects are JSON stringified before calculation
              * @return {string} Hex representation of CRC32 hash
              */
-            static crc32(str = ``) {
+            static crc32(str = '') {
                 if (!DRMng.Util.crcTbl) DRMng.Util.crcTbl = new Uint32Array(256).map(
                     (itm, i) => new Array(8).fill(0).reduce(c => c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1, i));
 
                 const crc = new Uint32Array(1);
                 crc[0] = 0xffffffff;
-                str = (typeof str !== `string` ? JSON.stringify(str) : str).split(``);
+                str = (typeof str !== 'string' ? JSON.stringify(str) : str).split('');
                 str.forEach(c => crc[0] = (crc[0] >>> 8) ^ DRMng.Util.crcTbl[(crc[0] ^ c.charCodeAt(0)) & 0xff]);
                 crc[0] ^= 0xffffffff;
                 return crc[0].toString(16);
@@ -235,35 +235,35 @@ function main() {
              * @param {string} [poster] Optional poster of peocessed raid
              * @return {?raidObject} Filled raid object or null if parsing failed
              */
-            static getRaidFromUrl(url, poster = ``) {
+            static getRaidFromUrl(url, poster = '') {
                 const r = { createtime: new Date().getTime(), poster: poster };
                 const reg = /[?&]([^=]+)=([^?&]+)/ig;
-                const p = url.replace(/&amp;/gi, `&`).replace(/kv_&/gi, `&kv_`);
+                const p = url.replace(/&amp;/gi, '&').replace(/kv_&/gi, '&kv_');
                 let cnt = 0, i;
                 while ((i = reg.exec(p))) {
                     switch (i[1]) {
-                        case `kv_raid_id`:
-                        case `raid_id`:
+                        case 'kv_raid_id':
+                        case 'raid_id':
                             r.id = i[2];
                             cnt++;
                             break;
-                        case `kv_difficulty`:
-                        case `difficulty`:
+                        case 'kv_difficulty':
+                        case 'difficulty':
                             r.diff = parseInt(i[2]);
                             cnt++;
                             break;
-                        case `kv_raid_boss`:
-                        case `raid_boss`:
+                        case 'kv_raid_boss':
+                        case 'raid_boss':
                             r.boss = i[2];
                             cnt++;
                             break;
-                        case `kv_hash`:
-                        case `hash`:
+                        case 'kv_hash':
+                        case 'hash':
                             r.hash = i[2];
                             cnt++;
                             break;
-                        case `kv_serverid`:
-                        case `serverid`:
+                        case 'kv_serverid':
+                        case 'serverid':
                             r.sid = parseInt(i[2]);
                             break;
                     }
@@ -282,12 +282,12 @@ function main() {
             static getShortNum(num, p = 4) {
                 num = parseInt(num);
                 if (isNaN(num) || num < 0) return num;
-                if (num >= 1000000000000000) return (num / 1000000000000000).toPrecision(p) + `q`;
-                if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + `t`;
-                if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + `b`;
-                if (num >= 1000000) return (num / 1000000).toPrecision(p) + `m`;
-                if (num >= 1000) return (num / 1000).toPrecision(p) + `k`;
-                return num + ``;
+                if (num >= 1000000000000000) return (num / 1000000000000000).toPrecision(p) + 'q';
+                if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 't';
+                if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 'b';
+                if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'm';
+                if (num >= 1000) return (num / 1000).toPrecision(p) + 'k';
+                return num + '';
             }
 
             /**
@@ -298,12 +298,12 @@ function main() {
              */
             static getShortNumK(num, p = 4) {
                 num = parseInt(num);
-                if (isNaN(num) || num < 0) return num + ``;
-                if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + `q`;
-                if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + `t`;
-                if (num >= 1000000) return (num / 1000000).toPrecision(p) + `b`;
-                if (num >= 1000) return (num / 1000).toPrecision(p) + `m`;
-                return num.toPrecision(p) + `k`;
+                if (isNaN(num) || num < 0) return num + '';
+                if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 'q';
+                if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 't';
+                if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'b';
+                if (num >= 1000) return (num / 1000).toPrecision(p) + 'm';
+                return num.toPrecision(p) + 'k';
             }
 
             /**
@@ -356,7 +356,7 @@ function main() {
             },
             findPane: function (e) {
                 let p = e.target, idx;
-                while (p && p.nodeName !== `BODY`) {
+                while (p && p.nodeName !== 'BODY') {
                     idx = this.regPanes.indexOf(p.id);
                     if (idx > -1) {
                         this.pane = p;
@@ -388,10 +388,10 @@ function main() {
                     left: this.left,
                     right: this.right
                 };
-                if (this.pane.id === `DRMng_main`) {
-                    this.pane.style.setProperty(`transition`, `none`);
-                    document.getElementById(`primarywrap`).style.setProperty(`transition`, `none`);
-                    document.getElementById(`headerwrap`).style.setProperty(`transition`, `none`);
+                if (this.pane.id === 'DRMng_main') {
+                    this.pane.style.setProperty('transition', 'none');
+                    document.getElementById('primarywrap').style.setProperty('transition', 'none');
+                    document.getElementById('headerwrap').style.setProperty('transition', 'none');
                 }
                 this.animate();
             },
@@ -399,7 +399,7 @@ function main() {
             resetHold: function () {
                 this.hold = false;
                 //console.log(this);
-                if (!(this.right || this.left)) document.body.style.removeProperty(`cursor`);
+                if (!(this.right || this.left)) document.body.style.removeProperty('cursor');
             },
             onMove: function (e) {
                 if (this.hold) return;
@@ -412,7 +412,7 @@ function main() {
             },
             onMoveProgress: function (e) {
                 if (!this.calc(e)) return;
-                if (this.right || this.left) document.body.style.cursor = `ew-resize`;
+                if (this.right || this.left) document.body.style.cursor = 'ew-resize';
                 //if (this.right || this.left) this.pane.style.cursor = `ew-resize`;
                 //else this.pane.style.cursor = `default`;
 
@@ -421,24 +421,24 @@ function main() {
                 this.redraw = true;
             },
             onUp: function () {
-                document.body.style.removeProperty(`cursor`);
+                document.body.style.removeProperty('cursor');
                 if (this.pane) {
                     const p = this.pane;
                     let w;
                     switch (p.id) {
-                        case `chat_container`:
-                            w = parseInt(p.style.width.replace(`px`, ``));
+                        case 'chat_container':
+                            w = parseInt(p.style.width.replace('px', ''));
                             DRMng.Config.local.kong.chatWidth =
                                 DRMng.Config.local.alliance.sbs ? parseInt((w - 7) / 2) : w;
                             DRMng.Config.saveLocal();
                             DRMng.Kong.setHeaderWidth();
                             break;
-                        case `DRMng_main`:
-                            DRMng.Config.local.scriptWidth = parseInt(p.style.width.replace(`px`, ``));
+                        case 'DRMng_main':
+                            DRMng.Config.local.scriptWidth = parseInt(p.style.width.replace('px', ''));
                             DRMng.Config.saveLocal();
-                            p.style.removeProperty(`transition`);
-                            document.getElementById(`primarywrap`).style.removeProperty(`transition`);
-                            document.getElementById(`headerwrap`).style.removeProperty(`transition`);
+                            p.style.removeProperty('transition');
+                            document.getElementById('primarywrap').style.removeProperty('transition');
+                            document.getElementById('headerwrap').style.removeProperty('transition');
                             break;
                     }
                 }
@@ -451,17 +451,17 @@ function main() {
                 this.redraw = false;
                 if (this.clicked && this.clicked.isResizing) {
                     if (this.clicked.right)
-                        this.pane.style.width = parseInt(Math.max(this.x, 200)) + `px`;
+                        this.pane.style.width = parseInt(Math.max(this.x, 200)) + 'px';
                     const w = parseInt(Math.max(this.clicked.cx - this.ev.clientX + this.clicked.w, 200));
                     if (this.clicked.left) {
-                        this.pane.style.width = w + `px`;
+                        this.pane.style.width = w + 'px';
                     }
-                    if (this.pane.id === `DRMng_main`) DRMng.Kong.setWrapperWidth(w);
+                    if (this.pane.id === 'DRMng_main') DRMng.Kong.setWrapperWidth(w);
                 }
             },
             init: function () {
-                document.addEventListener(`mousemove`, this.onMove.bind(this));
-                document.addEventListener(`mouseup`, this.onUp.bind(this));
+                document.addEventListener('mousemove', this.onMove.bind(this));
+                document.addEventListener('mouseup', this.onUp.bind(this));
                 //this.animate();
             }
         },
@@ -504,14 +504,14 @@ function main() {
              */
             lightShot: (link, id, ch, arr = false) => {
                 const req = {
-                    eventName: `DRMng.lightShot`,
+                    eventName: 'DRMng.lightShot',
                     url: link,
-                    method: `GET`,
+                    method: 'GET',
                     id: id,
                     ch: ch,
                     timeout: 10000
                 };
-                if (arr) req.responseType = `arraybuffer`;
+                if (arr) req.responseType = 'arraybuffer';
                 DRMng.postMessage(req);
             },
             // TODO: Add support for regular kong chat as well
@@ -525,16 +525,16 @@ function main() {
                 const c = d.ch;
                 if (i.notNull) {
                     let img = /og:image.+?content="(.+?)"/.exec(d.responseText);
-                    if (img && img[1] && img[1].indexOf(`image.prntscr.com`) > 0) {
+                    if (img && img[1] && img[1].indexOf('image.prntscr.com') > 0) {
                         setTimeout(() => DRMng.Gate.lightShot(img[1], d.id, d.ch, true), 0);
                         return;
                     }
-                    img = d.responseType === `arraybuffer` ? `data:image/png;base64,${btoa(d.responseText)}` : img[1];
+                    img = d.responseType === 'arraybuffer' ? `data:image/png;base64,${btoa(d.responseText)}` : img[1];
                     if (img && c)
-                        i.on(`load`,
+                        i.on('load',
                             () => { setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250); })
                             .attr({ src: img })
-                            .remove(`id`);
+                            .remove('id');
                     else i.detach();
                 }
             }
@@ -544,187 +544,187 @@ function main() {
          */
         Gestures: {
             Kiss: {
-                smittenAdjective: [`smitten`, `enamored`, `infatuated`, `taken`, `in love`, `inflamed`],
+                smittenAdjective: ['smitten', 'enamored', 'infatuated', 'taken', 'in love', 'inflamed'],
                 getSmittenAdjective: function () { return this.smittenAdjective[DRMng.Util.getRand(5)]; },
                 generate: function () {
-                    let txt = ``;
+                    let txt = '';
                     switch (DRMng.Util.getRand(8)) {
                         case 0:
-                            txt = `@from gives @who a puckered kiss on the lips.`;
+                            txt = '@from gives @who a puckered kiss on the lips.';
                             break;
                         case 1:
-                            txt = `@from plants a gentle kiss on the cheek of @who.`;
+                            txt = '@from plants a gentle kiss on the cheek of @who.';
                             break;
                         case 2:
-                            txt = `@from kisses @who... might have used tongue on that one.`;
+                            txt = '@from kisses @who... might have used tongue on that one.';
                             break;
                         case 3:
                         case 4:
-                            txt = `@from seems ` + this.getSmittenAdjective() + ` with @who.`;
+                            txt = '@from seems ' + this.getSmittenAdjective() + ' with @who.';
                             break;
                         default:
-                            txt = `@from tickles the lips of @who with a sensual kiss.`;
+                            txt = '@from tickles the lips of @who with a sensual kiss.';
                     }
                     return txt;
                 }
             },
             Poke: {
                 pokeBodyPlace: [
-                    `on the cheek`, `on the navel`, `in the nose`, `in the belly button`, `in the rib cage`,
-                    `in a really ticklish spot`, `square on the forehead`, `with a wet willy in the ear`, `on the arm`,
-                    `on the shoulder`, `on the chest`, `on the leg`, `in the face`, `on the neck`, `in the stomach`,
-                    `up the butt`
+                    'on the cheek', 'on the navel', 'in the nose', 'in the belly button', 'in the rib cage',
+                    'in a really ticklish spot', 'square on the forehead', 'with a wet willy in the ear', 'on the arm',
+                    'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
+                    'up the butt'
                 ],
                 getPokeBodyPlace: function () { return this.pokeBodyPlace[DRMng.Util.getRand(14)]; },
                 generate: function () {
-                    let txt = ``;
+                    let txt = '';
                     switch (DRMng.Util.getRand(6)) {
                         case 0:
-                            txt = `@from with a tickling finger of doom, pokes @who `;
+                            txt = '@from with a tickling finger of doom, pokes @who ';
                             break;
                         case 1:
-                            txt = `@from jumps out from the shadows and prods @who `;
+                            txt = '@from jumps out from the shadows and prods @who ';
                             break;
                         case 2:
-                            txt = `@from playfully pokes @who `;
+                            txt = '@from playfully pokes @who ';
                             break;
                         case 3:
-                            txt = `@from cheerfully pokes @who `;
+                            txt = '@from cheerfully pokes @who ';
                             break;
                         case 4:
-                            txt = `@from gleefully pokes @who `;
+                            txt = '@from gleefully pokes @who ';
                             break;
                         case 5:
-                            txt = `@from pokes @who repeatedly `;
+                            txt = '@from pokes @who repeatedly ';
                             break;
                         default:
-                            txt = `@from, with index finger stern and pointy, pokes @who `;
+                            txt = '@from, with index finger stern and pointy, pokes @who ';
                             break;
                     }
-                    return txt + this.getPokeBodyPlace() + `.`;
+                    return txt + this.getPokeBodyPlace() + '.';
                 }
             },
             Hit: {
                 strikeAction: [
-                    `clobber`, `subdue`, `hit`, `bash`, `pound`, `pelt`, `hammer`, `wallop`, `swat`, `punish`, `pummel`,
-                    `strike`, `beat`
+                    'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel',
+                    'strike', 'beat'
                 ],
                 leapingAction: [
-                    `vaults`, `surges`, `hurdles`, `bounds`, `pounces`, `storms`, `leaps`, `bolts`, `stampedes`,
-                    `sprints`, `dashes`, `charges`, `lunges`
+                    'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
+                    'sprints', 'dashes', 'charges', 'lunges'
                 ],
                 aimModifier: [
-                    `a well placed`, `a pin-point accurate`, `a targeted`, `an aimed`, `a`, `a`, `a`, `a`, `a`, `a`, `a`
+                    'a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
                 ],
                 wrestlingMove: [
-                    ` haymaker punch`, ` kitchen sink to the midsection`, ` jumping DDT`, ` cross body attack`,
-                    ` flying forearm`, ` low dropkick`, ` jumping thigh kick`, ` roundhouse`,
-                    ` left and right hook combo`, ` jab and middle kick combo`,
-                    ` spinning backfist and shin kick combo`, ` delayed backbrain wheel kick`,
-                    ` somersault kick to an uppercut combo`, ` jab to the face`, ` stomping hook punch`,
-                    ` palm thrust to the solar plexus`, ` shin kick`, ` side headbutt`,
-                    ` fast lowerbody roundhouse kick`, ` fast upperbody roundhouse kick`, `n uppercut palm strike`,
-                    `n uppercut to midsection jab combo`, ` downward chop`
+                    ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack',
+                    ' flying forearm', ' low dropkick', ' jumping thigh kick', ' roundhouse',
+                    ' left and right hook combo', ' jab and middle kick combo',
+                    ' spinning backfist and shin kick combo', ' delayed backbrain wheel kick',
+                    ' somersault kick to an uppercut combo', ' jab to the face', ' stomping hook punch',
+                    ' palm thrust to the solar plexus', ' shin kick', ' side headbutt',
+                    ' fast lowerbody roundhouse kick', ' fast upperbody roundhouse kick', 'n uppercut palm strike',
+                    'n uppercut to midsection jab combo', ' downward chop'
                 ],
                 meal: [
-                    `midmorning snack`, `midnight snack`, `supper`, `breakfast`, `brunch`, `2 o'clock tea time`,
-                    `midafternoon snack`, `lunch`
+                    'midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch', '2 o\'clock tea time',
+                    'midafternoon snack', 'lunch'
                 ],
-                throwAction: [`tosses`, `propels`, `throws`, `catapults`, `hurls`, `launches`],
-                crying: [`shouting`, `screaming`, `hollering`, `yelling`, `crying out`],
+                throwAction: ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'],
+                crying: ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'],
                 sportsWeapon: [
-                    `cricket paddle`, `lacrosse stick`, `hockey stick`, `croquet mallet`, `baseball bat`, `yoga ball`,
-                    `barbell`, `folding lawn chair`, `caber`, `shot put`, `bowling ball`, `lantern`, `tennis racket`
+                    'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
+                    'barbell', 'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
                 ],
-                midsectionStrikePlace: [`midsection`, `solar plexus`, `chest`, `abdomen`, `sternum`],
+                midsectionStrikePlace: ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'],
                 randomItemWeapon: [
-                    `a giant frozen trout`, `an inflatable duck`, `a waffle iron`, `a sponge brick`,
-                    `a board of education`, `an unidentified implement of mayhem and destruction`,
-                    `a rubber ducky *SQUEAK*`, `a rolling pin`, `a tire iron`, `a sock full of oranges`,
-                    `a slinky, a slink [fun for a girl or a boy]`, `a chinese finger puzzle`, `a whip of wet noodles`,
-                    `a humungous spicey italian meatstick`, `a giant garlic dill`, `an ACME hammer of pain`
+                    'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick',
+                    'a board of education', 'an unidentified implement of mayhem and destruction',
+                    'a rubber ducky *SQUEAK*', 'a rolling pin', 'a tire iron', 'a sock full of oranges',
+                    'a slinky, a slink [fun for a girl or a boy]', 'a chinese finger puzzle', 'a whip of wet noodles',
+                    'a humungous spicey italian meatstick', 'a giant garlic dill', 'an ACME hammer of pain'
                 ],
                 withDescriptors: [
-                    `with lightning reflexes, `, `with finesse and poise, `, `with mediocre skill, `,
-                    `with half-cocked attitude, `, `with fervor and oomph, `, `with vitality and gusto, `,
-                    `with ambition and enthusiasm, `, ``, ``, ``, ``
+                    'with lightning reflexes, ', 'with finesse and poise, ', 'with mediocre skill, ',
+                    'with half-cocked attitude, ', 'with fervor and oomph, ', 'with vitality and gusto, ',
+                    'with ambition and enthusiasm, ', '', '', '', ''
                 ],
                 strikeActionVerb: [
-                    `clobbers`, `subdues`, `hits`, `bashes`, `pounds`, `pelts`, `hammers`, `wallops`, `swats`,
-                    `punishes`, `pummels`, `strikes`, `assaults`, `beats`
+                    'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
+                    'punishes', 'pummels', 'strikes', 'assaults', 'beats'
                 ],
                 generate: function () {
-                    let txt = ``;
+                    let txt = '';
                     switch (DRMng.Util.getRand(7)) {
                         case 0:
-                            txt += `@from attempts to `;
-                            txt += this.strikeAction[DRMng.Util.getRand(12)] + ` @who but fails...`;
+                            txt += '@from attempts to ';
+                            txt += this.strikeAction[DRMng.Util.getRand(12)] + ' @who but fails...';
                             break;
                         case 1:
-                            txt += `@from ` + this.leapingAction[DRMng.Util.getRand(12)];
-                            txt += ` towards @who and lands ` + this.aimModifier[DRMng.Util.getRand(10)];
-                            txt += this.wrestlingMove[DRMng.Util.getRand(20)] + `.`;
+                            txt += '@from ' + this.leapingAction[DRMng.Util.getRand(12)];
+                            txt += ' towards @who and lands ' + this.aimModifier[DRMng.Util.getRand(10)];
+                            txt += this.wrestlingMove[DRMng.Util.getRand(20)] + '.';
                             break;
                         case 2:
-                            txt += `@from takes what's left of ` + this.meal[DRMng.Util.getRand(7)] + `, `;
-                            txt += this.throwAction[DRMng.Util.getRand(5)] + ` it towards @who `;
-                            txt += this.crying[DRMng.Util.getRand(4)] + `, 'FOOD FIGHT'!`;
+                            txt += '@from takes what\'s left of ' + this.meal[DRMng.Util.getRand(7)] + ', ';
+                            txt += this.throwAction[DRMng.Util.getRand(5)] + ' it towards @who ';
+                            txt += this.crying[DRMng.Util.getRand(4)] + ', \'FOOD FIGHT\'!';
                             break;
                         case 4:
-                            txt = `@from rolls up a magazine planting a blow upside the head of @who.`;
+                            txt = '@from rolls up a magazine planting a blow upside the head of @who.';
                             break;
                         case 5:
-                            txt = `@from hits @who on the head with a frying pan.`;
+                            txt = '@from hits @who on the head with a frying pan.';
                             break;
                         case 6:
-                            txt += `@from plants a ` + this.sportsWeapon[DRMng.Util.getRand(12)] + ` to the `;
-                            txt += this.midsectionStrikePlace[DRMng.Util.getRand(4)] + ` of @who.`;
+                            txt += '@from plants a ' + this.sportsWeapon[DRMng.Util.getRand(12)] + ' to the ';
+                            txt += this.midsectionStrikePlace[DRMng.Util.getRand(4)] + ' of @who.';
                             break;
                         default:
-                            txt += `@from pulls out ` + this.randomItemWeapon[DRMng.Util.getRand(15)];
-                            txt += ` and ` + this.withDescriptors[DRMng.Util.getRand(10)];
-                            txt += this.strikeActionVerb[DRMng.Util.getRand(13)] + ` @who with it.`;
+                            txt += '@from pulls out ' + this.randomItemWeapon[DRMng.Util.getRand(15)];
+                            txt += ' and ' + this.withDescriptors[DRMng.Util.getRand(10)];
+                            txt += this.strikeActionVerb[DRMng.Util.getRand(13)] + ' @who with it.';
                     }
                     return txt;
                 }
             },
             Slap: {
                 slapWeapon: [
-                    `white glove`, `rubber chicken`, `well placed backhand`, `failing Euryino`, `piece of moldy pizza`,
-                    `big dildo`, `loaf of french bread`, `smile of devious pleasure`, `dead >0))>-<`,
-                    `left over chicken drumstick`, `limp and slightly dirty french fry`, `brick of moldy cheese`,
-                    `tickle me Elmo`, `grilled cheese`
+                    'white glove', 'rubber chicken', 'well placed backhand', 'failing Euryino', 'piece of moldy pizza',
+                    'big dildo', 'loaf of french bread', 'smile of devious pleasure', 'dead >0))>-<',
+                    'left over chicken drumstick', 'limp and slightly dirty french fry', 'brick of moldy cheese',
+                    'tickle me Elmo', 'grilled cheese'
                 ],
                 targetAction: [
-                    `deals`, `aims`, `inflicts`, `releases`, `dispatches`, `discharges`, `delivers`, `unleashes`
+                    'deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers', 'unleashes'
                 ],
                 sassySynonym: [
-                    `an audacious`, `an impudent`, `a bold`, `an overbold`, `an arrant`, `a brassy`, `a sassy`
+                    'an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy', 'a sassy'
                 ],
-                place: [[`side`, `'s head.`], [`face`, `.`], [`cheek`, `.`]],
+                place: [['side', '\'s head.'], ['face', '.'], ['cheek', '.']],
                 leapingAction: [
-                    `vaults`, `surges`, `hurdles`, `bounds`, `pounces`, `storms`, `leaps`, `bolts`, `stampedes`,
-                    `sprints`, `dashes`, `charges`, `lunges`
+                    'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
+                    'sprints', 'dashes', 'charges', 'lunges'
                 ],
                 leadSpeed: [
-                    ` sudden`, ` spry`, `n abrupt`, `n energetic`, ` hasty`, `n agile`, `n accelerated`, ` quick`
+                    ' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile', 'n accelerated', ' quick'
                 ],
                 generate: function () {
-                    let txt = ``, place;
+                    let txt = '', place;
                     switch (DRMng.Util.getRand(2)) {
                         case 0:
-                            txt = `@from slaps @who with a ` + this.slapWeapon[DRMng.Util.getRand(13)] + `.`;
+                            txt = '@from slaps @who with a ' + this.slapWeapon[DRMng.Util.getRand(13)] + '.';
                             break;
                         case 1:
                             place = this.place[DRMng.Util.getRand(2)];
-                            txt += `@from ` + this.targetAction[DRMng.Util.getRand(7)];
-                            txt += ` ` + this.sassySynonym[DRMng.Util.getRand(6)] + ` slap to the `;
-                            txt += place[0] + ` of @who` + place[1];
+                            txt += '@from ' + this.targetAction[DRMng.Util.getRand(7)];
+                            txt += ' ' + this.sassySynonym[DRMng.Util.getRand(6)] + ' slap to the ';
+                            txt += place[0] + ' of @who' + place[1];
                             break;
                         default:
-                            txt += `@from ` + this.leapingAction[DRMng.Util.getRand(12)] + ` forward and with a `;
-                            txt += this.slapWeapon[DRMng.Util.getRand(13)] + `, deals a`;
-                            txt += this.leadSpeed[DRMng.Util.getRand(7)] + ` slap to @who.`;
+                            txt += '@from ' + this.leapingAction[DRMng.Util.getRand(12)] + ' forward and with a ';
+                            txt += this.slapWeapon[DRMng.Util.getRand(13)] + ', deals a';
+                            txt += this.leadSpeed[DRMng.Util.getRand(7)] + ' slap to @who.';
                     }
                     return txt;
                 }
@@ -739,8 +739,8 @@ function main() {
                     kongSlimHeader: false,
                     chatWidth: 250
                 },
-                server: `Elyssa`,
-                sortBy: `hp`,
+                server: 'Elyssa',
+                sortBy: 'hp',
                 scriptWidth: 300,
                 visited: { kasan: [], elyssa: [] },
                 dead: { kasan: {}, elyssa: {} },
@@ -748,13 +748,13 @@ function main() {
                 raidKeys: [],
                 filterData: {},
                 tiersData: {},
-                filterString: { kasan: ``, elyssa: `` },
+                filterString: { kasan: '', elyssa: '' },
                 filterRaids: { kasan: {}, elyssa: {} },
                 hardFilter: { kasan: [], elyssa: [] },
                 checkSums: {
-                    raidData: ``,
-                    filterData: ``,
-                    tiersData: ``,
+                    raidData: '',
+                    filterData: '',
+                    tiersData: '',
                 },
                 alliance: {
                     //enabled: false,
@@ -780,7 +780,7 @@ function main() {
              * @param {string} key Property name
              * @return {*} Data from selected property
              */
-            get: key => key.split(`::`).reduce((t, l) => t[l], DRMng.Config.local),
+            get: key => key.split('::').reduce((t, l) => t[l], DRMng.Config.local),
             /**
              * Sets config parameters. Saves local configuration afterwards
              * @param {Object} params Parameters as object properties with values
@@ -789,8 +789,8 @@ function main() {
                 if (params) {
                     const loc = DRMng.Config.local;
                     Object.keys(params).forEach(key => {
-                        if (key.indexOf(`::` > -1)) {
-                            const keys = key.split(`::`);
+                        if (key.indexOf('::' > -1)) {
+                            const keys = key.split('::');
                             const sub = keys.reduce((t, l, i) => (i < keys.length - 1 ? t[l] : t), loc);
                             const lastKey = keys[keys.length - 1];
                             sub[lastKey] = params[key];
@@ -804,7 +804,7 @@ function main() {
              * Loads local config to object
              */
             loadLocal: () => {
-                const data = localStorage[`DRMng`] ? JSON.parse(localStorage[`DRMng`]) : {};
+                const data = localStorage['DRMng'] ? JSON.parse(localStorage['DRMng']) : {};
                 const loc = DRMng.Config.local;
                 if (data) {
                     Object.keys(loc).forEach(key => { if (data[key]) loc[key] = data[key]; });
@@ -815,7 +815,7 @@ function main() {
                             name: loc.alliance.channel.charAt(0).toUpperCase() +
                                                           loc.alliance.channel.slice(1),
                             channel: loc.alliance.channel, pass: loc.alliance.pass,
-                            color: `336699`, enabled: true
+                            color: '336699', enabled: true
                         });
                         delete loc.alliance.pass;
                         delete loc.alliance.channel;
@@ -830,7 +830,7 @@ function main() {
             /**
              * Saves config to local storage
              */
-            saveLocal: () => localStorage[`DRMng`] = JSON.stringify(DRMng.Config.local)
+            saveLocal: () => localStorage['DRMng'] = JSON.stringify(DRMng.Config.local)
         },
         /**
          * Chat message class
@@ -844,11 +844,11 @@ function main() {
              */
             constructor(message, user, props) {
                 //console.log(props);
-                this._node = new DRMng.Node(`div`).attr({ class: `chat-message` });
-                this._class = { main: [], msg: [`username`, `truncate`] };
-                this._prefix = ``;
-                this._addClass = ``;
-                this._addStyle = ``;
+                this._node = new DRMng.Node('div').attr({ class: 'chat-message' });
+                this._class = { main: [], msg: ['username', 'truncate'] };
+                this._prefix = '';
+                this._addClass = '';
+                this._addStyle = '';
                 this._raid = null;
                 // Setters
                 this.type = props.type;
@@ -864,30 +864,30 @@ function main() {
             set pm(val) {
                 this._pm = val || { any: false, sent: false, recv: false };
                 if (this._pm.any) {
-                    this._class.main.push(`whisper`);
+                    this._class.main.push('whisper');
                     if (this._pm.recv) {
-                        this._class.main.push(`received_whisper`);
-                        this._prefix = `from `;
+                        this._class.main.push('received_whisper');
+                        this._prefix = 'from ';
                     }
                     else {
-                        this._class.main.push(`sent_whisper`);
-                        this._prefix = `to `;
+                        this._class.main.push('sent_whisper');
+                        this._prefix = 'to ';
                     }
                 }
             }
 
             set type(val) {
-                this._type = val || `game`;
+                this._type = val || 'game';
             }
 
             set room(val) {
-                this._room = val || `none`;
+                this._room = val || 'none';
             }
 
             set user(val) {
                 if (val) this._user = val.toString();
-                else this._user = `Unknown`;
-                if ((this._user === this._self) || this._pm.sent) this._class.msg.push(`is_self`);
+                else this._user = 'Unknown';
+                if ((this._user === this._self) || this._pm.sent) this._class.msg.push('is_self');
             }
 
             set self(val) {
@@ -901,7 +901,7 @@ function main() {
             }
 
             get time() {
-                return this._ts.format(`mmm d, HH:MM`);
+                return this._ts.format('mmm d, HH:MM');
             }
 
             get ts() {
@@ -910,13 +910,13 @@ function main() {
 
             set ts(val) {
                 if (val instanceof Date) this._ts = val;
-                else if (typeof val === `number`)
+                else if (typeof val === 'number')
                     this._ts = new Date(val.toString().length < 12 ? val * 1000 : val);
                 else this._ts = new Date();
             }
 
             set msg(val) {
-                if (typeof val === `string`) {
+                if (typeof val === 'string') {
                     if (this.getRaid(val)) this._msg = this._raid.text;
                     else this._msg = this.formatLinks(val).trim();
                     if (!this._msg) this._msg = null;
@@ -929,33 +929,33 @@ function main() {
             }
 
             get html() {
-                if (this._type !== `service`) {
-                    const p = new DRMng.Node(`p`).attr({ timestamp: this.ts });
-                    if (this._class.main.length > 0) p.attr({ class: this._class.main.join(` `) });
+                if (this._type !== 'service') {
+                    const p = new DRMng.Node('p').attr({ timestamp: this.ts });
+                    if (this._class.main.length > 0) p.attr({ class: this._class.main.join(' ') });
                     // Time field + raid link
-                    new DRMng.Node(`span`).attr({ class: `timestamp` }).txt(this.time)
-                        .data(this._raid ? new DRMng.Node(`span`).data(this._raid.link) : null)
-                        .attach(`to`, p);
+                    new DRMng.Node('span').attr({ class: 'timestamp' }).txt(this.time)
+                        .data(this._raid ? new DRMng.Node('span').data(this._raid.link) : null)
+                        .attach('to', p);
                     // Extra raid data field
-                    if (this._raid && this._raid.extra) this._raid.extra.attach(`to`, p);
+                    if (this._raid && this._raid.extra) this._raid.extra.attach('to', p);
                     // User field
-                    new DRMng.Node(`span`)
-                        .attr({ username: this._user, class: this._class.msg.join(` `) })
-                        .txt(this._prefix + this._user).attach(`to`, p);
+                    new DRMng.Node('span')
+                        .attr({ username: this._user, class: this._class.msg.join(' ') })
+                        .txt(this._prefix + this._user).attach('to', p);
                     // IGN field
                     if (this._ign)
-                        new DRMng.Node(`span`).attr({ class: `guildname truncate` }).txt(this._ign).attach(`to`, p);
+                        new DRMng.Node('span').attr({ class: 'guildname truncate' }).txt(this._ign).attach('to', p);
                     if (this._msg) {
                         // Separator field
-                        new DRMng.Node(`span`).attr({ class: `separator` }).txt(`: `).attach(`to`, p);
+                        new DRMng.Node('span').attr({ class: 'separator' }).txt(': ').attach('to', p);
                         // Message field
-                        new DRMng.Node(`span`).attr({ class: `message hyphenate` }).data(this._msg).attach(`to`, p);
+                        new DRMng.Node('span').attr({ class: 'message hyphenate' }).data(this._msg).attach('to', p);
                     }
-                    p.attach(`to`, this._node);
+                    p.attach('to', this._node);
                 }
-                else new DRMng.Node(`div`)
-                    .attr({ class: `script` + this._addClass, style: this._addStyle })
-                    .data(this._msg).attach(`to`, this._node);
+                else new DRMng.Node('div')
+                    .attr({ class: 'script' + this._addClass, style: this._addStyle })
+                    .data(this._msg).attach('to', this._node);
 
                 return this._node.node;
             }
@@ -967,33 +967,33 @@ function main() {
                     const r = DRMng.Util.getRaidFromUrl(match[2], this._user);
                     if (r) {
                         const config = DRMng.Config;
-                        const srv = config.get(`server`).toLowerCase();
+                        const srv = config.get('server').toLowerCase();
                         const vis = config.get(`visited::${srv}`).indexOf(r.id) > -1;
                         const ded = config.get(`dead::${srv}`).hasOwnProperty(r.id);
                         const flt = config.get(`filterRaids_${srv}_${r.boss}`);
                         const ifo = config.get(`raidData::${r.boss}`);
                         const rnm = [
-                            [`n`, `h`, `l`, `nm`][r.diff - 1],
-                            ifo ? ifo.sName : r.boss.replace(/_/g, ` `)
+                            ['n', 'h', 'l', 'nm'][r.diff - 1],
+                            ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
                         ];
-                        this._class.main.push(`raid`, r.id, rnm[0]);
-                        ded && this._class.main.push(`dead`);
-                        vis && this._class.main.push(`visited`);
+                        this._class.main.push('raid', r.id, rnm[0]);
+                        ded && this._class.main.push('dead');
+                        vis && this._class.main.push('visited');
 
                         this._raid = {
-                            link: new DRMng.Node(`a`)
-                                .attr({ href: match[2].replace(/&amp;/g, `&`), data: JSON.stringify(r) })
-                                .on(`click`, DRMng.Raids.joinClick)
-                                .txt(rnm.join(` `).toUpperCase()),
+                            link: new DRMng.Node('a')
+                                .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(r) })
+                                .on('click', DRMng.Raids.joinClick)
+                                .txt(rnm.join(' ').toUpperCase()),
                             text: (match[1] + match[3]).trim(),
-                            extra: new DRMng.Node(`span`)
-                                .attr({ class: `extraid` })
-                                .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? `Guild ER` : `WR/ER`) :
+                            extra: new DRMng.Node('span')
+                                .attr({ class: 'extraid' })
+                                .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? 'Guild ER' : 'WR/ER') :
                                     `FS ${DRMng.Util.getShortNumK(
-                                        ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : ``)
+                                        ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : '')
                         };
 
-                        if (this._room === `none` || this._type !== `game`) {
+                        if (this._room === 'none' || this._type !== 'game') {
                             const filter = flt ? !flt[r.diff - 1] : true;
                             if (!ded && !vis && filter && DRMng.Raids.filter.indexOf(`@${r.boss}_${r.diff}`) > -1) {
                                 if (DRMng.Raids.isJoining)
@@ -1016,7 +1016,7 @@ function main() {
                 while ((l = regLink.exec(msg))) {
                     link = regImg.test(l[2]) ?
                         `<img src="${l[2]}" alt="${l[2]}" onclick="window.open(this.src)">` :
-                        `<a href="${l[2]}" target="_blank">${l[2].replace(/^https?:\/\//, ``)}</a>`;
+                        `<a href="${l[2]}" target="_blank">${l[2].replace(/^https?:\/\//, '')}</a>`;
                     prefix = msg.slice(0, regLink.lastIndex - l[2].length);
                     suffix = msg.slice(regLink.lastIndex);
                     msg = prefix + link + suffix;
@@ -1046,7 +1046,7 @@ function main() {
 
             static compile(obj) {
                 if (DRMng.CSS.node === undefined)
-                    DRMng.CSS.node = new DRMng.Node(`style`).attr({ type: `text/css` }).attach(`to`, document.head);
+                    DRMng.CSS.node = new DRMng.Node('style').attr({ type: 'text/css' }).attach('to', document.head);
                 if (obj) DRMng.CSS.node.txt(`${obj.name} {${obj.value}}\n`);
                 else {
                     DRMng.CSS.node.clear();
@@ -1068,24 +1068,24 @@ function main() {
              * Removes google spying scripts
              */
             killScripts: () => {
-                const scr = document.querySelectorAll(`script`);
+                const scr = document.querySelectorAll('script');
                 let counter = 0;
                 scr.forEach(s => {
-                    if (s.src && s.src.indexOf(`google`) > 0) {
+                    if (s.src && s.src.indexOf('google') > 0) {
                         s.parentNode.removeChild(s);
                         counter++;
                     }
                 });
-                DRMng.log(`debug`, `{Kong} Removed intrusive script tags (${counter})`);
+                DRMng.log('debug', `{Kong} Removed intrusive script tags (${counter})`);
             },
             /**
              * Adjusts kong_ads object
              */
             killAds: () => {
-                if (typeof window.kong_ads === `object`) {
+                if (typeof window.kong_ads === 'object') {
                     window.kong_ads._slots = {};
                     window.kong_ads._refreshAds = false;
-                    DRMng.log(`debug`, `{Kong::kong_ads} Adjusted`);
+                    DRMng.log('debug', '{Kong::kong_ads} Adjusted');
                 }
                 else setTimeout(DRMng.Kong.killAds, 10);
             },
@@ -1093,10 +1093,10 @@ function main() {
              * Removes FB Like button placed just above kong chat
              */
             killFBlike: () => {
-                const like = document.getElementById(`quicklinks_facebook`);
+                const like = document.getElementById('quicklinks_facebook');
                 if (like) {
                     like.parentNode.removeChild(like);
-                    DRMng.log(`debug`, `{Kong} Removed 'FB like'`);
+                    DRMng.log('debug', '{Kong} Removed \'FB like\'');
                 }
                 else setTimeout(DRMng.Kong.killFBlike, 50);
             },
@@ -1104,10 +1104,10 @@ function main() {
              * Removes dealspot object
              */
             killDealSpot: () => {
-                const ds = document.getElementById(`dealspot_banner_holder`);
+                const ds = document.getElementById('dealspot_banner_holder');
                 if (ds) {
                     ds.parentNode.removeChild(ds);
-                    DRMng.log(`debug`, `{Kong} Removed 'Dealspot banner'`);
+                    DRMng.log('debug', '{Kong} Removed \'Dealspot banner\'');
                 }
                 else setTimeout(DRMng.Kong.killDealSpot, 50);
             },
@@ -1115,59 +1115,59 @@ function main() {
              * Adds reload game and reload chat buttons at the top of the game window
              */
             addReloadButton: () => {
-                new DRMng.Node(`li`)
-                    .attr({ class: `spritegame` })
-                    .style({ 'background-position': `0 -280px`, 'cursor': `pointer` })
-                    .html(`<a onclick="DRMng.postGameMessage('gameReload');">Reload Game</a>`, true)
-                    .attach(`to`, `quicklinks`);
+                new DRMng.Node('li')
+                    .attr({ class: 'spritegame' })
+                    .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+                    .html('<a onclick="DRMng.postGameMessage(\'gameReload\');">Reload Game</a>', true)
+                    .attach('to', 'quicklinks');
 
-                new DRMng.Node(`li`)
-                    .attr({ class: `spritegame` })
-                    .style({ 'background-position': `0 -280px`, 'cursor': `pointer` })
-                    .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
-                    .attach(`to`, `quicklinks`);
+                new DRMng.Node('li')
+                    .attr({ class: 'spritegame' })
+                    .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+                    .html('<a onclick="DRMng.postGameMessage(\'chatReload\');">Reload Chat</a>', true)
+                    .attach('to', 'quicklinks');
             },
             /**
              * Add Slim button to kong user bar
              */
             addSlimButton: () => {
-                if (DRMng.Config.local.kong.kongSlimHeader && document.body.className.indexOf(`slim`) === -1)
-                    document.body.className += ` slim`;
+                if (DRMng.Config.local.kong.kongSlimHeader && document.body.className.indexOf('slim') === -1)
+                    document.body.className += ' slim';
 
-                if (document.getElementById(`DRMng_header`)) {
-                    new DRMng.Node(`li`)
-                        .data(new DRMng.Node(`a`)
-                            .attr({ id: `DRMng_KongSlimHeader`, href: `` })
-                            .txt(DRMng.Config.local.kong.kongSlimHeader ? `Full` : `Slim`)
-                            .on(`click`, e => {
+                if (document.getElementById('DRMng_header')) {
+                    new DRMng.Node('li')
+                        .data(new DRMng.Node('a')
+                            .attr({ id: 'DRMng_KongSlimHeader', href: '' })
+                            .txt(DRMng.Config.local.kong.kongSlimHeader ? 'Full' : 'Slim')
+                            .on('click', e => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                const isSlim = !DRMng.Config.get(`kong::kongSlimHeader`);
+                                const isSlim = !DRMng.Config.get('kong::kongSlimHeader');
                                 DRMng.Config.set({ 'kong::kongSlimHeader': isSlim });
-                                if (isSlim) document.body.className += ` slim`;
-                                else document.body.className = document.body.className.replace(/\s?slim/g, ``);
-                                new DRMng.Node(`#DRMng_KongSlimHeader`).txt(isSlim ? `Full` : `Slim`, true);
+                                if (isSlim) document.body.className += ' slim';
+                                else document.body.className = document.body.className.replace(/\s?slim/g, '');
+                                new DRMng.Node('#DRMng_KongSlimHeader').txt(isSlim ? 'Full' : 'Slim', true);
                                 return false;
                             }))
-                        .attach(`to`, `nav_welcome_box`);
+                        .attach('to', 'nav_welcome_box');
                 }
                 else setTimeout(DRMng.Kong.addSlimButton, 1000);
             },
             searchFieldIcon: () => {
-                const el = document.getElementById(`nav_search_submit_button`);
-                if (el) el.value = `\uf1c3`;
+                const el = document.getElementById('nav_search_submit_button');
+                if (el) el.value = '\uf1c3';
                 else setTimeout(DRMng.Kong.searchFieldIcon, 100);
             },
             /**
              * Add container for Side-by-Side alliance chat window
              */
             addSbsChatContainer: () => {
-                if (document.getElementById(`chat_window`))
-                    new DRMng.Node(`div`)
-                        .attr({ id: `alliance_chat_sbs` })
-                        .style({ display: `none` })
-                        .on(`click`, DRMng.PrivateChat.sbsEvent)
-                        .attach(`to`, `chat_tab_pane`);
+                if (document.getElementById('chat_window'))
+                    new DRMng.Node('div')
+                        .attr({ id: 'alliance_chat_sbs' })
+                        .style({ display: 'none' })
+                        .on('click', DRMng.PrivateChat.sbsEvent)
+                        .attach('to', 'chat_tab_pane');
                 else setTimeout(DRMng.Kong.addSbsChatContainer, 10);
             },
             /**
@@ -1186,7 +1186,7 @@ function main() {
                         return a;
                     };
                     Element.addMethods(Element.Methods);
-                    DRMng.log(`debug`, `{Kong::Element} Patched`);
+                    DRMng.log('debug', '{Kong::Element} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyElement, 10);
             },
@@ -1214,9 +1214,9 @@ function main() {
                     };
                     ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
                     ChatDialogue.prototype.serviceMessage = function (cont, raidInfo = null) {
-                        const msg = new DRMng.Message(cont, null, { type: `service` });
+                        const msg = new DRMng.Message(cont, null, { type: 'service' });
                         if (raidInfo) {
-                            msg._addClass = ` raidinfo`;
+                            msg._addClass = ' raidinfo';
                             msg._addStyle = `background-image: url(https://content.5thplanetgames.com/dotd_live/images/bosses/${raidInfo}.jpg);`;
                         }
                         this.insert(msg.html, null, null);
@@ -1227,7 +1227,7 @@ function main() {
                             a.data.from,
                             `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.` +
                             `insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
-                            { class: `whisper received_whisper` },
+                            { class: 'whisper received_whisper' },
                             { whisper: true }
                         );
                         else this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
@@ -1235,7 +1235,7 @@ function main() {
                     ChatDialogue.prototype.sendPrivateMessage = function (a, b) {
                         this._user_manager.sendPrivateMessage(a, b);
                         this.displayUnsanitizedMessage(a, b,
-                            { class: `whisper sent_whisper` },
+                            { class: 'whisper sent_whisper' },
                             { private: true }
                         );
                     };
@@ -1248,8 +1248,8 @@ function main() {
 
                         holodeck.scheduleRender(() => {
                             if (opts && opts.timestamp) {
-                                const newer = Array.from(chat.querySelectorAll(`div > p`))
-                                    .filter(node => node.getAttribute(`timestamp`) > opts.timestamp);
+                                const newer = Array.from(chat.querySelectorAll('div > p'))
+                                    .filter(node => node.getAttribute('timestamp') > opts.timestamp);
 
                                 if (newer.length > 0) {
                                     chat.insertBefore(msg, newer[0].parentNode);
@@ -1262,16 +1262,16 @@ function main() {
                         });
                     };
                     ChatDialogue.prototype.earliestTimestamp = function () {
-                        const node = this._message_window_node.querySelectorAll(`div > p`);
-                        if (node && node.length > 0) return parseInt(node[0].getAttribute(`timestamp`)) / 1000;
+                        const node = this._message_window_node.querySelectorAll('div > p');
+                        if (node && node.length > 0) return parseInt(node[0].getAttribute('timestamp')) / 1000;
                         return parseInt(new Date().getTime() / 1000);
                     };
                     ChatDialogue.prototype.clear = function () {
                         const c = this._message_window_node;
-                        while (c.lastChild && c.lastChild.nodeName === `DIV`) c.removeChild(c.lastChild);
+                        while (c.lastChild && c.lastChild.nodeName === 'DIV') c.removeChild(c.lastChild);
                         this._messages_count = 0;
                     };
-                    DRMng.log(`debug`, `{Kong::ChatDialogue} Patched`);
+                    DRMng.log('debug', '{Kong::ChatDialogue} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyChatDialogue, 10);
             },
@@ -1299,14 +1299,14 @@ function main() {
                         this._node.show();
                         this.updateRoomHeader();
                         this._chat_actions_node.show();
-                        this._tab_for_room.addClassName(`active`);
+                        this._tab_for_room.addClassName('active');
                         this._unread_message_node.hide();
                         this.scrollToBottom();
                     };
                     ChatRoom.prototype.isActive = function () {
                         return !(DRMng && DRMng.PrivateChat.anyActive()) && this === this._chat_window.activeRoom();
                     };
-                    DRMng.log(`debug`, `{Kong::ChatRoom} Patched`);
+                    DRMng.log('debug', '{Kong::ChatRoom} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyChatRoom, 10);
             },
@@ -1321,15 +1321,13 @@ function main() {
                             data: {
                                 history: b.history,
                                 message: b.text,
-                                timestamp: b.timestamp *
-                                                                                                               1000,
+                                timestamp: b.timestamp * 1000,
                                 room: a,
-                                user: FayeUserTransformer.transformUser(
-                                    b)
+                                user: FayeUserTransformer.transformUser(b)
                             }
                         });
                     };
-                    DRMng.log(`debug`, `{Kong::FayeEventDispatcher} Patched`);
+                    DRMng.log('debug', '{Kong::FayeEventDispatcher} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyFayeEvent, 10);
             },
@@ -1343,12 +1341,12 @@ function main() {
                         this._makeAjaxRequest(a, b, c).then(b => {
                             $j.each(b.history, (b, c) => {
                                 c.push(true);
-                                self.trigger(`message`, a, FayeMessageTransformer.transform(c));
+                                self.trigger('message', a, FayeMessageTransformer.transform(c));
                             });
-                            self.trigger(`history`, a, b.history.length);
+                            self.trigger('history', a, b.history.length);
                         });
                     };
-                    DRMng.log(`debug`, `{Kong::FayeHistory} Patched`);
+                    DRMng.log('debug', '{Kong::FayeHistory} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyFayeHistory, 10);
             },
@@ -1368,15 +1366,15 @@ function main() {
                             username: a[6],
                             character_name: a[7],
                             level: a[8],
-                            admin: 0 <= a[10].indexOf(`a`),
-                            developer: 0 <= a[10].indexOf(`d`),
-                            mobile: 0 <= a[10].indexOf(`m`),
-                            premium: 0 <= a[10].indexOf(`p`),
+                            admin: 0 <= a[10].indexOf('a'),
+                            developer: 0 <= a[10].indexOf('d'),
+                            mobile: 0 <= a[10].indexOf('m'),
+                            premium: 0 <= a[10].indexOf('p'),
                             guid: a[9],
                             history: a[12] || false
                         };
                     };
-                    DRMng.log(`debug`, `{Kong::FayeTransformer} Patched`);
+                    DRMng.log('debug', '{Kong::FayeTransformer} Patched');
                 }
                 else setTimeout(DRMng.Kong.modifyFayeTransformer, 10);
             },
@@ -1386,14 +1384,14 @@ function main() {
             modifyHolodeck: function () {
                 if (Holodeck) {
                     Holodeck.prototype.processChatCommand = function (command, ally) {
-                        const cmd = ((command.match(/^\/([^\s]+)/) || [])[1] || ``).toLowerCase();
+                        const cmd = ((command.match(/^\/([^\s]+)/) || [])[1] || '').toLowerCase();
                         if (this._chat_commands[cmd]) {
                             const chat = ally ? DRMng.PrivateChat.getChat(ally) : this;
                             return this._chat_commands[cmd].detect(b => !b(chat, command)) === undefined;
                         }
                         return true;
                     };
-                    DRMng.log(`debug`, `{Kong::Holodeck} Patched`);
+                    DRMng.log('debug', '{Kong::Holodeck} Patched');
                 }
                 else setTimeout(this.modifyHolodeck, 10);
             },
@@ -1411,11 +1409,11 @@ function main() {
                 const self = DRMng.Kong;
                 if (holodeck && holodeck.ready) {
                     /* Gestures Commands */
-                    self.addChatCommand([`kiss`, `hit`, `poke`, `slap`], (chat, cmd) => {
+                    self.addChatCommand(['kiss', 'hit', 'poke', 'slap'], (chat, cmd) => {
                         const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
                         if (part) {
                             const gesture = `** ${DRMng.Gestures[part[1].charAt(0).toUpperCase() + part[1].slice(1)]
-                                .generate().replace(`@from`, DRMng.UM.user.name).replace(`@who`, part[2])} **`;
+                                .generate().replace('@from', DRMng.UM.user.name).replace('@who', part[2])} **`;
                             if (chat instanceof Holodeck)
                                 chat.filterOutgoingMessage(gesture, chat._active_dialogue._onInputFunction);
                             else chat.send(gesture);
@@ -1427,15 +1425,15 @@ function main() {
                         return false;
                     });
                     // TODO: /perc WIP HALP!
-                    self.addChatCommand(`perc`, (a, b) => {
+                    self.addChatCommand('perc', (a, b) => {
                         let pval = /.+\s(\d+)(\w?)/.exec(b);
                         if (pval) {
                             let mul = 1;
                             switch (pval[2]) {
-                                case `k`:
+                                case 'k':
                                     mul *= 1000;
                                     break;
-                                case `m`:
+                                case 'm':
                                     mul *= 1000000;
                                     break;
                             }
@@ -1445,59 +1443,59 @@ function main() {
                         else pval = 0;
 
                         const D = [
-                            { val: 1, bok: [`Brown`, `Grey`], bokp: [50, 50] },
-                            { val: 4000, bok: [`Brown`, `Grey`, `Green`], bokp: [33, 34, 33] },
-                            { val: 6000, bok: [`Grey`, `Green`], bokp: [50, 50] },
-                            { val: 10000, bok: [`Grey`, `Green`, `Blue`], bokp: [33, 34, 33] },
-                            { val: 14000, bok: [`Green`, `Blue`], bokp: [50, 50] },
-                            { val: 16000, bok: [`Green`, `Blue`, `Purple`], bokp: [33, 34, 33] },
-                            { val: 18000, bok: [`Blue`, `Purple`], bokp: [50, 50] },
-                            { val: 22000, bok: [`Blue`, `Purple`, `Orange`], bokp: [33, 34, 33] },
-                            { val: 24000, bok: [`Purple`, `Orange`], bokp: [50, 50] },
-                            { val: 30000, bok: [`Orange`], bokp: [100] },
-                            { val: 33000, bok: [`Orange`, `Red`], bokp: [75, 25] },
-                            { val: 36000, bok: [`Orange`, `Red`], bokp: [50, 50] },
-                            { val: 50000, bok: [`Orange`, `Red`], bokp: [25, 75] },
-                            { val: 70000, bok: [`Red`], bokp: [100] },
-                            { val: 80000, bok: [`Red`, `Bronze`], bokp: [75, 25] },
-                            { val: 90000, bok: [`Red`, `Bronze`], bokp: [50, 50] },
-                            { val: 100000, bok: [`Red`, `Bronze`], bokp: [25, 75] },
-                            { val: 110000, bok: [`Bronze`, `Silver`], bokp: [75, 25] },
-                            { val: 120000, bok: [`Bronze`, `Silver`], bokp: [50, 50] },
-                            { val: 130000, bok: [`Bronze`, `Silver`], bokp: [25, 75] },
-                            { val: 140000, bok: [`Silver`], bokp: [100] },
-                            { val: 150000, bok: [`Silver`, `Gold`], bokp: [75, 25] },
-                            { val: 160000, bok: [`Silver`, `Gold`], bokp: [50, 50] },
-                            { val: 170000, bok: [`Silver`, `Gold`], bokp: [25, 75] },
+                            { val: 1, bok: ['Brown', 'Grey'], bokp: [50, 50] },
+                            { val: 4000, bok: ['Brown', 'Grey', 'Green'], bokp: [33, 34, 33] },
+                            { val: 6000, bok: ['Grey', 'Green'], bokp: [50, 50] },
+                            { val: 10000, bok: ['Grey', 'Green', 'Blue'], bokp: [33, 34, 33] },
+                            { val: 14000, bok: ['Green', 'Blue'], bokp: [50, 50] },
+                            { val: 16000, bok: ['Green', 'Blue', 'Purple'], bokp: [33, 34, 33] },
+                            { val: 18000, bok: ['Blue', 'Purple'], bokp: [50, 50] },
+                            { val: 22000, bok: ['Blue', 'Purple', 'Orange'], bokp: [33, 34, 33] },
+                            { val: 24000, bok: ['Purple', 'Orange'], bokp: [50, 50] },
+                            { val: 30000, bok: ['Orange'], bokp: [100] },
+                            { val: 33000, bok: ['Orange', 'Red'], bokp: [75, 25] },
+                            { val: 36000, bok: ['Orange', 'Red'], bokp: [50, 50] },
+                            { val: 50000, bok: ['Orange', 'Red'], bokp: [25, 75] },
+                            { val: 70000, bok: ['Red'], bokp: [100] },
+                            { val: 80000, bok: ['Red', 'Bronze'], bokp: [75, 25] },
+                            { val: 90000, bok: ['Red', 'Bronze'], bokp: [50, 50] },
+                            { val: 100000, bok: ['Red', 'Bronze'], bokp: [25, 75] },
+                            { val: 110000, bok: ['Bronze', 'Silver'], bokp: [75, 25] },
+                            { val: 120000, bok: ['Bronze', 'Silver'], bokp: [50, 50] },
+                            { val: 130000, bok: ['Bronze', 'Silver'], bokp: [25, 75] },
+                            { val: 140000, bok: ['Silver'], bokp: [100] },
+                            { val: 150000, bok: ['Silver', 'Gold'], bokp: [75, 25] },
+                            { val: 160000, bok: ['Silver', 'Gold'], bokp: [50, 50] },
+                            { val: 170000, bok: ['Silver', 'Gold'], bokp: [25, 75] },
                         ];
 
-                        let t = document.createElement(`table`), row, cell, s;
-                        t.setAttribute(`cellspacing`, `0`);
-                        t.style.setProperty(`width`, `100%`);
-                        t.style.setProperty(`font-weight`, `300`);
-                        t.style.setProperty(`font-size`, `10px`);
+                        let t = document.createElement('table'), row, cell, s;
+                        t.setAttribute('cellspacing', '0');
+                        t.style.setProperty('width', '100%');
+                        t.style.setProperty('font-weight', '300');
+                        t.style.setProperty('font-size', '10px');
 
                         for (let i = 0, l = D.length; i < l; ++i) {
                             if (D[i].val >= pval || i === l - 1) {
-                                row = document.createElement(`tr`);
-                                cell = document.createElement(`td`);
-                                cell.style.setProperty(`background`, `#303030`);
-                                cell.style.setProperty(`border-right`, `1px solid #000000`);
-                                cell.style.setProperty(`border-bottom`, `1px solid #000000`);
-                                cell.style.setProperty(`padding-right`, `5px`);
-                                cell.style.setProperty(`text-align`, `right`);
-                                cell.style.setProperty(`width`, `30px`);
+                                row = document.createElement('tr');
+                                cell = document.createElement('td');
+                                cell.style.setProperty('background', '#303030');
+                                cell.style.setProperty('border-right', '1px solid #000000');
+                                cell.style.setProperty('border-bottom', '1px solid #000000');
+                                cell.style.setProperty('padding-right', '5px');
+                                cell.style.setProperty('text-align', 'right');
+                                cell.style.setProperty('width', '30px');
                                 cell.textContent = D[i].val > 1000 ? `${D[i].val / 1000}k` : D[i].val;
                                 row.appendChild(cell);
-                                cell = document.createElement(`td`);
-                                cell.style.setProperty(`border-bottom`, `1px solid #000000`);
-                                cell.style.setProperty(`border-right`, `1px solid #000000`);
-                                cell.style.setProperty(`width`, `80%`);
+                                cell = document.createElement('td');
+                                cell.style.setProperty('border-bottom', '1px solid #000000');
+                                cell.style.setProperty('border-right', '1px solid #000000');
+                                cell.style.setProperty('width', '80%');
                                 for (let j = 0; j < D[i].bok.length; j++) {
-                                    s = document.createElement(`span`);
-                                    s.style.setProperty(`width`, D[i].bokp[j] + `%`);
-                                    s.style.setProperty(`background-color`, D[i].bok[j]);
-                                    s.style.setProperty(`display`, `inline-block`);
+                                    s = document.createElement('span');
+                                    s.style.setProperty('width', D[i].bokp[j] + '%');
+                                    s.style.setProperty('background-color', D[i].bok[j]);
+                                    s.style.setProperty('display', 'inline-block');
                                     s.textContent = D[i].bok[j];
                                     cell.appendChild(s);
                                 }
@@ -1511,61 +1509,61 @@ function main() {
 
                         return false;
                     });
-                    self.addChatCommand([`reload`, `reloaf`, `relaod`, `rl`], (_, cmd) => {
+                    self.addChatCommand(['reload', 'reloaf', 'relaod', 'rl'], (_, cmd) => {
                         const type = /^\/\w+\s?(.*)$/.exec(cmd)[1];
                         switch (type) {
-                            case `game`:
-                                DRMng.postGameMessage(`gameReload`);
+                            case 'game':
+                                DRMng.postGameMessage('gameReload');
                                 break;
-                            case `chat`:
-                                DRMng.postGameMessage(`chatReload`);
+                            case 'chat':
+                                DRMng.postGameMessage('chatReload');
                                 break;
                             default:
-                                window.gameLoader.loadGame(``);
+                                window.gameLoader.loadGame('');
                         }
                         return false;
                     });
-                    self.addChatCommand(`clear`, chat => {
+                    self.addChatCommand('clear', chat => {
                         chat = chat instanceof Holodeck ? chat._active_dialogue : chat;
                         chat.clear();
                         return false;
                     });
-                    self.addChatCommand(`kill`, (_, cmd) => {
+                    self.addChatCommand('kill', (_, cmd) => {
                         const mode = /^\/kill\s?(.*)$/.exec(cmd)[1];
                         switch (mode) {
-                            case `game`:
-                                DRMng.postGameMessage(`killGame`);
+                            case 'game':
+                                DRMng.postGameMessage('killGame');
                                 break;
-                            case `chat`:
-                                DRMng.postGameMessage(`killChat`);
+                            case 'chat':
+                                DRMng.postGameMessage('killChat');
                                 break;
                             default:
-                                new DRMng.Node(`#gameiframe`).attr({ src: `` });
+                                new DRMng.Node('#gameiframe').attr({ src: '' });
                         }
                         return false;
                     });
-                    self.addChatCommand(`wiki`, (_, cmd) => {
+                    self.addChatCommand('wiki', (_, cmd) => {
                         const val = /^\/wiki (.+)$/.exec(cmd);
                         if (val) window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${val[1]}`);
                         return false;
                     });
-                    self.addChatCommand(`enc`, (_, cmd) => {
+                    self.addChatCommand('enc', (_, cmd) => {
                         const val = /^\/enc (.+)$/.exec(cmd);
-                        if (val) window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(`${val[1]}`)}`, `_blank`);
+                        if (val) window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(`${val[1]}`)}`, '_blank');
                         return false;
                     });
-                    self.addChatCommand([`ver`, `version`, `update`], chat => {
+                    self.addChatCommand(['ver', 'version', 'update'], chat => {
                         if (chat instanceof Holodeck) chat = chat._active_dialogue;
                         DRMng.Kong.serviceMsg(DRMng.About.version(), chat);
                         return false;
                     });
-                    self.addChatCommand([`raid`, `rd`], (chat, cmd) => {
+                    self.addChatCommand(['raid', 'rd'], (chat, cmd) => {
                         const comm = /^\/(raid|rd) (.+)$/.exec(cmd);
                         if (chat instanceof Holodeck) chat = chat._active_dialogue;
                         if (comm) {
                             const raid = comm[2].toLowerCase();
-                            const rarr = raid.split(` `);
-                            const data = DRMng.Config.get(`raidData`);
+                            const rarr = raid.split(' ');
+                            const data = DRMng.Config.get('raidData');
                             const fnd = [];
 
                             Object.keys(data).forEach(rd => {
@@ -1578,17 +1576,17 @@ function main() {
                             if (fnd.length > 1) {
                                 const raidPicker = fnd.reduce((a, f) =>
                                     `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`,
-                                ``);
-                                chat && chat.serviceMessage(`Multiple results found, pick one:` + raidPicker);
+                                '');
+                                chat && chat.serviceMessage('Multiple results found, pick one:' + raidPicker);
                             }
                             else if (fnd.length === 1)
                                 chat && chat.serviceMessage(DRMng.UI.raidInfo(fnd[0][0]), data[fnd[0][0]].banner);
-                            else chat && chat.serviceMessage(`No info found matching ` + raid);
+                            else chat && chat.serviceMessage('No info found matching ' + raid);
                         }
-                        else chat && chat.serviceMessage(`Wrong /raid or /rd syntax`);
+                        else chat && chat.serviceMessage('Wrong /raid or /rd syntax');
                         return false;
                     });
-                    DRMng.log(`debug`, `{Kong} Chat commands added`);
+                    DRMng.log('debug', '{Kong} Chat commands added');
                 }
                 else setTimeout(self.addChatCommands, 100);
             },
@@ -1596,8 +1594,8 @@ function main() {
              * Relocates Chat options button
              */
             moveChatOptions: () => {
-                const src = document.getElementById(`chat_actions_container`);
-                const dst = document.getElementById(`chat_room_tabs`);
+                const src = document.getElementById('chat_actions_container');
+                const dst = document.getElementById('chat_room_tabs');
                 if (src && dst) dst.appendChild(src);
                 else setTimeout(DRMng.Kong.moveChatOptions, 10);
             },
@@ -1617,28 +1615,28 @@ function main() {
              * Sets kongregate header width to match game frame
              */
             setHeaderWidth: () => {
-                document.getElementById(`header`).style.width = document.getElementById(`maingame`).offsetWidth + `px`;
+                document.getElementById('header').style.width = document.getElementById('maingame').offsetWidth + 'px';
             },
             /**
              * Resize game frame to account for inactive/hidden world chat
              */
             hideWorldChat: () => {
-                const opts = DRMng.Config.get(`gameFrame`);
-                new DRMng.Node(`#game`).style({ width: (opts.hideWChat || opts.removeWChat) ? `760px` : `1025px` });
+                const opts = DRMng.Config.get('gameFrame');
+                new DRMng.Node('#game').style({ width: (opts.hideWChat || opts.removeWChat) ? '760px' : '1025px' });
             },
             setWrapperWidth: w => {
-                const width = w ? `calc(100% - ${w}px)` : `100%`;
-                new DRMng.Node(`#primarywrap`).style({ width: width });
-                new DRMng.Node(`#headerwrap`).style({ width: width });
+                const width = w ? `calc(100% - ${w}px)` : '100%';
+                new DRMng.Node('#primarywrap').style({ width: width });
+                new DRMng.Node('#headerwrap').style({ width: width });
             },
             /**
              * Removes iFrames leaving only one with game
              */
             killIframes: () => {
-                document.querySelectorAll(`iframe`).forEach(ifr =>
-                    ifr.id !== `gameiframe` &&
+                document.querySelectorAll('iframe').forEach(ifr =>
+                    ifr.id !== 'gameiframe' &&
                                                                 ifr.parentNode.removeChild(ifr));
-                DRMng.log(`debug`, `{Kong} Removed all redundant iFrames`);
+                DRMng.log('debug', '{Kong} Removed all redundant iFrames');
             },
             serviceMsg: (msg, chat) => {
                 chat = chat ||
@@ -1647,8 +1645,8 @@ function main() {
                 else if (!holodeck) setTimeout(DRMng.Kong.serviceMsg, 50, msg);
             },
             init: function () {
-                if (document.body.className.indexOf(`premium_user`) === -1) document.body.className += ` premium_user`;
-                document.body.className = document.body.className.replace(` spotlight_ad_creative-control`, ``);
+                if (document.body.className.indexOf('premium_user') === -1) document.body.className += ' premium_user';
+                document.body.className = document.body.className.replace(' spotlight_ad_creative-control', '');
                 this.killAds();
                 this.killScripts();
                 this.killFBlike();
@@ -1664,24 +1662,24 @@ function main() {
                 //setTimeout(this.killIframes, 5000);
 
                 // Open Sans font used by scripts theme
-                new DRMng.Node(`link`)
+                new DRMng.Node('link')
                     .attr({
-                        href: `https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800`,
-                        rel: `stylesheet`
+                        href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
+                        rel: 'stylesheet'
                     })
-                    .attach(`to`, document.head);
+                    .attach('to', document.head);
 
                 // Kong theme
-                new DRMng.Node(`link`)
+                new DRMng.Node('link')
                     .attr({
-                        id: `DRMng_kongCSS`,
-                        href: `https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css`,
-                        rel: `stylesheet`
+                        id: 'DRMng_kongCSS',
+                        href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
+                        rel: 'stylesheet'
                     })
-                    .on(`load`, DRMng.Kong.setHeaderWidth)
-                    .attach(`to`, document.head);
+                    .on('load', DRMng.Kong.setHeaderWidth)
+                    .attach('to', document.head);
 
-                DRMng.log(`{Kong} Module loaded`);
+                DRMng.log('{Kong} Module loaded');
             }
         },
         /**
@@ -1689,9 +1687,9 @@ function main() {
          * All raids management related methods
          */
         Raids: {
-            srv: `elyssa`,
+            srv: 'elyssa',
             flt: {},
-            filter: ``,
+            filter: '',
             all: [],
             locked: false,
             bootstrap: true,
@@ -1708,26 +1706,26 @@ function main() {
              * Checks and sends direct submission
              */
             checkAndSend: () => {
-                const link = document.getElementById(`DRMng_submitRaidLink`);
+                const link = document.getElementById('DRMng_submitRaidLink');
                 const r = DRMng.Util.getRaidFromUrl(link.textContent, DRMng.UM.user.name);
-                if (r && !isNaN(+r.id) && r.hash.length === 10 && [`kasan`, `elyssa`][r.pid] === DRMng.Raids.srv) {
-                    const delayBase = document.querySelector(`[group=DRMng_submitDelay].crimson`).textContent;
-                    let delay = parseInt(document.getElementById(`DRMng_submitDelay`).value);
+                if (r && !isNaN(+r.id) && r.hash.length === 10 && ['kasan', 'elyssa'][r.pid] === DRMng.Raids.srv) {
+                    const delayBase = document.querySelector('[group=DRMng_submitDelay].crimson').textContent;
+                    let delay = parseInt(document.getElementById('DRMng_submitDelay').value);
                     switch (delayBase) {
-                        case `day`:
+                        case 'day':
                             delay *= 24;    // break omitted
-                        case `hr`:
+                        case 'hr':
                             delay *= 60;     // break omitted
                         default:
                             delay *= 60000;
                     }
                     r.delay = delay;
                     delete r.sid;
-                    DRMng.Engine.client.emit(`service`, { action: `delayedSub`, data: r });
+                    DRMng.Engine.client.emit('service', { action: 'delayedSub', data: r });
                 }
-                else DRMng.UI.submitResponse(0, `Paste proper raid link before submitting`);
-                link.textContent = `Paste raid link here`;
-                link.className = `default`;
+                else DRMng.UI.submitResponse(0, 'Paste proper raid link before submitting');
+                link.textContent = 'Paste raid link here';
+                link.className = 'default';
             },
             /**
              * Removes old raids from dead cache
@@ -1765,22 +1763,22 @@ function main() {
                     if (u.qualified) {
                         const authData = `kongregate_user_id=${u.ID}&kongregate_game_auth_token=${u.authToken}`;
                         const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}` +
-                                         `&serverid=${r.sid || (DRMng.Config.get(`server`) === `Elyssa` ? `1` : `2`)}`;
+                                         `&serverid=${r.sid || (DRMng.Config.get('server') === 'Elyssa' ? '1' : '2')}`;
                         const data = {
-                            eventName: `DRMng.joinRaid${multi ? `s` : ``}`,
+                            eventName: `DRMng.joinRaid${multi ? 's' : ''}`,
                             url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
-                            method: `GET`, ext: r, timeout: 10000
+                            method: 'GET', ext: r, timeout: 10000
                         };
                         DRMng.postMessage(data);
                     }
                     else {
-                        DRMng.log(`warn`, `{Raids::join} User not qualified to join`, u);
+                        DRMng.log('warn', '{Raids::join} User not qualified to join', u);
                         DRMng.Raids.joined++;
                         DRMng.Raids.joinMsg();
                     }
                 }
                 else {
-                    DRMng.log(`warn`, `{Raids::join} Bad data`, r);
+                    DRMng.log('warn', '{Raids::join} Bad data', r);
                     DRMng.Raids.joined++;
                     DRMng.Raids.joinMsg();
                 }
@@ -1792,16 +1790,16 @@ function main() {
                 let i, l, name;
                 this.joinQueue = [];
                 for (i = 0, l = this.all.length; i < l; ++i) {
-                    name = this.all[i].boss + `_` + this.all[i].diff;
+                    name = this.all[i].boss + '_' + this.all[i].diff;
                     if (!this.all[i].visited &&
                         !this.all[i].isFull &&
-                        this.filter.indexOf(`@` + name) !== -1) {
+                        this.filter.indexOf('@' + name) !== -1) {
                         this.joinQueue.push(this.all[i]);
                         this.ids.push(this.all[i].id);
                     }
                 }
                 // chat raids
-                let cr = document.querySelectorAll(`p.raid:not(.dead):not(.visited) a`),
+                let cr = document.querySelectorAll('p.raid:not(.dead):not(.visited) a'),
                     s  = DRMng.Config.local.server.toLowerCase(),
                     f  = DRMng.Config.local.filterRaids[s], r, hf;
                 for (i = 0, l = cr.length; i < l; ++i) {
@@ -1811,7 +1809,7 @@ function main() {
                         if (hf) {
                             name = `${r.boss}_${r.diff}`;
                             if (this.ids.indexOf(r.id) === -1 &&
-                                this.filter.indexOf(`@` + name) !== -1) {
+                                this.filter.indexOf('@' + name) !== -1) {
                                 this.joinQueue.push(r);
                                 this.ids.push(r.id);
                             }
@@ -1831,15 +1829,15 @@ function main() {
                 }
             },
             switchAutoJoin: function () {
-                const button = document.getElementById(`DRMng_autoJoin`);
+                const button = document.getElementById('DRMng_autoJoin');
                 if (this.isAuto) {
                     this.isAuto = false;
-                    button.className = ``;
+                    button.className = '';
                 }
                 else {
                     this.joinAll();
                     this.isAuto = true;
-                    button.className = `crimson`;
+                    button.className = 'crimson';
                 }
             },
             joinAll: function () {
@@ -1858,7 +1856,7 @@ function main() {
             joinClick: e => {
                 e.preventDefault();
                 if (e && e.target) {
-                    const r = JSON.parse(e.target.getAttribute(`data`) || `false`);
+                    const r = JSON.parse(e.target.getAttribute('data') || 'false');
                     if (r) setTimeout(DRMng.Raids.joinOne.bind(DRMng.Raids, r), 1);
                 }
                 return false;
@@ -1899,7 +1897,7 @@ function main() {
                 if (data && data.status === 200 && data.responseText && data.url) {
                     let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
                     let name = DRMng.Config.local.raidData[data.ext.boss];
-                    status = [`Unknown`, `Success`, `Dead`, `Already in`, `Wrong Guild`, `Invalid`][status];
+                    status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
                     name = name ? name.sName : data.ext.boss;
                     DRMng.Raids.joinMsg(`Joining ${name} :: ${status}`);
                     setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 0);
@@ -1914,7 +1912,7 @@ function main() {
                     else {
                         let name = DRMng.Config.local.raidData[data.ext.boss];
                         name = name ? name.sName : data.ext.boss;
-                        status = [`Unknown`, `Success`, `Dead`, `Already in`, `Wrong Guild`, `Invalid`][status];
+                        status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
                         DRMng.Raids.joinMsg(`Joining ${name} :: ${status}`);
                     }
                 }
@@ -1931,7 +1929,7 @@ function main() {
             },
             processFilter: function (filterTxt, loading) {
                 DRMng.Raids.isAuto && DRMng.Raids.switchAutoJoin();
-                if (loading) filterTxt = DRMng.Config.get(`filterString::${this.srv}`) || ``;
+                if (loading) filterTxt = DRMng.Config.get(`filterString::${this.srv}`) || '';
                 else DRMng.Config.set({ [`filterString::${this.srv}`]: filterTxt });
 
                 const parts = filterTxt.split(/\s?\|\s?|\sor\s|\s?,\s?/ig);
@@ -1941,22 +1939,22 @@ function main() {
                 let mode, raids, diff, reg, i, d, result = [];
                 // prepare filters
                 parts.forEach(p => {
-                    mode = p[0] === `-` ? `rem` : `add`;
-                    if (mode === `rem`) p = p.slice(1);
+                    mode = p[0] === '-' ? 'rem' : 'add';
+                    if (mode === 'rem') p = p.slice(1);
                     p = regChk.exec(p);
                     if (p) switch (p[1]) {
-                        case `m:`:
+                        case 'm:':
                             flt[mode].magic.push(p[2]);
                             break;
-                        case `k:`:
+                        case 'k:':
                             reg = regZone.exec(p[2]);
                             raids = [];
                             if (reg) for (i = reg[1]; i <= reg[2]; ++i) {
                                 d = DRMng.Config.get(`filterData::z${i}`);
                                 if (d) raids = raids.concat(d);
                             }
-                            else raids = p[2] === `all` ?
-                                Object.keys(DRMng.Config.get(`raidData`)) :
+                            else raids = p[2] === 'all' ?
+                                Object.keys(DRMng.Config.get('raidData')) :
                                 DRMng.Config.get(`filterData::${p[2]}`);
 
                             if (raids) {
@@ -1965,8 +1963,8 @@ function main() {
                             }
                             break;
                         default:
-                            raids = DRMng.Config.get(`raidData`);
-                            reg = new RegExp(p[2], `ig`);
+                            raids = DRMng.Config.get('raidData');
+                            reg = new RegExp(p[2], 'ig');
                             diff = this.getDiff(p[3]);
                             Object.keys(raids).forEach(r =>
                                 `${r} ${raids[r].sName}`.search(reg) > -1 &&
@@ -1976,20 +1974,20 @@ function main() {
                 });
                 // merge
                 //DRMng.log(`debug`, `FILTERS`, filters);
-                raids = DRMng.Config.get(`raidData`);
+                raids = DRMng.Config.get('raidData');
                 if (flt.add.raid.length > 0)
                     flt.add.raid.forEach(r => {
                         i = raids[r[0]];
                         i = i ? i.hp : [1, 1, 1, 1];
-                        if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) result.push(r[0] + `_4`);
-                        if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) result.push(r[0] + `_3`);
-                        if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) result.push(r[0] + `_2`);
-                        if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) result.push(r[0] + `_1`);
+                        if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_4');
+                        if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) result.push(r[0] + '_3');
+                        if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) result.push(r[0] + '_2');
+                        if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_1');
                     });
                 else Object.keys(raids).forEach(r => {
                     i = raids[r];
                     i = i ? i.hp.length : 4;
-                    for (d = 1; d <= i; ++d) result.push(r + `_` + d);
+                    for (d = 1; d <= i; ++d) result.push(r + '_' + d);
                 });
 
                 if (flt.rem.raid.length > 0)
@@ -1997,33 +1995,33 @@ function main() {
                         i = raids[r[0]];
                         i = i ? i.hp : [1, 1, 1, 1];
                         const arr = [];
-                        if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) arr.push(r[0] + `_4`);
-                        if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) arr.push(r[0] + `_3`);
-                        if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) arr.push(r[0] + `_2`);
-                        if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) arr.push(r[0] + `_1`);
+                        if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_4');
+                        if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) arr.push(r[0] + '_3');
+                        if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) arr.push(r[0] + '_2');
+                        if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_1');
                         arr.forEach(r => {
                             d = result.indexOf(r);
                             d > -1 && result.splice(d, 1);
                         });
                     });
 
-                DRMng.log(`debug`, `{Raid::Filter} Add filters ::`, flt.add.raid.join(`, `));
-                DRMng.log(`debug`, `{Raid::Filter} Sub filters ::`, flt.rem.raid.join(`, `));
+                DRMng.log('debug', '{Raid::Filter} Add filters ::', flt.add.raid.join(', '));
+                DRMng.log('debug', '{Raid::Filter} Sub filters ::', flt.rem.raid.join(', '));
 
                 // joining filter
-                this.filter = `@${result.join(`@`)}`;
+                this.filter = `@${result.join('@')}`;
                 if (!this.bootstrap && !this.isJoining) setTimeout(this.prepareJoining.bind(this), 10);
 
                 // UI filter
-                const content = `.drm_${result.join(`, .drm_`)} { display: flex !important; }`;
-                DRMng.Util.cssStyle(`DRMng_RaidsCSS`, content);
+                const content = `.drm_${result.join(', .drm_')} { display: flex !important; }`;
+                DRMng.Util.cssStyle('DRMng_RaidsCSS', content);
             },
             setChat: (id, cls) => {
                 const list = document.getElementsByClassName(id);
                 for (let i = 0, len = list.length; i < len; ++i) list[i].classList.add(cls);
             },
             setVisited: function (id, drop) {
-                const srv = DRMng.Config.get(`server`).toLowerCase();
+                const srv = DRMng.Config.get('server').toLowerCase();
                 let idx = DRMng.Config.get(`visited::${srv}`).indexOf(id);
                 if (drop && idx > -1) DRMng.Config.local.visited[srv].splice(idx, 1);
                 else if (idx === -1) {
@@ -2032,22 +2030,22 @@ function main() {
                     if (idx > -1) {
                         this.all[idx].visited = true;
                         const el = document.getElementById(`DRMng_${id}`);
-                        if (el) el.className += ` visited`;
+                        if (el) el.className += ' visited';
                     }
                 }
-                if (!drop) this.setChat(id, `visited`);
+                if (!drop) this.setChat(id, 'visited');
                 DRMng.Config.saveLocal();
             },
             comp: (a, b) => a.hp - b.hp,
             _setComp: function (field) {
                 switch (field) {
-                    case `id`:
+                    case 'id':
                         this.comp = (a, b) => parseInt(a.id) - parseInt(b.id);
                         break;
-                    case `health`:
+                    case 'health':
                         this.comp = (a, b) => a.hp - b.hp;
                         break;
-                    case `name`: /* by name then by hp */
+                    case 'name': /* by name then by hp */
                         this.comp = (a, b) => {
                             const an = a.sname || a.boss;
                             const bn = b.sname || b.boss;
@@ -2056,11 +2054,11 @@ function main() {
                             return a.hp - b.hp;
                         };
                         break;
-                    case `time`:
+                    case 'time':
                         this.comp = (a, b) => a.createtime - b.createtime;
                         break;
                     default:
-                        field = `health`;
+                        field = 'health';
                         this.comp = (a, b) => a.hp - b.hp;
                         DRMng.Config.set({ sortBy: field });
                 }
@@ -2099,11 +2097,11 @@ function main() {
                 this.bootstrap = true;
 
                 this.all = [];
-                this.srv = DRMng.Config.get(`server`).toLowerCase();
+                this.srv = DRMng.Config.get('server').toLowerCase();
                 this.flt = DRMng.Config.get(`filterRaids::${this.srv}`);
 
                 const vis = DRMng.Config.get(`visited::${this.srv}`);
-                const rDat = DRMng.Config.get(`raidData`);
+                const rDat = DRMng.Config.get('raidData');
                 let rd, hf;
 
                 raids.forEach(r => {
@@ -2112,7 +2110,7 @@ function main() {
                         r.createtime = new Date(r.createtime).getTime();
                         if (vis.indexOf(r.id) > -1) {
                             r.visited = true;
-                            this.setChat(r.id, `visited`);
+                            this.setChat(r.id, 'visited');
                         }
                         rd = rDat[r.boss];
                         r.isFull = rd && r.participants && rd.maxPlayers === r.participants;
@@ -2120,7 +2118,7 @@ function main() {
                     }
                 });
 
-                this._setComp(DRMng.Config.get(`sortBy`));
+                this._setComp(DRMng.Config.get('sortBy'));
                 this.all.sort(this.comp);
 
                 this.count = this.all.length;
@@ -2174,7 +2172,7 @@ function main() {
                 }
                 this.locked = true;
 
-                serverNuke && DRMng.Engine.client.emit(`service`, { action: `raidNuke`, data: id });
+                serverNuke && DRMng.Engine.client.emit('service', { action: 'raidNuke', data: id });
 
                 const cfg = DRMng.Config.local;
 
@@ -2185,7 +2183,7 @@ function main() {
                     const r = this.get(id);
                     this.all.splice(i, 1);
                     this.count--;
-                    if (!this.isJoining && this.filter.indexOf(`@` + r.boss + `_` + r.diff) > -1)
+                    if (!this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1)
                         setTimeout(this.prepareJoining.bind(this), 10);
                 }
                 DRMng.UI.removeRaidField(id);
@@ -2194,7 +2192,7 @@ function main() {
                 i = cfg.visited[this.srv].indexOf(id);
                 i > -1 && cfg.visited[this.srv].splice(i, 1);
 
-                this.setChat(id, `dead`);
+                this.setChat(id, 'dead');
                 this.setVisited(id, true);
                 DRMng.UI.displayStatus();
 
@@ -2211,8 +2209,8 @@ function main() {
 
                 let r = this.get(raid.id);
                 if (r && !this.getDead(raid.id)) {
-                    const keys = [`hp`, `participants`, `m1`, `m2`, `m3`, `m4`, `m5`, `m6`];
-                    full && keys.push(`mnum`, `size`);
+                    const keys = ['hp', 'participants', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6'];
+                    full && keys.push('mnum', 'size');
 
                     const rd = cfg.raidData[r.boss];
 
@@ -2231,7 +2229,7 @@ function main() {
                     DRMng.UI.addRaidField(r, i);
 
                     // handle raid becoming full on update
-                    if (r.isFull && !this.isJoining && this.filter.indexOf(`@` + r.boss + `_` + r.diff) > -1)
+                    if (r.isFull && !this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1)
                         setTimeout(this.prepareJoining.bind(this), 0);
                 }
 
@@ -2252,9 +2250,9 @@ function main() {
                 return pos;
             },
             init: function () {
-                DRMng.log(`{Raids} This`, this);
+                DRMng.log('{Raids} This', this);
                 setTimeout(() => this.cleanDeadCache(), 60000);
-                DRMng.log(`{Raids} Module loaded`);
+                DRMng.log('{Raids} Module loaded');
             }
         },
         /**
@@ -2266,14 +2264,14 @@ function main() {
             knownUsers: {},
             user: { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null },
             getBasicUserData: function () {
-                if (active_user && active_user.username().toLowerCase() !== `guest`) {
+                if (active_user && active_user.username().toLowerCase() !== 'guest') {
                     this.user.ID = active_user.id();
                     this.user.name = active_user.username();
                     this.user.authToken = active_user.gameAuthToken();
                     setTimeout(this.getExtendedUserData.bind(this), 0);
                 }
                 else {
-                    DRMng.log(`debug`, `{UserManager} User data not ready, trying again in .1 sec`);
+                    DRMng.log('debug', '{UserManager} User data not ready, trying again in .1 sec');
                     setTimeout(this.getBasicUserData.bind(this), 100);
                 }
             },
@@ -2298,14 +2296,14 @@ function main() {
                 if (holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
                     if (holodeck._chat_window._rooms_by_type.guild) setTimeout(this.getUserNode.bind(this), 0);
                     else if (this.numTries++ <= 20) {
-                        DRMng.log(`debug`, `{UserManager} Guild data missing, trying again in 2 sec (%d/20)`,
+                        DRMng.log('debug', '{UserManager} Guild data missing, trying again in 2 sec (%d/20)',
                             this.numTries);
                         setTimeout(this.getExtendedUserData.bind(this), 2000);
                     }
                     else {
-                        DRMng.log(`warn`, `{UserManager} Guild info missing. Protip: Join private guild.`);
-                        this.user.guild = ``;
-                        this.user.IGN = ``;
+                        DRMng.log('warn', '{UserManager} Guild info missing. Protip: Join private guild.');
+                        this.user.guild = '';
+                        this.user.IGN = '';
                         this.user.qualified = true;
                     }
                 }
@@ -2324,16 +2322,16 @@ function main() {
         Engine: {
             client: null,
             changeServer: server => {
-                if (typeof server !== `string`) server = (DRMng.Config.get(`server`) === `Elyssa` ? `Kasan` : `Elyssa`);
-                DRMng.log(`info`, `{Engine} Changing server to <%s>`, server);
+                if (typeof server !== 'string') server = (DRMng.Config.get('server') === 'Elyssa' ? 'Kasan' : 'Elyssa');
+                DRMng.log('info', '{Engine} Changing server to <%s>', server);
                 DRMng.Engine.client.disconnect();
                 DRMng.Config.set({ server: server });
-                DRMng.Engine.client.nsp = `/` + server;
-                DRMng.Raids.processFilter(``, true);
+                DRMng.Engine.client.nsp = '/' + server;
+                DRMng.Raids.processFilter('', true);
                 DRMng.UI.setupFilterBox();
                 DRMng.UI.setupFilterTab();
-                document.getElementById(`DRMng_server`).innerText = server;
-                DRMng.UI.displayStatus(`Loading...`);
+                document.getElementById('DRMng_server').innerText = server;
+                DRMng.UI.displayStatus('Loading...');
                 setTimeout(DRMng.Engine.client.connect.bind(DRMng.Engine.client), 1000);
             },
             reconnect: () => {
@@ -2342,21 +2340,21 @@ function main() {
                 setTimeout(DRMng.Engine.client.connect.bind(DRMng.Engine.client), 1000);
             },
             init: () => {
-                if (typeof io === `function` && DRMng.UM.user.qualified) {
+                if (typeof io === 'function' && DRMng.UM.user.qualified) {
                     DRMng.Engine.client = io
                         .connect(`${DRMng.ServerWS}/${DRMng.Config.local.server}`,
                             {
                                 secure: true,
-                                transports: [`websocket`],
+                                transports: ['websocket'],
                                 query: { user: DRMng.UM.user.name }
                             })
-                        .on(`error`, data => DRMng.log(`warn`, `{Engine} Error ::`, data))
-                        .on(`msg`, DRMng.Engine.handleMessage)
-                        .on(`service`, DRMng.Engine.handleService)
-                        .on(`disconnect`, () => DRMng.log(`warn`, `{Engine} Socket client disconnected.`))
-                        .on(`connect`, () => {
-                            DRMng.log(`{Engine} Socket connection established, joining...`);
-                            DRMng.Engine.client.emit(`join`, {
+                        .on('error', data => DRMng.log('warn', '{Engine} Error ::', data))
+                        .on('msg', DRMng.Engine.handleMessage)
+                        .on('service', DRMng.Engine.handleService)
+                        .on('disconnect', () => DRMng.log('warn', '{Engine} Socket client disconnected.'))
+                        .on('connect', () => {
+                            DRMng.log('{Engine} Socket connection established, joining...');
+                            DRMng.Engine.client.emit('join', {
                                 usr: DRMng.UM.user.name,
                                 ign: DRMng.UM.user.IGN,
                                 gld: DRMng.UM.user.guild,
@@ -2365,12 +2363,12 @@ function main() {
                         });
                 }
                 else {
-                    DRMng.log(`debug`, `{Engine} Resources not ready, trying again in 1 sec...`);
+                    DRMng.log('debug', '{Engine} Resources not ready, trying again in 1 sec...');
                     setTimeout(DRMng.Engine.init, 1000);
                 }
             },
             //handleMessage: msg => DRMng.Kong.serviceMsg(msg.txt),
-            handleMessage: msg => DRMng.log(`info`, `{Engine::Message} ${msg.txt}`),
+            handleMessage: msg => DRMng.log('info', `{Engine::Message} ${msg.txt}`),
             handleService: d => {
                 if (!d) return;
                 const config = DRMng.Config;
@@ -2378,11 +2376,11 @@ function main() {
                 const data = d.data;
 
                 switch (action) {
-                    case `raidData`:
-                        if (config.get(`checkSums::raidData`) !== data.raidDataHash && data.raidDataHash.length > 6) {
-                            DRMng.log(`info`, `{Engine::Service} New raids data. Old hash ` +
+                    case 'raidData':
+                        if (config.get('checkSums::raidData') !== data.raidDataHash && data.raidDataHash.length > 6) {
+                            DRMng.log('info', '{Engine::Service} New raids data. Old hash ' +
                                               `<${config.get(
-                                                  `checkSums::raidData`)}> | New hash <${data.raidDataHash}>`);
+                                                  'checkSums::raidData')}> | New hash <${data.raidDataHash}>`);
                             config.set({
                                 raidData: data.raidData,
                                 'checkSums::raidData': data.raidDataHash
@@ -2390,50 +2388,50 @@ function main() {
                         }
                         setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 0);
                         break;
-                    case `filterData`:
-                        if (config.get(`checkSums::filterData`) !== data.filterDataHash &&
+                    case 'filterData':
+                        if (config.get('checkSums::filterData') !== data.filterDataHash &&
                             data.filterDataHash.length > 6) {
-                            DRMng.log(`info`, `{Engine::Service} New keywords data. Old hash ` +
+                            DRMng.log('info', '{Engine::Service} New keywords data. Old hash ' +
                                               `<${config.get(
-                                                  `checkSums::filterData`)}> | New hash <${data.filterDataHash}>`);
+                                                  'checkSums::filterData')}> | New hash <${data.filterDataHash}>`);
                             config.set({
                                 filterData: data.filterData,
                                 'checkSums::filterData': data.filterDataHash
                             });
                         }
                         break;
-                    case `tiersData`:
+                    case 'tiersData':
                         if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
                             d.data.tiersDataHash.length > 6) {
-                            DRMng.log(`info`, `{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>`,
-                                config.get(`checkSums::tiersData`), data.tiersDataHash);
+                            DRMng.log('info', '{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>',
+                                config.get('checkSums::tiersData'), data.tiersDataHash);
                             config.set({
                                 tiersData: JSON.parse(data.tiersData),
                                 'checkSums::tiersData': data.tiersDataHash
                             });
                         }
                         break;
-                    case `bootStrap`:
+                    case 'bootStrap':
                         DRMng.log(`{Engine::Service} Raids feed <${d.raids.length}>`);
                         setTimeout(DRMng.Raids.insertAll.bind(DRMng.Raids, d.raids), 0);
                         break;
-                    case `newRaid`:
+                    case 'newRaid':
                         setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, d.data), 0);
                         break;
-                    case `nukedRaid`:
+                    case 'nukedRaid':
                         setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, d.data), 0);
                         break;
-                    case `partialUpdate`:
+                    case 'partialUpdate':
                         setTimeout(DRMng.Raids.update.bind(DRMng.Raids, d.data, false), 0);
                         break;
-                    case `fullUpdate`:
+                    case 'fullUpdate':
                         setTimeout(DRMng.Raids.update.bind(DRMng.Raids, d.data, true), 0);
                         break;
-                    case `delayedSub`:
+                    case 'delayedSub':
                         setTimeout(DRMng.UI.submitResponse.bind(DRMng.UI, d.data.error ? 0 : 1, d.data.msg), 0);
                         break;
                     default:
-                        DRMng.log(`warn`, `{Engine::Service} Unknown action => `, action);
+                        DRMng.log('warn', '{Engine::Service} Unknown action => ', action);
                 }
             }
         },
@@ -2453,29 +2451,27 @@ function main() {
                             const el = {
                                 html: null,
                                 name: user.usr || null,
-                                ign: user.ign || ``,
-                                guild: user.gld || ``,
+                                ign: user.ign || '',
+                                guild: user.gld || '',
                                 sock: user.sid || null
                             };
 
-                            el.html = document.createElement(`div`);
-                            el.html.setAttribute(`class`, `userlist`);
+                            el.html = document.createElement('div');
+                            el.html.setAttribute('class', 'userlist');
 
-                            let span = document.createElement(`span`);
-                            span.setAttribute(`class`, `guildtag`);
-                            span.textContent = el.guild ? DRMng.PrivateChat.getGuildTag(el.guild) : `???`;
+                            let span = document.createElement('span');
+                            span.setAttribute('class', 'guildtag');
+                            span.textContent = el.guild ? DRMng.PrivateChat.getGuildTag(el.guild) : '???';
                             el.html.appendChild(span);
 
-                            span = document.createElement(`span`);
-                            span.setAttribute(`style`, `flex-grow: 0; flex-shrink: 0; color: #f0f0f9;` +
-                                                       ` margin-right: 4px; padding-bottom: 1px;`);
+                            span = document.createElement('span');
+                            span.setAttribute('class', 'username');
                             span.textContent = el.name;
                             el.html.appendChild(span);
 
-                            span = document.createElement(`span`);
-                            span.setAttribute(`style`, `flex-grow: 1; flex-shrink: 1; color: #ddd; font-style:` +
-                                                       ` italic; padding-bottom: 1px; text-overflow: ellipsis; overflow: hidden;`);
-                            span.textContent = `(` + el.ign + `)`;
+                            span = document.createElement('span');
+                            span.setAttribute('class', 'userign');
+                            if (el.ign) span.textContent = '(' + el.ign + ')';
                             el.html.appendChild(span);
 
                             this.fields[el.name] = el;
@@ -2526,13 +2522,13 @@ function main() {
             }
 
             connect() {
-                if (typeof io === `function` && this.tab && this.chat &&
+                if (typeof io === 'function' && this.tab && this.chat &&
                     DRMng.UM.user.qualified && !DRMng.Raids.bootstrap) {
 
                     if (DRMng.Config.local.alliance.sbs)
-                        document.getElementById(`alliance_chat_sbs`).style.removeProperty(`display`);
+                        document.getElementById('alliance_chat_sbs').style.removeProperty('display');
                     else
-                        this.tab.style.removeProperty(`display`);
+                        this.tab.style.removeProperty('display');
 
                     const usr = DRMng.UM.user;
                     const user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
@@ -2544,32 +2540,32 @@ function main() {
                                 token: DRMng.Util.crc32(this.conf.pass)
                             },
                             secure: true,
-                            transports: [`websocket`]
+                            transports: ['websocket']
                         });
 
-                    this.client.on(`error`, err => {
-                        DRMng.log(`warn`, `{PrivateChat} Client error:`, err);
-                        document.getElementById(`alliance_chat_sbs`).style.setProperty(`display`, `none`);
-                        this.tab.style.setProperty(`display`, `none`);
+                    this.client.on('error', err => {
+                        DRMng.log('warn', '{PrivateChat} Client error:', err);
+                        document.getElementById('alliance_chat_sbs').style.setProperty('display', 'none');
+                        this.tab.style.setProperty('display', 'none');
                         //destroyChat();
                     });
 
-                    this.client.on(`disconnect`, () => {
-                        console.warn(`warn`, `{PrivateChat} Client disconnected!`);
+                    this.client.on('disconnect', () => {
+                        console.warn('warn', '{PrivateChat} Client disconnected!');
                     });
 
-                    this.client.on(`connect`, () => {
+                    this.client.on('connect', () => {
                         this.clearUsers();              // clear user list
                         this.clear();                   // clear chat
-                        this.client.emit(`join`, user); // login to server
-                        DRMng.log(`info`, `{PrivateChat} User login data [%s|%s|%s]`, user.usr, user.ign, user.gld);
+                        this.client.emit('join', user); // login to server
+                        DRMng.log('info', '{PrivateChat} User login data [%s|%s|%s]', user.usr, user.ign, user.gld);
                     });
 
-                    this.client.on(`msg`, data => this.messageEvent(data));
-                    this.client.on(`service`, data => this.serviceEvent(data));
+                    this.client.on('msg', data => this.messageEvent(data));
+                    this.client.on('service', data => this.serviceEvent(data));
                 }
                 else {
-                    DRMng.log(`info`, `{PrivateChat} Resources not ready, trying again in 1 sec...`);
+                    DRMng.log('info', '{PrivateChat} Resources not ready, trying again in 1 sec...');
                     setTimeout(() => this.connect(), 1000);
                 }
             }
@@ -2642,28 +2638,28 @@ function main() {
 
             nameUpdate() {
                 if (DRMng.Config.local.alliance.sbs || !this.active) return;
-                document.querySelector(`.room_name.h6`).textContent = this.name;
+                document.querySelector('.room_name.h6').textContent = this.name;
             }
 
             static getGuildTag(guild) {
                 const roman = /^(.+\s)([IXV]+)$/.exec(guild);
                 if (roman) guild = roman[1] + DRMng.Util.deRomanize(roman[2]);
                 const reg = /([A-Z]+|\w)\w*/g;
-                let tag = ``, part;
+                let tag = '', part;
                 while ((part = reg.exec(guild))) tag += part[1];
                 return tag;
             }
 
             setUnread(unset = false) {
-                if (this.unr) this.unr.setAttribute(`style`, unset ? `display: none` : ``);
+                if (this.unr) this.unr.setAttribute('style', unset ? 'display: none' : '');
             }
 
             activate() {
                 if (!DRMng.Config.local.alliance.sbs) holodeck._chat_window._active_room.hide();
                 if (DRMng.PrivateChat.getActive()) DRMng.PrivateChat.getActive().deactivate();
-                this.tab.classList.add(`active`);
+                this.tab.classList.add('active');
                 //this.tab.style.setProperty(`border-right`, `0`);
-                this.body.style.removeProperty(`display`);
+                this.body.style.removeProperty('display');
                 this.setUnread(true);
                 this.active = true;
                 this.nameUpdate();
@@ -2674,8 +2670,8 @@ function main() {
             deactivate() {
                 if (!this.active) return;
                 this.active = false;
-                this.tab.classList.remove(`active`);
-                this.body.style.display = `none`;
+                this.tab.classList.remove('active');
+                this.body.style.display = 'none';
             }
 
             tabClick(e) {
@@ -2691,12 +2687,12 @@ function main() {
 
             send(msg) {
                 msg = msg || this.input.value;
-                if (msg && msg !== `Enter text for chat here`) {
+                if (msg && msg !== 'Enter text for chat here') {
                     let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
-                    if (pm && pm[1] && pm[2]) this.client.emit(`msg`, { type: 1, user: pm[1], text: pm[2] });
+                    if (pm && pm[1] && pm[2]) this.client.emit('msg', { type: 1, user: pm[1], text: pm[2] });
                     else holodeck.processChatCommand(msg, this.conf.channel) &&
-                         this.client.emit(`msg`, { type: 0, text: msg });
-                    this.input.value = ``;
+                         this.client.emit('msg', { type: 0, text: msg });
+                    this.input.value = '';
                 }
             }
 
@@ -2708,31 +2704,31 @@ function main() {
             }
 
             initTab() {
-                this.tabs = document.getElementById(`chat_room_tabs`);
-                const actions = document.getElementById(`chat_actions_container`);
-                const gr = document.getElementById(`guild_room_tab`);
+                this.tabs = document.getElementById('chat_room_tabs');
+                const actions = document.getElementById('chat_actions_container');
+                const gr = document.getElementById('guild_room_tab');
                 if (this.tabs && actions && gr && actions.parentNode === this.tabs) {
-                    this.tab = document.createElement(`div`);
-                    this.tab.setAttribute(`id`, `drmng_${this.conf.channel}_room_tab`);
-                    this.tab.setAttribute(`class`, `chat_room_tab drmng_room_tab`);
-                    this.tab.style.setProperty(`display`, `none`);
+                    this.tab = document.createElement('div');
+                    this.tab.setAttribute('id', `drmng_${this.conf.channel}_room_tab`);
+                    this.tab.setAttribute('class', 'chat_room_tab drmng_room_tab');
+                    this.tab.style.setProperty('display', 'none');
 
-                    this.unr = document.createElement(`span`);
-                    this.unr.setAttribute(`class`, `unread_chat_messages spriteall spritegame`);
-                    this.unr.setAttribute(`style`, `display: none`);
-                    this.unr.innerHTML = `Unread`;
+                    this.unr = document.createElement('span');
+                    this.unr.setAttribute('class', 'unread_chat_messages spriteall spritegame');
+                    this.unr.setAttribute('style', 'display: none');
+                    this.unr.innerHTML = 'Unread';
 
-                    const a = document.createElement(`a`);
-                    a.setAttribute(`href`, `#`);
+                    const a = document.createElement('a');
+                    a.setAttribute('href', '#');
                     a.textContent = this.conf.name;
-                    a.addEventListener(`click`, e => this.tabClick(e));
+                    a.addEventListener('click', e => this.tabClick(e));
                     a.appendChild(this.unr);
 
                     this.tab.appendChild(a);
                     this.tabs.insertBefore(this.tab, actions);
-                    this.count = document.querySelector(`.number_in_room`);
+                    this.count = document.querySelector('.number_in_room');
 
-                    console.info(`[DRMng] {PrivateChat} Chat tab created.`);
+                    console.info('[DRMng] {PrivateChat} Chat tab created.');
 
                     setTimeout(() => this.initBody(), 0);
                 }
@@ -2742,67 +2738,67 @@ function main() {
             initBody() {
                 if (!DRMng.PrivateChat.container) {
                     DRMng.PrivateChat.container = document.getElementById(
-                        this.conf.sbs ? `alliance_chat_sbs` : `chat_rooms_container`);
+                        this.conf.sbs ? 'alliance_chat_sbs' : 'chat_rooms_container');
                     if (!DRMng.PrivateChat.container) return setTimeout(() => this.initBody(), 100);
                 }
 
                 if (this.body === null) {
-                    this.body = document.createElement(`div`);
-                    this.body.style.setProperty(`width`, `100%`);
+                    this.body = document.createElement('div');
+                    this.body.style.setProperty('width', '100%');
 
-                    if (!this.conf.sbs) this.body.style.setProperty(`display`, `none`);
+                    if (!this.conf.sbs) this.body.style.setProperty('display', 'none');
 
-                    const usr = document.createElement(`div`);
-                    usr.setAttribute(`class`, `chat_tabpane users_in_room clear`);
+                    const usr = document.createElement('div');
+                    usr.setAttribute('class', 'chat_tabpane users_in_room clear');
                     this.users.html = usr;
 
-                    const chat = document.createElement(`div`);
-                    chat.setAttribute(`class`, `chat_message_window`);
+                    const chat = document.createElement('div');
+                    chat.setAttribute('class', 'chat_message_window');
                     this.chat = chat;
 
-                    const inputDiv = document.createElement(`div`);
-                    inputDiv.setAttribute(`class`, `chat_controls`);
+                    const inputDiv = document.createElement('div');
+                    inputDiv.setAttribute('class', 'chat_controls');
 
-                    this.input = document.createElement(`textarea`);
-                    this.input.setAttribute(`class`, `chat_input`);
-                    this.input.value = `Enter text for chat here`;
+                    this.input = document.createElement('textarea');
+                    this.input.setAttribute('class', 'chat_input');
+                    this.input.value = 'Enter text for chat here';
 
-                    this.input.addEventListener(`focus`, () => {
-                        if (this.input.value === `Enter text for chat here`) {
-                            this.input.value = ``;
-                            this.input.style.removeProperty(`font-style`);
+                    this.input.addEventListener('focus', () => {
+                        if (this.input.value === 'Enter text for chat here') {
+                            this.input.value = '';
+                            this.input.style.removeProperty('font-style');
                         }
                     });
-                    this.input.addEventListener(`blur`, () => {
-                        if (this.input.value === ``) {
-                            this.input.value = `Enter text for chat here`;
-                            this.input.style.setProperty(`font-style`, `italic`);
+                    this.input.addEventListener('blur', () => {
+                        if (this.input.value === '') {
+                            this.input.value = 'Enter text for chat here';
+                            this.input.style.setProperty('font-style', 'italic');
                         }
                     });
-                    this.input.addEventListener(`keydown`, e => {
+                    this.input.addEventListener('keydown', e => {
                         //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
-                        if (e.key === `Enter` && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                             this.send();
                             e.preventDefault();
                         }
                     });
-                    this.input.addEventListener(`keyup`, () => {
-                        if (this.input.value !== `Enter text for chat here`) {
+                    this.input.addEventListener('keyup', () => {
+                        if (this.input.value !== 'Enter text for chat here') {
                             let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
-                            txt = txt[2] || ``;
+                            txt = txt[2] || '';
                             if (this.inputCnt) this.inputCnt.textContent = txt.length;
                         }
                     });
 
-                    const cnt = document.createElement(`span`);
-                    cnt.setAttribute(`class`, `chat_chars_remaining`);
-                    cnt.textContent = `0`;
+                    const cnt = document.createElement('span');
+                    cnt.setAttribute('class', 'chat_chars_remaining');
+                    cnt.textContent = '0';
                     this.inputCnt = cnt;
 
-                    const cntCont = document.createElement(`span`);
-                    cntCont.setAttribute(`class`, `chat_char_countdown`);
+                    const cntCont = document.createElement('span');
+                    cntCont.setAttribute('class', 'chat_char_countdown');
                     cntCont.appendChild(this.inputCnt);
-                    cntCont.appendChild(document.createTextNode(`/Inf`));
+                    cntCont.appendChild(document.createTextNode('/Inf'));
 
                     inputDiv.appendChild(this.input);
                     inputDiv.appendChild(cntCont);
@@ -2810,17 +2806,17 @@ function main() {
                     this.body.appendChild(this.chat);
                     this.body.appendChild(inputDiv);
 
-                    console.info(`[DRMng] {PrivateChat} Chat body created.`);
+                    console.info('[DRMng] {PrivateChat} Chat body created.');
 
 
                 }
 
-                const sbs = document.getElementById(`alliance_chat_sbs`);
-                if (!this.conf.sbs) sbs.style.setProperty(`display`, `none`);
+                const sbs = document.getElementById('alliance_chat_sbs');
+                if (!this.conf.sbs) sbs.style.setProperty('display', 'none');
 
                 DRMng.PrivateChat.container.appendChild(this.body);
 
-                console.info(`[DRMng] {PrivateChat} Chat body attached to DOM.`);
+                console.info('[DRMng] {PrivateChat} Chat body attached to DOM.');
 
                 setTimeout(() => this.connect(), 0);
             }
@@ -2862,7 +2858,7 @@ function main() {
                 // TODO: remove act when users move to new version
                 if (data.act) data.action = data.act;
                 switch (data.action) {
-                    case `loadData`:
+                    case 'loadData':
                         // load users
                         this.userLock = true;
                         this.clearUsers();
@@ -2885,39 +2881,39 @@ function main() {
 
                         break;
 
-                    case `userJoin`:
+                    case 'userJoin':
                         setTimeout(() => this.addUser(data.user), 0);
                         break;
 
-                    case `userLeave`:
+                    case 'userLeave':
                         setTimeout(() => this.delUser(data.user.usr), 0);
                         break;
 
-                    case `allianceRaids`:
+                    case 'allianceRaids':
                         data.raids.forEach(raid => {
                             raid.createtime = new Date(raid.createtime).getTime();
                             DRMng.Raids.insert(raid);
                         });
                         break;
 
-                    case `newRaid`:
+                    case 'newRaid':
                         setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, data.data), 0);
                         break;
 
-                    case `fullUpdate`:
+                    case 'fullUpdate':
                         setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, true), 0);
                         break;
 
-                    case `partialUpdate`:
+                    case 'partialUpdate':
                         setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, false), 0);
                         break;
 
-                    case `nukedRaid`:
+                    case 'nukedRaid':
                         setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, data.data), 0);
                         break;
 
                     default:
-                        console.log(`[DRMng] {PrivateChat} SRV:`, data);
+                        console.log('[DRMng] {PrivateChat} SRV:', data);
                 }
             }
 
@@ -2926,16 +2922,16 @@ function main() {
                 else if (!this.messageLock || history) {
                     let u = DRMng.UM.user,
                         t = data.type,
-                        e = [`username`, `truncate`],
+                        e = ['username', 'truncate'],
                         f = data.usr.usr === u.name,
-                        h = [``, `From `, `To `, ``][t],
+                        h = ['', 'From ', 'To ', ''][t],
                         g = [];
 
-                    e.push(`chat_message_window` + (c ? `_undecorated` : ``) + `_username`);
-                    h && g.push(`whisper`);
-                    (t === 1) && g.push(`received_whisper`);
-                    (t === 2) && g.push(`sent_whisper`);
-                    f && e.push(`is_self`);
+                    e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
+                    h && g.push('whisper');
+                    (t === 1) && g.push('received_whisper');
+                    (t === 2) && g.push('sent_whisper');
+                    f && e.push('is_self');
 
                     let content = DRMng.PrivateChat.raidMessage(data, g, e, h);
                     if (!content) {
@@ -2952,29 +2948,29 @@ function main() {
                             else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1])))
                                 link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
                             else
-                                link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, ``)}</a>`;
+                                link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
                             start = msg.substr(0, reg.lastIndex - l[1].length);
                             end = msg.slice(reg.lastIndex);
                             msg = start + link + end;
                             reg.lastIndex += link.length - l[1].length;
                         }
                         content = DRMng.PrivateChat.getMessageHTML({
-                            mainCls: g.join(` `),
+                            mainCls: g.join(' '),
                             ts: new Date(data.ts).format(
-                                `mmm d, HH:MM`),
+                                'mmm d, HH:MM'),
                             pfx: h,
                             user: data.usr.usr,
-                            userCls: e.join(` `),
-                            ign: data.usr.ign || ``,
-                            ignCls: data.usr.ign ? `guildname truncate` :
-                                ``,
+                            userCls: e.join(' '),
+                            ign: data.usr.ign || '',
+                            ignCls: data.usr.ign ? 'guildname truncate' :
+                                '',
                             tag: DRMng.PrivateChat.getGuildTag(
-                                t === 2 ? u.guild : data.usr.gld) || `???`,
+                                t === 2 ? u.guild : data.usr.gld) || '???',
                             msg: msg
                         });
                     }
-                    const msg = document.createElement(`div`);
-                    msg.setAttribute(`class`, `chat-message`);
+                    const msg = document.createElement('div');
+                    msg.setAttribute('class', 'chat-message');
                     if (content instanceof HTMLElement) msg.appendChild(content);
                     else msg.innerHTML = content;
                     this.chat.appendChild(msg);
@@ -2986,58 +2982,58 @@ function main() {
 
             serviceMessage(msg, ri) {
                 if (msg) {
-                    const p = new DRMng.Node(`div`).attr({ class: `chat-message` });
-                    new DRMng.Node(`div`)
-                        .attr({ class: `service${ri ? ` raidinfo` : ``}` })
+                    const p = new DRMng.Node('div').attr({ class: 'chat-message' });
+                    new DRMng.Node('div')
+                        .attr({ class: `service${ri ? ' raidinfo' : ''}` })
                         .style(ri ?
                             { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
                             {})
-                        .data(msg).attach(`to`, p);
+                        .data(msg).attach('to', p);
                     if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
                 }
             }
 
             static getMessageHTML(d) {
-                let p = new DRMng.Node(`p`);
+                let p = new DRMng.Node('p');
                 if (d) {
                     if (d.mainCls) p.attr({ class: d.mainCls });
 
                     // 1st row (header)
-                    let hdr = new DRMng.Node(`span`).attr({ class: `header` });
+                    let hdr = new DRMng.Node('span').attr({ class: 'header' });
 
                     // Time field
-                    new DRMng.Node(`span`)
-                        .attr({ class: `timestamp` })
-                        .style({ 'flex-grow': `1` })
-                        .txt(d.ts).attach(`to`, hdr);
+                    new DRMng.Node('span')
+                        .attr({ class: 'timestamp' })
+                        .style({ 'flex-grow': '1' })
+                        .txt(d.ts).attach('to', hdr);
                     // Guild tag
-                    new DRMng.Node(`span`)
-                        .attr({ class: `sticker` })
-                        .txt(d.tag).attach(`to`, hdr);
+                    new DRMng.Node('span')
+                        .attr({ class: 'sticker' })
+                        .txt(d.tag).attach('to', hdr);
 
-                    hdr.attach(`to`, p);
+                    hdr.attach('to', p);
 
                     // 2nd row
-                    hdr = new DRMng.Node(`span`).style({ display: `block` });
+                    hdr = new DRMng.Node('span').style({ display: 'block' });
 
                     // Username
-                    new DRMng.Node(`span`)
+                    new DRMng.Node('span')
                         .attr({ class: d.userCls, username: d.user, ign: d.ign })
-                        .txt((d.pfx || ``) + d.user).attach(`to`, hdr);
+                        .txt((d.pfx || '') + d.user).attach('to', hdr);
                     // IGN
-                    new DRMng.Node(`span`)
+                    new DRMng.Node('span')
                         .attr({ class: d.ignCls })
-                        .txt(d.ign).attach(`to`, hdr);
+                        .txt(d.ign).attach('to', hdr);
                     // Separator
-                    new DRMng.Node(`span`)
-                        .attr({ class: `separator` })
-                        .txt(`: `).attach(`to`, hdr);
+                    new DRMng.Node('span')
+                        .attr({ class: 'separator' })
+                        .txt(': ').attach('to', hdr);
                     // Message
-                    new DRMng.Node(`span`)
-                        .attr({ class: `message hyphenate` })
-                        .html(d.msg).attach(`to`, hdr);
+                    new DRMng.Node('span')
+                        .attr({ class: 'message hyphenate' })
+                        .html(d.msg).attach('to', hdr);
 
-                    hdr.attach(`to`, p);
+                    hdr.attach('to', p);
                 }
                 return p.node;
             }
@@ -3051,33 +3047,33 @@ function main() {
                             v                                                  = DRMng.Config.local.visited[srv].indexOf(r.id) > -1,
                             d                                                  = DRMng.Config.local.dead[srv].hasOwnProperty(r.id),
                             l, m                                               = msg[1] + msg[3],
-                            i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? `:` : ``,
-                            t                                                  = new Date(data.ts).format(`mmm d, HH:MM`), u    = data.usr.usr,
+                            i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
+                            t                                                  = new Date(data.ts).format('mmm d, HH:MM'), u    = data.usr.usr,
                             ign                                                = data.usr.ign;
 
-                        pc.push(`raid`);
-                        pc.push([`n`, `h`, `l`, `nm`][r.diff - 1]);
+                        pc.push('raid');
+                        pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
                         pc.push(r.id);
-                        d ? pc.push(`dead`) : v && pc.push(`visited`);
+                        d ? pc.push('dead') : v && pc.push('visited');
 
-                        n.push([`N`, `H`, `L`, `NM`][r.diff - 1]);
-                        n.push(i ? i.sName : r.boss.replace(/_/g, ` `).toUpperCase());
+                        n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
+                        n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
 
                         l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
                         l = `return DRMng.Raids.joinOne(${l});`;
 
-                        let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff - 1] * 1000 / i.maxPlayers) : ``;
-                        f = `${i && i.maxPlayers === 90000 ? `ER/WR` : `FS ${f}`}`;
+                        let f = i ? DRMng.Util.getShortNumK(i.hp[r.diff - 1] * 1000 / i.maxPlayers) : '';
+                        f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : `FS ${f}`}`;
 
-                        return `<p class="${pc.join(` `)}">
+                        return `<p class="${pc.join(' ')}">
                                     <span class="header">
                                         <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
                                         <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
                                         <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(
-    ` `)}</a>
+    ' ')}</a>
                                     </span>
                                     <span style="display: flex">
-                                        <span username="${u}" class="${uc.join(` `)}">${pfx}${u}</span>
+                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
                                         <span class="guildname truncate">${ign}</span>
                                         <span class="separator">${s}</span>
                                         <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
@@ -3119,10 +3115,10 @@ function main() {
             }
 
             static add() {
-                const elChannel = document.getElementById(`DRMng_allianceChnl`);
-                const elPasswd = document.getElementById(`DRMng_alliancePass`);
+                const elChannel = document.getElementById('DRMng_allianceChnl');
+                const elPasswd = document.getElementById('DRMng_alliancePass');
 
-                if (elChannel.classList.contains(`default`) || elPasswd.classList.contains(`default`)) return;
+                if (elChannel.classList.contains('default') || elPasswd.classList.contains('default')) return;
 
                 const rooms = DRMng.Config.local.alliance.rooms;
                 let replace = -1;
@@ -3130,14 +3126,14 @@ function main() {
                     if (room.channel === elChannel.value) replace = i;
                 });
 
-                const elName = document.getElementById(`DRMng_allianceName`);
-                const elColor = document.getElementById(`DRMng_allianceColor`);
+                const elName = document.getElementById('DRMng_allianceName');
+                const elColor = document.getElementById('DRMng_allianceColor');
                 const room = {
                     channel: elChannel.value,
                     pass: elPasswd.value,
-                    name: elName.classList.contains(`default`) ?
+                    name: elName.classList.contains('default') ?
                         elChannel.value.charAt(0).toUpperCase() + elChannel.value.slice(1) : elName.value,
-                    color: elColor.classList.contains(`default`) ? `#336699` : elColor.value,
+                    color: elColor.classList.contains('default') ? '#336699' : elColor.value,
                     enabled: true
                 };
 
@@ -3160,16 +3156,16 @@ function main() {
                 const id = `DRMng_privateChat_room_${room.channel}`;
                 const el = new DRMng.Node(`#${id}`);
                 if (el.notNull) el.node.firstChild.textContent = room.name;
-                else new DRMng.Node(`div`)
-                    .attr({ class: `buttonStripe`, id: id })
-                    .data(new DRMng.Node(`span`).txt(room.name))
+                else new DRMng.Node('div')
+                    .attr({ class: 'buttonStripe', id: id })
+                    .data(new DRMng.Node('span').txt(room.name))
                     .data(
-                        new DRMng.Node(`button`).attr({ class: `l` }).txt(`Del`).on(`click`, () => this.removeChat(id)))
-                    .attach(`to`, `DRMng_privateChat`);
+                        new DRMng.Node('button').attr({ class: 'l' }).txt('Del').on('click', () => this.removeChat(id)))
+                    .attach('to', 'DRMng_privateChat');
             }
 
             static removeChat(chatID) {
-                const id = chatID.split(`_`)[3];
+                const id = chatID.split('_')[3];
                 new DRMng.Node(`#${chatID}`).detach();
                 const chat = this.getChat(id);
                 if (chat) {
@@ -3818,20 +3814,20 @@ function main() {
                 this.setup = function (alias, title, visible) {
                     if (alias && title) {
                         visible = visible || false;
-                        let groupDiv = document.createElement(`div`);
-                        groupDiv.setAttribute(`class`, visible ? `group flex` : `group flex hide`);
-                        groupDiv.setAttribute(`group`, `option`);
-                        let titleDiv = document.createElement(`div`);
-                        titleDiv.setAttribute(`class`, `title`);
-                        titleDiv.addEventListener(`click`, DRMng.UI.roll.bind(this, titleDiv));
-                        titleDiv.innerHTML = `` + title;
-                        let contentDiv = document.createElement(`div`);
+                        let groupDiv = document.createElement('div');
+                        groupDiv.setAttribute('class', visible ? 'group flex' : 'group flex hide');
+                        groupDiv.setAttribute('group', 'option');
+                        let titleDiv = document.createElement('div');
+                        titleDiv.setAttribute('class', 'title');
+                        titleDiv.addEventListener('click', DRMng.UI.roll.bind(this, titleDiv));
+                        titleDiv.innerHTML = '' + title;
+                        let contentDiv = document.createElement('div');
                         groupDiv.appendChild(titleDiv);
                         groupDiv.appendChild(contentDiv);
                         this.cont = contentDiv;
                         this.html = groupDiv;
                         DRMng.UI.Groups[alias] = this;
-                        document.getElementById(`DRMng_Options`).appendChild(this.html);
+                        document.getElementById('DRMng_Options').appendChild(this.html);
                     }
                     return this;
                 };
@@ -3848,23 +3844,23 @@ function main() {
                 this.html = null;
                 this.conf = null;
                 this.cbFn = null;
-                this.group = ``;
-                this.field = ``;
-                this.type = ``;
-                let _title = ``, _desc = ``;
-                this.setup = function (alias, title, type = `bool`, value) {
+                this.group = '';
+                this.field = '';
+                this.type = '';
+                let _title = '', _desc = '';
+                this.setup = function (alias, title, type = 'bool', value) {
                     if (alias !== null) {
                         const defaults = {
                             bool: false,
                             number: 0,
                             object: {}
                         };
-                        let name = alias.split(`_`);
-                        this.group = name[0] || `other`;
+                        let name = alias.split('_');
+                        this.group = name[0] || 'other';
                         this.field = name[1] || alias;
                         this.type = type;
                         _title = title || this.field;
-                        if (type !== `action`) {
+                        if (type !== 'action') {
                             if (DRMng.Config.local[this.group] === undefined) DRMng.Config.local[this.group] = {};
                             this.conf = DRMng.Config.local[this.group];
                             if (this.conf[this.field] === undefined) this.conf[this.field] = value || defaults[type];
@@ -3882,50 +3878,50 @@ function main() {
                     return this;
                 };
                 this.event = function (callback) {
-                    if (callback && typeof callback === `function`) this.cbFn = callback;
+                    if (callback && typeof callback === 'function') this.cbFn = callback;
                     return this;
                 };
-                this.make = function (group, skipCb = false, name = `Apply`) {
+                this.make = function (group, skipCb = false, name = 'Apply') {
 
-                    let optionDiv = document.createElement(`div`);
-                    optionDiv.setAttribute(`class`, `buttonStripe`);
-                    optionDiv.setAttribute(`style`, `flex-wrap: wrap; overflow: hidden; max-height: 74px;`);
+                    let optionDiv = document.createElement('div');
+                    optionDiv.setAttribute('class', 'buttonStripe');
+                    optionDiv.setAttribute('style', 'flex-wrap: wrap; overflow: hidden; max-height: 74px;');
 
-                    let titleField = document.createElement(`span`);
-                    titleField.setAttribute(`style`, `background-color: #444; font-size: 9pt;`);
-                    titleField.innerHTML = `` + _title;
+                    let titleField = document.createElement('span');
+                    titleField.setAttribute('style', 'background-color: #444; font-size: 9pt;');
+                    titleField.innerHTML = '' + _title;
 
-                    let button = document.createElement(`button`);
-                    if (this.type === `bool`) {
-                        button.setAttribute(`class`, this.getConf() ? `n` : `l`);
-                        button.textContent = this.getConf() ? `On` : `Off`;
+                    let button = document.createElement('button');
+                    if (this.type === 'bool') {
+                        button.setAttribute('class', this.getConf() ? 'n' : 'l');
+                        button.textContent = this.getConf() ? 'On' : 'Off';
                     }
                     else {
-                        button.classList.add(`n`);
+                        button.classList.add('n');
                         button.textContent = name;
                     }
-                    button.setAttribute(`style`, `border-left-color: #3a3a3a;`);
-                    button.addEventListener(`click`, function (e) {
-                        if (this.type === `bool`) {
+                    button.setAttribute('style', 'border-left-color: #3a3a3a;');
+                    button.addEventListener('click', function (e) {
+                        if (this.type === 'bool') {
                             this.flipConf();
-                            e.target.setAttribute(`class`, this.getConf() ? `n` : `l`);
-                            e.target.innerHTML = this.getConf() ? `On` : `Off`;
+                            e.target.setAttribute('class', this.getConf() ? 'n' : 'l');
+                            e.target.innerHTML = this.getConf() ? 'On' : 'Off';
                         }
-                        if (typeof this.cbFn === `function`) this.cbFn.call(this, e);
+                        if (typeof this.cbFn === 'function') this.cbFn.call(this, e);
 
                     }.bind(this));
 
                     optionDiv.appendChild(titleField);
                     optionDiv.appendChild(button);
 
-                    if (typeof this.cbFn === `function` && !skipCb) this.cbFn.call(this, { target: button });
+                    if (typeof this.cbFn === 'function' && !skipCb) this.cbFn.call(this, { target: button });
 
                     if (_desc) {
-                        let descField = document.createElement(`div`);
-                        descField.setAttribute(`style`, `border-top: 1px solid #404040; background-color:` +
-                                                        ` #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:` +
-                                                        ` italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;`);
-                        descField.innerHTML = `` + _desc;
+                        let descField = document.createElement('div');
+                        descField.setAttribute('style', 'border-top: 1px solid #404040; background-color:' +
+                                                        ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
+                                                        ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
+                        descField.innerHTML = '' + _desc;
                         optionDiv.appendChild(descField);
                     }
 
@@ -3936,48 +3932,48 @@ function main() {
                     return this;
                 };
                 this.makeSbButton = btn => {
-                    btn = btn || { name: `X`, command: `` };
-                    return new DRMng.Node(`div`)
-                        .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
+                    btn = btn || { name: 'X', command: '' };
+                    return new DRMng.Node('div')
+                        .data(new DRMng.Node('span').txt('\uf2f9').on('click', e => {
                             const el = e.target.parentNode;
                             el.parentNode.insertBefore(el.nextSibling, el);
                         }))
-                        .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
+                        .data(new DRMng.Node('span').txt('\uf2fc').on('click', e => {
                             const el = e.target.parentNode;
                             el.parentNode.insertBefore(el, el.previousSibling);
                         }))
-                        .data(new DRMng.Node(`input`).attr({ type: `text`, value: btn.name, class: `inp_fld` }))
-                        .data(new DRMng.Node(`input`).attr({ type: `text`, value: btn.command, class: `inp_cmd` }))
-                        .data(new DRMng.Node(`span`).attr({ class: `red` }).txt(`\uf270`).on(`click`, e => {
+                        .data(new DRMng.Node('input').attr({ type: 'text', value: btn.name, class: 'inp_fld' }))
+                        .data(new DRMng.Node('input').attr({ type: 'text', value: btn.command, class: 'inp_cmd' }))
+                        .data(new DRMng.Node('span').attr({ class: 'red' }).txt('\uf270').on('click', e => {
                             const el = e.target.parentNode;
                             el.parentNode.removeChild(el);
                         }));
                 };
                 this.makeSbGroup = grp => {
-                    grp = grp || { name: `Group` };
-                    const el = new DRMng.Node(`div`)
-                        .attr({ class: `drmng_config_sb` })
-                        .data(new DRMng.Node(`div`)
-                            .data(new DRMng.Node(`span`).txt(`\uf2f9`).on(`click`, e => {
+                    grp = grp || { name: 'Group' };
+                    const el = new DRMng.Node('div')
+                        .attr({ class: 'drmng_config_sb' })
+                        .data(new DRMng.Node('div')
+                            .data(new DRMng.Node('span').txt('\uf2f9').on('click', e => {
                                 const el = e.target.parentNode.parentNode;
                                 el.parentNode.insertBefore(el.nextSibling, el);
                             }))
-                            .data(new DRMng.Node(`span`).txt(`\uf2fc`).on(`click`, e => {
+                            .data(new DRMng.Node('span').txt('\uf2fc').on('click', e => {
                                 const el = e.target.parentNode.parentNode;
                                 el.parentNode.insertBefore(el, el.previousSibling);
                             }))
                             .data(
-                                new DRMng.Node(`input`).attr({ type: `text`, value: grp.name, class: `inp_grp` }))
-                            .data(new DRMng.Node(`span`).attr({ class: `del_grp red` }).txt(`\uf272`)
-                                .on(`click`, e => {
+                                new DRMng.Node('input').attr({ type: 'text', value: grp.name, class: 'inp_grp' }))
+                            .data(new DRMng.Node('span').attr({ class: 'del_grp red' }).txt('\uf272')
+                                .on('click', e => {
                                     const el = e.target.parentNode.parentNode;
                                     el.parentNode.removeChild(el);
                                 }))
-                            .data(new DRMng.Node(`span`).attr({ class: `add_grp` }).txt(`\uf277`)
-                                .on(`click`, e => this.makeSbGroup().attach(`before`,
+                            .data(new DRMng.Node('span').attr({ class: 'add_grp' }).txt('\uf277')
+                                .on('click', e => this.makeSbGroup().attach('before',
                                     e.target.parentNode.parentNode)))
-                            .data(new DRMng.Node(`span`).txt(`\uf275`)
-                                .on(`click`, e => this.makeSbButton().attach(`to`,
+                            .data(new DRMng.Node('span').txt('\uf275')
+                                .on('click', e => this.makeSbButton().attach('to',
                                     e.target.parentNode.parentNode)))
                         );
                     if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn)));
@@ -4010,43 +4006,43 @@ function main() {
                         this.conf = {
                             groups: [
                                 {
-                                    name: `Info`, hidden: false,
+                                    name: 'Info', hidden: false,
                                     buttons: [
-                                        { name: `Emall`, action: `chat`, command: `/raid elite mall` },
-                                        { name: `Cecil`, action: `chat`, command: `/raid elite cecil` },
-                                        { name: `Mang`, action: `chat`, command: `/raid elite mangler` }
+                                        { name: 'Emall', action: 'chat', command: '/raid elite mall' },
+                                        { name: 'Cecil', action: 'chat', command: '/raid elite cecil' },
+                                        { name: 'Mang', action: 'chat', command: '/raid elite mangler' }
                                     ]
                                 },
                                 {
-                                    name: `Sheet`, hidden: true,
+                                    name: 'Sheet', hidden: true,
                                     buttons: [
                                         {
-                                            name: `Proc`, action: `www`,
-                                            command: `https://docs.google.com/spreadsheets/d/1YTbJ0wgJUygdmix6a8BzLThrHhDINX943aadjboOTj8`
+                                            name: 'Proc', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/1YTbJ0wgJUygdmix6a8BzLThrHhDINX943aadjboOTj8'
                                         },
                                         {
-                                            name: `Magic`, action: `www`,
-                                            command: `https://docs.google.com/spreadsheets/d/1O0eVSnzlACP9XJDq0VN4kN51ESUusec3-gD4dKPHRNU`
+                                            name: 'Magic', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/1O0eVSnzlACP9XJDq0VN4kN51ESUusec3-gD4dKPHRNU'
                                         },
                                         {
-                                            name: `TiersI`, action: `www`,
-                                            command: `https://docs.google.com/spreadsheets/d/10a8qCq5zgyR-kAOq-kuKuttADfU16aVWxgTCf9Eu4b8`
+                                            name: 'TiersI', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/10a8qCq5zgyR-kAOq-kuKuttADfU16aVWxgTCf9Eu4b8'
                                         },
                                         {
-                                            name: `TiersII`, action: `www`,
-                                            command: `https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ`
+                                            name: 'TiersII', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ'
                                         },
                                         {
-                                            name: `Keyki`, action: `www`,
-                                            command: `https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI`
+                                            name: 'Keyki', action: 'www',
+                                            command: 'https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI'
                                         }
                                     ]
                                 }
                             ],
                             buttons: [
-                                { name: `Join`, action: `func`, command: `DRMng.Raids.joinAll` },
-                                { name: `Kill`, action: `chat`, command: `/kill` },
-                                { name: `Server`, action: `func`, command: `DRMng.Engine.changeServer` }
+                                { name: 'Join', action: 'func', command: 'DRMng.Raids.joinAll' },
+                                { name: 'Kill', action: 'chat', command: '/kill' },
+                                { name: 'Server', action: 'func', command: 'DRMng.Engine.changeServer' }
                             ]
                         };
                         DRMng.Config.local.sidebar.data = this.conf;
@@ -4057,27 +4053,27 @@ function main() {
 
                 make(group) {
                     this.conf.groups.forEach(grp => new DRMng.UI.Option().makeSb(group, grp));
-                    new DRMng.UI.Option().makeSb(group, { name: `Buttons`, buttons: this.conf.buttons });
+                    new DRMng.UI.Option().makeSb(group, { name: 'Buttons', buttons: this.conf.buttons });
                 }
             },
             addRaidField: function (r, idx) {
                 const ifo = DRMng.Config.local.raidData[r.boss];
                 // classes
-                const cls = [`drm_` + r.boss + `_` + r.diff];
-                cls.push([`n`, `h`, `l`, `nm`][r.diff - 1]);
-                r.visited && cls.push(`visited`);
-                r.isFull && cls.push(`full`);
+                const cls = ['drm_' + r.boss + '_' + r.diff];
+                cls.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
+                r.visited && cls.push('visited');
+                r.isFull && cls.push('full');
 
-                const hp = ifo && ifo.isEvent ? `\u221e` : `HP: ${(r.hp * 100).toPrecision(3).slice(0, 4)}%`;
+                const hp = ifo && ifo.isEvent ? '\u221e' : `HP: ${(r.hp * 100).toPrecision(3).slice(0, 4)}%`;
 
                 // main elem
-                const div = new DRMng.Node(`div`)
-                    .attr({ id: `DRMng_${r.id}`, class: cls.join(` `) })
-                    .data(new DRMng.Node(`span`).txt(ifo ? ifo.sName : r.boss.replace(/_/g, ` `)))
-                    .data(new DRMng.Node(`span`).txt(hp))
-                    .on(`mouseenter`, DRMng.UI.infoEvent);
+                const div = new DRMng.Node('div')
+                    .attr({ id: `DRMng_${r.id}`, class: cls.join(' ') })
+                    .data(new DRMng.Node('span').txt(ifo ? ifo.sName : r.boss.replace(/_/g, ' ')))
+                    .data(new DRMng.Node('span').txt(hp))
+                    .on('mouseenter', DRMng.UI.infoEvent);
 
-                const list = document.getElementById(`DRMng_RaidList`);
+                const list = document.getElementById('DRMng_RaidList');
                 if (idx === undefined) list.appendChild(div.node);
                 else {
                     const chLen = list.childNodes.length;
@@ -4087,17 +4083,17 @@ function main() {
                 if (list.scrollTop < 20) list.scrollTop = 0;
             },
             removeRaidField: function (id) {
-                let r = document.getElementById(`DRMng_` + id);
+                let r = document.getElementById('DRMng_' + id);
                 if (r) r.parentNode.removeChild(r);
             },
-            clearRaidList: function () { document.getElementById(`DRMng_RaidList`).innerHTML = ``; },
+            clearRaidList: function () { document.getElementById('DRMng_RaidList').innerHTML = ''; },
             statusTimer: null,
             displayStatus: function (msg) {
-                const status = document.getElementById(`DRMng_status`);
+                const status = document.getElementById('DRMng_status');
                 if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
                     if (DRMng.Raids.joinLen > 0)
-                        status.textContent = DRMng.Raids.count + ` raids, ` + DRMng.Raids.joinLen + ` selected`;
-                    else status.textContent = DRMng.Raids.count + ` raids in list`;
+                        status.textContent = DRMng.Raids.count + ' raids, ' + DRMng.Raids.joinLen + ' selected';
+                    else status.textContent = DRMng.Raids.count + ' raids in list';
                     this.statusTimer = null;
                 }
                 else if (msg) {
@@ -4109,17 +4105,17 @@ function main() {
             submitResponseTimeout: 0,
             submitResponse: function (mode, msg) {
                 clearTimeout(this.submitResponseTimeout);
-                let respDiv = document.getElementById(`DRMng_submitResponse`);
-                msg = msg || `Unidentified event occurred`;
+                let respDiv = document.getElementById('DRMng_submitResponse');
+                msg = msg || 'Unidentified event occurred';
                 switch (mode) {
                     case 0:
-                        mode = ` error`;
+                        mode = ' error';
                         break;
                     case 1:
-                        mode = ` success`;
+                        mode = ' success';
                         break;
                     default:
-                        mode = ` regular`;
+                        mode = ' regular';
                         break;
                 }
                 if (respDiv) {
@@ -4127,7 +4123,7 @@ function main() {
                     respDiv.className += mode;
                 }
                 this.submitResponseTimeout = setTimeout(function () {
-                    document.getElementById(`DRMng_submitResponse`).className = `textField`;
+                    document.getElementById('DRMng_submitResponse').className = 'textField';
                 }, 60000);
             },
             createCSS: function () {
@@ -4788,10 +4784,26 @@ function main() {
                     margin-right: 5px;\
                     border: 1px solid #363636;\
                 }\
+                div.userlist > span.username {\
+                    flex-grow: 0;
+                    flex-shrink: 0;
+                    color: #f0f0f9;
+                    margin-right: 4px;
+                    padding-bottom: 1px;
+                }\
+                div.username > span.userign {
+                    flex-grow: 1;
+                    flex-shrink: 1;
+                    color: #ddd;
+                    font-style: italic;
+                    padding-bottom: 1px;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
                 `;
                 const isFF = navigator.userAgent.match(/Firefox\/(\d+)/);
                 if (isFF && parseInt(isFF[1]) > 64) {
-                    content += `\
+                    content += '\
                     div#kong_game_ui div.chat_message_window,\
                     div#kong_game_ui div.users_in_room,\
                     div#kong_game_ui div.chat_controls textarea.chat_input,\
@@ -4801,33 +4813,33 @@ function main() {
                         scrollbar-width: thin;\
                         margin-right: -1px;\
                     }\
-                    `;
+                    ';
                 }
                 
-                DRMng.Util.cssStyle(`DRMng_CSS`, content);
+                DRMng.Util.cssStyle('DRMng_CSS', content);
 
                 // raid list filtering css
-                DRMng.Util.cssStyle(`DRMng_RaidsCSS`, `dummy`);
-                DRMng.Raids.processFilter(``, true);
+                DRMng.Util.cssStyle('DRMng_RaidsCSS', 'dummy');
+                DRMng.Raids.processFilter('', true);
             },
             setupFilterBox: () => {
-                const srv = DRMng.Config.get(`server`).toLowerCase();
+                const srv = DRMng.Config.get('server').toLowerCase();
                 const fst = DRMng.Config.get(`filterString::${srv}`);
-                new DRMng.Node(`#DRMng_txtFilter`)
-                    .attr({ class: fst ? `` : `default` }).txt(fst || `Filter raids here`, true);
+                new DRMng.Node('#DRMng_txtFilter')
+                    .attr({ class: fst ? '' : 'default' }).txt(fst || 'Filter raids here', true);
             },
             setupFilterTab: raidData => {
-                const srv = DRMng.Config.get(`server`).toLowerCase();
+                const srv = DRMng.Config.get('server').toLowerCase();
                 const flt = DRMng.Config.get(`filterRaids::${srv}`);
-                const raids = raidData || DRMng.Config.get(`raidData`);
+                const raids = raidData || DRMng.Config.get('raidData');
                 const fltDivs = [
-                    document.getElementById(`DRMng_filterSmall`),
-                    document.getElementById(`DRMng_filterMedium`),
-                    document.getElementById(`DRMng_filterLarge`),
-                    document.getElementById(`DRMng_filterEpic`),
-                    document.getElementById(`DRMng_filterColossal`),
-                    document.getElementById(`DRMng_filterGuild`),
-                    document.getElementById(`DRMng_filterGigantic`)
+                    document.getElementById('DRMng_filterSmall'),
+                    document.getElementById('DRMng_filterMedium'),
+                    document.getElementById('DRMng_filterLarge'),
+                    document.getElementById('DRMng_filterEpic'),
+                    document.getElementById('DRMng_filterColossal'),
+                    document.getElementById('DRMng_filterGuild'),
+                    document.getElementById('DRMng_filterGigantic')
                 ];
                 fltDivs.forEach(div => { if (div) while (div.firstChild) div.removeChild(div.firstChild); });
 
@@ -4835,21 +4847,21 @@ function main() {
                     const r = raids[k];
                     if (!r.isEvent || r.isGuild) {
                         if (flt[k] === undefined) flt[k] = new Array(4).fill(false);
-                        const el = new DRMng.Node(`div`)
-                            .attr({ class: `buttonStripe`, id: `DRMng_filter_${k}` })
-                            .data(new DRMng.Node(`span`).txt(r.fName))
-                            .on(`click`, DRMng.UI.applyFilter)
-                            .attach(`to`, fltDivs[r.isGuild ? 5 : r.size]);
+                        const el = new DRMng.Node('div')
+                            .attr({ class: 'buttonStripe', id: `DRMng_filter_${k}` })
+                            .data(new DRMng.Node('span').txt(r.fName))
+                            .on('click', DRMng.UI.applyFilter)
+                            .attach('to', fltDivs[r.isGuild ? 5 : r.size]);
 
-                        new Array(4).fill(0).forEach((_, d) => new DRMng.Node(`button`)
-                            .attr({ class: `${[`n`, `h`, `l`, `nm`][d]} ${flt[k][d] ? `off` : `on`}` })
-                            .txt(flt[k][d] ? `Off` : `On`).attach(`to`, el));
+                        new Array(4).fill(0).forEach((_, d) => new DRMng.Node('button')
+                            .attr({ class: `${['n', 'h', 'l', 'nm'][d]} ${flt[k][d] ? 'off' : 'on'}` })
+                            .txt(flt[k][d] ? 'Off' : 'On').attach('to', el));
                     }
                 });
             },
             applyDiffFilter: function (id) {
-                let mode = id && id.split(`_`);
-                if (mode[0] === `DRMngFilter`) {
+                let mode = id && id.split('_');
+                if (mode[0] === 'DRMngFilter') {
                     let diff = parseInt(mode[2]);
                     mode = parseInt(mode[1]);
                     if (diff > 0 && mode > 0) {
@@ -4861,17 +4873,17 @@ function main() {
                         for (let i = 0, len = fk.length; i < len; ++i) flt[fk[i]][diff] = mode;
                         DRMng.Config.saveLocal();
                         DRMng.UI.setupFilterTab();
-                        document.getElementById(`DRMng_filterApply`).parentNode.removeAttribute(`style`);
+                        document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
                     }
                 }
             },
             applyFilter: function (e) {
                 let el = e.target;
-                if (el.tagName !== `SPAN` && el.tagName !== `BUTTON`) el = el.children[0];
+                if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
                 let server = DRMng.Config.local.server.toLowerCase();
-                let btns = el.parentNode.getElementsByTagName(`BUTTON`);
+                let btns = el.parentNode.getElementsByTagName('BUTTON');
                 let id = el.parentNode.id.substr(13);
-                let spanHit = el.tagName === `SPAN`;
+                let spanHit = el.tagName === 'SPAN';
                 let flt = DRMng.Config.local.filterRaids[server][id];
                 let i, diff;
 
@@ -4880,41 +4892,41 @@ function main() {
                     for (i = 0; i < 4; ++i) if (flt[i]) flts += 1 << i;
                     diff = (flts !== 15 && flts !== 0) ? flts : 15;
                 }
-                else diff = { n: 1, h: 2, l: 4, nm: 8 }[el.className.split(` `)[0]];
+                else diff = { n: 1, h: 2, l: 4, nm: 8 }[el.className.split(' ')[0]];
 
                 for (i = 0; i < 4; ++i) if (diff & (1 << i)) {
                     flt[i] = !flt[i];
-                    btns[i].innerText = flt[i] ? `Off` : `On`;
-                    btns[i].className = btns[i].className.split(` `)[0] + ` ` + btns[i].innerText.toLowerCase();
+                    btns[i].innerText = flt[i] ? 'Off' : 'On';
+                    btns[i].className = btns[i].className.split(' ')[0] + ' ' + btns[i].innerText.toLowerCase();
                 }
 
-                document.getElementById(`DRMng_filterApply`).parentNode.removeAttribute(`style`);
+                document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
 
                 DRMng.Config.saveLocal();
             },
             sidebarLabelOpen: e => {
-                document.querySelectorAll(`#DRMng_Sidebar > div.label:not(.hidden)`)
-                    .forEach(lbl => lbl.className += ` hidden`);
-                e.target.className = `label`;
+                document.querySelectorAll('#DRMng_Sidebar > div.label:not(.hidden)')
+                    .forEach(lbl => lbl.className += ' hidden');
+                e.target.className = 'label';
             },
             setupSidebarButton: button => {
                 if (!button || !button.name) return null;
 
-                const btn = new DRMng.Node(`button`).txt(button.name);
+                const btn = new DRMng.Node('button').txt(button.name);
                 let fn, th;
                 if (button.command) {
                     switch (button.action) {
-                        case `func`:
-                            fn = button.command.split(`,`);
-                            th = fn[0].split(`.`).reduce((a, v, i, o) => (i < o.length - 1 ? a[v] : a), window);
-                            btn.on(`click`, (fn[0].split(`.`).reduce((a, v) => a[v], window)).bind(th, ...fn.slice(1)));
+                        case 'func':
+                            fn = button.command.split(',');
+                            th = fn[0].split('.').reduce((a, v, i, o) => (i < o.length - 1 ? a[v] : a), window);
+                            btn.on('click', (fn[0].split('.').reduce((a, v) => a[v], window)).bind(th, ...fn.slice(1)));
                             break;
-                        case `chat`:
-                            btn.on(`click`, () =>
+                        case 'chat':
+                            btn.on('click', () =>
                                 holodeck.processChatCommand(button.command, DRMng.PrivateChat.getActive(true)));
                             break;
-                        case `www`:
-                            btn.on(`click`, () => window.open(button.command));
+                        case 'www':
+                            btn.on('click', () => window.open(button.command));
                             break;
                     }
                 }
@@ -4922,21 +4934,21 @@ function main() {
             },
             setupSidebar: function () {
                 let left = true;
-                let sb = document.getElementById(`DRMng_Sidebar`);
+                let sb = document.getElementById('DRMng_Sidebar');
                 if (sb) new DRMng.Node(sb).clear();
-                else sb = new DRMng.Node(`div`).attr({ id: `DRMng_Sidebar` }).node;
+                else sb = new DRMng.Node('div').attr({ id: 'DRMng_Sidebar' }).node;
                 const scData = DRMng.Config.local.sidebar.data;
 
                 // sidebar buttons routine
                 let div, button;
                 for (let group of scData.groups) {
-                    div = document.createElement(`div`);
-                    div.className = `label`;
-                    if (group.hidden) div.className += ` hidden`;
+                    div = document.createElement('div');
+                    div.className = 'label';
+                    if (group.hidden) div.className += ' hidden';
                     div.innerText = group.name;
                     sb.appendChild(div);
-                    div = document.createElement(`div`);
-                    div.className = `group`;
+                    div = document.createElement('div');
+                    div.className = 'group';
                     for (let btn of group.buttons) {
                         button = this.setupSidebarButton(btn);
                         if (button) div.appendChild(button);
@@ -4948,22 +4960,22 @@ function main() {
                     if (button) sb.appendChild(button);
                 }
 
-                let parent = document.querySelector(`#chat_container_cell`);
+                let parent = document.querySelector('#chat_container_cell');
                 if (left) parent.insertBefore(sb, parent.children[0]);
                 else parent.appendChild(sb);
-                let labels = document.querySelectorAll(`#DRMng_Sidebar > div.label`);
+                let labels = document.querySelectorAll('#DRMng_Sidebar > div.label');
                 let labLen = labels.length;
-                for (let i = 0; i < labLen; ++i) labels[i].addEventListener(`click`, this.sidebarLabelOpen);
-                let grpButtLen = document.querySelectorAll(`#DRMng_Sidebar > div > button`).length;
-                let staButtLen = document.querySelectorAll(`#DRMng_Sidebar > button`).length;
+                for (let i = 0; i < labLen; ++i) labels[i].addEventListener('click', this.sidebarLabelOpen);
+                let grpButtLen = document.querySelectorAll('#DRMng_Sidebar > div > button').length;
+                let staButtLen = document.querySelectorAll('#DRMng_Sidebar > button').length;
                 let sbLen = labLen * 26 + grpButtLen * 23 + staButtLen * 23;
-                if (sbLen > 690) sb.className = `flex`;
+                if (sbLen > 690) sb.className = 'flex';
             },
             setChatWidth: () => {
-                const el = document.getElementById(`chat_container`);
+                const el = document.getElementById('chat_container');
                 if (el) {
-                    const a = DRMng.Config.get(`alliance::sbs`) && DRMng.Config.get(`alliance::enabled`);
-                    const w = DRMng.Config.get(`kong::chatWidth`);
+                    const a = DRMng.Config.get('alliance::sbs') && DRMng.Config.get('alliance::enabled');
+                    const w = DRMng.Config.get('kong::chatWidth');
                     el.style.width = `${a ? (w * 2 + 7) : w}px`;
                 }
             },
@@ -4974,10 +4986,10 @@ function main() {
                 this.setChatWidth();
 
                 // Script width
-                val = document.getElementById(`DRMng_main`);
+                val = document.getElementById('DRMng_main');
                 if (val) {
-                    val.className = `hidden`;
-                    val.style.width = `${DRMng.Config.get(`scriptWidth`)}px`;
+                    val.className = 'hidden';
+                    val.style.width = `${DRMng.Config.get('scriptWidth')}px`;
                 }
 
                 // Filtering
@@ -4985,8 +4997,8 @@ function main() {
                 this.setupFilterTab();
 
                 // Sorting
-                document.querySelectorAll(`#DRMng_sortOrderBy > button`).forEach(el => {
-                    if (el.textContent.toLowerCase() === DRMng.Config.get(`sortBy`)) el.className = `active`;
+                document.querySelectorAll('#DRMng_sortOrderBy > button').forEach(el => {
+                    if (el.textContent.toLowerCase() === DRMng.Config.get('sortBy')) el.className = 'active';
                 });
 
                 // Private Chats
@@ -4995,61 +5007,61 @@ function main() {
             loadOptions: function () {
                 let group, opt;
 
-                group = new this.Group(`kongui`, `Kongregate`, true);
+                group = new this.Group('kongui', 'Kongregate', true);
 
                 opt = new this.Option();
-                opt.setup(`kongui_stickyHeader`, `Sticky header`, `bool`, true)
-                    .desc(`Makes top header always visible on screen.`)
+                opt.setup('kongui_stickyHeader', 'Sticky header', 'bool', true)
+                    .desc('Makes top header always visible on screen.')
                     .event(function () {
                         if (this.conf[this.field]) {
-                            new DRMng.Node(`#headerwrap`).detach().attach(`before`, `primarywrap`);
+                            new DRMng.Node('#headerwrap').detach().attach('before', 'primarywrap');
                             DRMng.CSS.del(this.field);
-                            DRMng.CSS.del(this.field + `b`);
+                            DRMng.CSS.del(this.field + 'b');
                         }
                         else {
-                            new DRMng.Node(`#headerwrap`).detach().attach(`before`, `tr8n_language_selector_trigger`);
-                            DRMng.CSS.add(this.field, `div#headerwrap`, `width: 100% !important`);
-                            DRMng.CSS.add(this.field + `b`, `div#primarywrap`, `height: 100% !important`);
+                            new DRMng.Node('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
+                            DRMng.CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
+                            DRMng.CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
                         }
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideToolbar`, `Hide game toolbar`, `bool`, false)
-                    .desc(`Hides toolbar located above game window (cinematic mode, rating, etc).`)
+                opt.setup('kongui_hideToolbar', 'Hide game toolbar', 'bool', false)
+                    .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `table.game_table > tbody > tr:first-child`, `display: none`);
+                            DRMng.CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideFrame`, `Hide game frame`, `bool`, false)
-                    .desc(`Hides 7px wide frame around game window.`)
+                opt.setup('kongui_hideFrame', 'Hide game frame', 'bool', false)
+                    .desc('Hides 7px wide frame around game window.')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `div#maingame`, `padding: 0`);
+                            DRMng.CSS.add(this.field, 'div#maingame', 'padding: 0');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideGameDetails`, `Hide game details`, `bool`, false)
-                    .desc(`Hides game details part located just below game window.`)
+                opt.setup('kongui_hideGameDetails', 'Hide game details', 'bool', false)
+                    .desc('Hides game details part located just below game window.')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `div.game_details_outer`, `display: none`);
+                            DRMng.CSS.add(this.field, 'div.game_details_outer', 'display: none');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`kongui_hideForum`, `Hide forum area`, `bool`, true)
-                    .desc(`Hides forum part located below game window.`)
+                opt.setup('kongui_hideForum', 'Hide forum area', 'bool', true)
+                    .desc('Hides forum part located below game window.')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `#below_fold_content div.game_page_wrap`, `display: none`);
+                            DRMng.CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
@@ -5057,26 +5069,26 @@ function main() {
                 /**
                  * RaidsManager UI
                  */
-                group = new this.Group(`drmui`, `RaidsManager`);
+                group = new this.Group('drmui', 'RaidsManager');
 
                 opt = new this.Option();
-                opt.setup(`drmui_disableTransitions`, `Disable transitions`, `bool`, false)
-                    .desc(`Disables animated transitions for various UI elements to improve performance on` +
-                         ` low-end hardware.`)
+                opt.setup('drmui_disableTransitions', 'Disable transitions', 'bool', false)
+                    .desc('Disables animated transitions for various UI elements to improve performance on' +
+                         ' low-end hardware.')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `div#DRMng_main, div#DRMng_main *, div#DRMng_info,` +
-                                                     ` div#DRMng_info *`, `transition: initial !important`);
+                            DRMng.CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+                                                     ' div#DRMng_info *', 'transition: initial !important');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
 
                 opt = new this.Option();
-                opt.setup(`drmui_hideSideBar`, `Hide sidebar`, `bool`, false)
-                    .desc(`Hides sidebar which is located between game window and kongregate chat.`)
+                opt.setup('drmui_hideSideBar', 'Hide sidebar', 'bool', false)
+                    .desc('Hides sidebar which is located between game window and kongregate chat.')
                     .event(function () {
                         if (this.conf[this.field])
-                            DRMng.CSS.add(this.field, `div#DRMng_Sidebar`, `display: none`);
+                            DRMng.CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
                         else DRMng.CSS.del(this.field);
                     })
                     .make(group);
@@ -5084,18 +5096,18 @@ function main() {
                 /**
                  * Alliance UI
                  */
-                group = new this.Group(`alliance`, `Alliance`);
+                group = new this.Group('alliance', 'Alliance');
 
                 opt = new this.Option();
-                opt.setup(`alliance_sbs`, `Side by side`, `bool`, false)
-                    .desc(`Makes alliance chat visible all the time along with regular kongregate chats` +
-                         ` (doubles width taken by chat area).`)
+                opt.setup('alliance_sbs', 'Side by side', 'bool', false)
+                    .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
+                         ' (doubles width taken by chat area).')
                     .event(function () {
                         // make sure initial variable setting wont fire this
                         if (DRMng.Alliance.tab) {
                             const a = DRMng.Alliance;
-                            if (this.conf[this.field]) a.body.style.removeProperty(`display`);
-                            else a.tab.className = `chat_room_tab`;
+                            if (this.conf[this.field]) a.body.style.removeProperty('display');
+                            else a.tab.className = 'chat_room_tab';
                             DRMng.UI.setChatWidth();
                             a.active = false;
                             holodeck._chat_window.showActiveRoom();
@@ -5107,47 +5119,47 @@ function main() {
                 /**
                  * Game frame UI
                  */
-                group = new this.Group(`gameFrame`, `Game`);
+                group = new this.Group('gameFrame', 'Game');
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_removeWChat`, `Disable World Chat`, `bool`, false)
-                    .desc(`Disables World Chat located next to game window.`)
+                opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
+                    .desc('Disables World Chat located next to game window.')
                     .event(function () {
-                        DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
+                        DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
                         DRMng.Kong.hideWorldChat();
                     })
                     .make(group, true);
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_leftWChat`, `World Chat on left side`, `bool`, false)
-                    .desc(`Moves World Chat to the left side of game window.`)
-                    .event(DRMng.postGameMessage.bind(this, `chatSettings`, DRMng.Config.local.gameFrame))
+                opt.setup('gameFrame_leftWChat', 'World Chat on left side', 'bool', false)
+                    .desc('Moves World Chat to the left side of game window.')
+                    .event(DRMng.postGameMessage.bind(this, 'chatSettings', DRMng.Config.local.gameFrame))
                     .make(group, true);
 
                 opt = new this.Option();
-                opt.setup(`gameFrame_hideWChat`, `Hide World Chat`, `bool`, false)
-                    .desc(`Hides World Chat (without disabling it completely).`)
+                opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
+                    .desc('Hides World Chat (without disabling it completely).')
                     .event(function () {
-                        DRMng.postGameMessage(`chatSettings`, DRMng.Config.local.gameFrame);
+                        DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
                         DRMng.Kong.hideWorldChat();
                     })
                     .make(group, true);
 
-                group = new this.Group(`sidebar`, `Sidebar`);
+                group = new this.Group('sidebar', 'Sidebar');
 
                 new this.Option()
-                    .setup(`sidebar_apply`, `Apply changes`, `action`)
-                    .desc(`Applies sidebar layout changes as defined below.`)
+                    .setup('sidebar_apply', 'Apply changes', 'action')
+                    .desc('Applies sidebar layout changes as defined below.')
                     .event(function () {
-                        const sb = document.getElementsByClassName(`drmng_config_sb`);
+                        const sb = document.getElementsByClassName('drmng_config_sb');
                         const dat = { groups: [], buttons: [] };
                         for (let i = 0; i < sb.length; ++i) {
-                            const inp = Array.from(sb[i].querySelectorAll(`input`));
+                            const inp = Array.from(sb[i].querySelectorAll('input'));
                             const grp = { name: inp.shift().value, hidden: i > 0, buttons: [] };
                             while (inp.length) {
-                                const btn = { name: inp.shift().value, command: inp.shift().value, action: `func` };
-                                if (btn.command.indexOf(`/`) === 0) btn.action = `chat`;
-                                else if (btn.command.indexOf(`http`) === 0) btn.action = `www`;
+                                const btn = { name: inp.shift().value, command: inp.shift().value, action: 'func' };
+                                if (btn.command.indexOf('/') === 0) btn.action = 'chat';
+                                else if (btn.command.indexOf('http') === 0) btn.action = 'www';
                                 if (i < sb.length - 1) grp.buttons.push(btn);
                                 else dat.buttons.push(btn);
                             }
@@ -5160,38 +5172,38 @@ function main() {
                     .make(group, true);
 
                 new this.Option()
-                    .setup(`sidebar_export`, `Export configuration`, `action`)
-                    .desc(`Exports sidebar configuration to JSON file.`)
+                    .setup('sidebar_export', 'Export configuration', 'action')
+                    .desc('Exports sidebar configuration to JSON file.')
                     .event(() => {
-                        const a = document.createElement(`a`);
-                        a.setAttribute(`href`, `data:text,${JSON.stringify(DRMng.Config.local.sidebar.data)}`);
-                        a.setAttribute(`download`, `sidebar_config.json`);
-                        a.dispatchEvent(new MouseEvent(`click`));
+                        const a = document.createElement('a');
+                        a.setAttribute('href', `data:text,${JSON.stringify(DRMng.Config.local.sidebar.data)}`);
+                        a.setAttribute('download', 'sidebar_config.json');
+                        a.dispatchEvent(new MouseEvent('click'));
                     })
-                    .make(group, true, `Export`);
+                    .make(group, true, 'Export');
 
                 new this.Option()
-                    .setup(`sidebar_import`, `Import configuration`, `action`)
-                    .desc(`Imports sidebar configuration from JSON file.`)
+                    .setup('sidebar_import', 'Import configuration', 'action')
+                    .desc('Imports sidebar configuration from JSON file.')
                     .event(() => {
-                        const a = document.createElement(`input`);
-                        a.setAttribute(`type`, `file`);
-                        a.setAttribute(`accept`, `.json`);
-                        a.addEventListener(`change`, e => {
+                        const a = document.createElement('input');
+                        a.setAttribute('type', 'file');
+                        a.setAttribute('accept', '.json');
+                        a.addEventListener('change', e => {
                             if (e.target.files instanceof FileList && e.target.files.length > 0) {
                                 const reader = new FileReader();
-                                reader.addEventListener(`load`, e => {
+                                reader.addEventListener('load', e => {
                                     const res = `${e.target.result}`;
                                     let data = null;
                                     try { data = JSON.parse(res); }
-                                    catch (e) { DRMng.log(`error`, `{Sidebar::Import} Wrong data format ::`, res); }
+                                    catch (e) { DRMng.log('error', '{Sidebar::Import} Wrong data format ::', res); }
                                     if (data && data.groups && data.buttons) {
                                         DRMng.Config.local.sidebar.data = data;
                                         DRMng.Config.saveLocal();
-                                        DRMng.log(`debug`, `{Sidebar::Import} Data ::`, data);
+                                        DRMng.log('debug', '{Sidebar::Import} Data ::', data);
                                         // clear old fields
                                         group.fields = group.fields.filter(fld => {
-                                            if (fld.html.className === `drmng_config_sb`) {
+                                            if (fld.html.className === 'drmng_config_sb') {
                                                 fld.html.parentNode.removeChild(fld.html);
                                                 return false;
                                             }
@@ -5204,9 +5216,9 @@ function main() {
                                 reader.readAsText(e.target.files[0]);
                             }
                         });
-                        a.dispatchEvent(new MouseEvent(`click`));
+                        a.dispatchEvent(new MouseEvent('click'));
                     })
-                    .make(group, true, `Import`);
+                    .make(group, true, 'Import');
                 new this.SidebarConfig().make(group);
 
                 DRMng.Kong.hideWorldChat();
@@ -5215,82 +5227,82 @@ function main() {
                 DRMng.Config.saveLocal();
             },
             raidInfo: function (boss) {
-                let txt = ``;
+                let txt = '';
                 if (boss) {
                     let r = DRMng.Config.local.raidData[boss];
                     if (r) {
-                        txt += `<div class="name">` + r.fName + `</div>`;
-                        let race = r.race.join(`, `);
-                        if (race) txt += `<div class="race">(` + race + `)</div>`;
+                        txt += '<div class="name">' + r.fName + '</div>';
+                        let race = r.race.join(', ');
+                        if (race) txt += '<div class="race">(' + race + ')</div>';
                         let t = DRMng.Config.local.tiersData, rt;
                         const Diff = [0, 1, 2, 3];
 
-                        txt += `<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>`;
-                        txt += Diff.reduce((acc, d) => acc + `<td>` +
-                               (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000, 4) : `&mdash;`) + `</td>`,
-                        `<tr><td>HP</td>`) + `</tr>`;
-                        txt += Diff.reduce((acc, d) => acc + `<td>` +
-                               (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : `&mdash;`) +
-                               `</td>`, `<tr><td>FS</td>`) + `</tr>`;
-                        txt += `<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>` + `<td>` +
-                               (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : `&mdash;`) +
-                               `</td></tr>`;
+                        txt += '<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>';
+                        txt += Diff.reduce((acc, d) => acc + '<td>' +
+                               (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000, 4) : '&mdash;') + '</td>',
+                        '<tr><td>HP</td>') + '</tr>';
+                        txt += Diff.reduce((acc, d) => acc + '<td>' +
+                               (r.hp[d] ? DRMng.Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                               '</td>', '<tr><td>FS</td>') + '</tr>';
+                        txt += '<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>' + '<td>' +
+                               (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : '&mdash;') +
+                               '</td></tr>';
                         if (t.nonTiered && t.nonTiered.raids.indexOf(boss) !== -1) {
                             rt = t.nonTiered.ratio[r.size][3];
-                            txt += `<tr><td>OS</td>` +
-                                   `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td></tr>`;
+                            txt += '<tr><td>OS</td>' +
+                                   '<td>' + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td></tr>';
                             rt = t.nonTiered.ratio[r.size][6];
-                            txt += `<tr><td>MS</td>` +
-                                   `<td>` + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td>` +
-                                   `<td>` + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                                `&mdash;`) + `</td></tr>`;
+                            txt += '<tr><td>MS</td>' +
+                                   '<td>' + (r.hp[0] ? DRMng.Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[1] ? DRMng.Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[2] ? DRMng.Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td>' +
+                                   '<td>' + (r.hp[3] ? DRMng.Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
+                                '&mdash;') + '</td></tr>';
                         }
-                        txt += `</table>`;
+                        txt += '</table>';
 
                         if (t.tiers && t.tiers[boss]) {
                             t = t.tiers[boss];
                             rt = t.ratio[3];
-                            txt += `<table class="raidinfo"><tr><td></td><td>Tier</td><td>Stats</td><td>dmg/SP</td><td>dmg/E</td></tr>`;
+                            txt += '<table class="raidinfo"><tr><td></td><td>Tier</td><td>Stats</td><td>dmg/SP</td><td>dmg/E</td></tr>';
                             // Stats OS
-                            if (t.spOS >= 0) txt += `<tr><td>Stats OS</td><td>` +
-                                                    DRMng.Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + `</td>` +
-                                                    `<td>` + DRMng.Util.getShortNum(t.sp[t.spOS]) + `</td>` +
-                                                    `<td>` + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
-                                                    `</td>` +
-                                                    `<td>` + (t.hasCURE && t.e ?
+                            if (t.spOS >= 0) txt += '<tr><td>Stats OS</td><td>' +
+                                                    DRMng.Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + '</td>' +
+                                                    '<td>' + DRMng.Util.getShortNum(t.sp[t.spOS]) + '</td>' +
+                                                    '<td>' + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
+                                                    '</td>' +
+                                                    '<td>' + (t.hasCURE && t.e ?
                                 (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
-                                `&mdash;`) + `</td>`;
+                                '&mdash;') + '</td>';
                             // Epics OS
-                            if (t.eOS >= 0) txt += `<tr><td>Epics OS</td><td>` +
-                                                   DRMng.Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + `</td>` +
-                                                   `<td>` + DRMng.Util.getShortNum(t.sp[t.eOS]) + `</td>` +
-                                                   `<td>` + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
-                                                   `</td>` +
-                                                   `<td>` + (t.hasCURE && t.e ?
+                            if (t.eOS >= 0) txt += '<tr><td>Epics OS</td><td>' +
+                                                   DRMng.Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' +
+                                                   '<td>' + DRMng.Util.getShortNum(t.sp[t.eOS]) + '</td>' +
+                                                   '<td>' + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
+                                                   '</td>' +
+                                                   '<td>' + (t.hasCURE && t.e ?
                                 (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
-                                `&mdash;`) + `</td>`;
+                                '&mdash;') + '</td>';
                             // Max Tier
                             let idx = t.tiers.length - 1;
-                            txt += `<tr><td>Max Tier</td><td>` + DRMng.Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
-                                   `</td>` +
-                                   `<td>` + DRMng.Util.getShortNum(t.sp[idx]) + `</td>` +
-                                   `<td>` + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) + `</td>` +
-                                   `<td>` +
-                                   (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : `&mdash;`) +
-                                   `</td>`;
-                            txt += `</table>`;
+                            txt += '<tr><td>Max Tier</td><td>' + DRMng.Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
+                                   '</td>' +
+                                   '<td>' + DRMng.Util.getShortNum(t.sp[idx]) + '</td>' +
+                                   '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) + '</td>' +
+                                   '<td>' +
+                                   (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
+                                   '</td>';
+                            txt += '</table>';
                         }
                     }
                 }
@@ -5300,14 +5312,14 @@ function main() {
             fillInfoTimeout: 0,
             fillInfo: id => {
                 // Get info div and clear its content
-                const ifo = document.getElementById(`DRMng_info`);
+                const ifo = document.getElementById('DRMng_info');
                 while (ifo.firstChild) ifo.removeChild(ifo.firstChild);
 
                 const rd = DRMng.Raids.get(id);
                 const ri = DRMng.Config.local.raidData[rd.boss];
                 const hpMax = ri ? ri.hp[rd.diff - 1] * 1000 : Infinity;
                 const data = {
-                    nam: rd.boss.replace(/_/g, ` `), mag: ``, rac: ``, sta: `Healthy`, ptm: 1.0, hpi: `?`, tmi: `?`
+                    nam: rd.boss.replace(/_/g, ' '), mag: '', rac: '', sta: 'Healthy', ptm: 1.0, hpi: '?', tmi: '?'
                 };
 
                 if (ri) {
@@ -5315,35 +5327,35 @@ function main() {
                     data.nam = ri.fName;
                     // Magic
                     data.mag = JSON.parse(rd.magic).reduce(
-                        (a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`, ``);
+                        (a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`, '');
                     //data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
                     //    `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
                     // Race
                     if (ri.race.length > 0)
-                        data.rac = `Race: ` + ri.race.map(v => v.replace(/ /g, `&nbsp;`)).join(`, `);
+                        data.rac = 'Race: ' + ri.race.map(v => v.replace(/ /g, '&nbsp;')).join(', ');
                     // Timer
                     if (!ri.isEvent) {
                         data.ptm = 1.0 - ((new Date().getTime() - rd.createtime) / (3600000 * ri.timer));
-                        if (data.ptm + 0.05 < rd.hp) data.sta = `Behind timer`;
-                        if (data.ptm + 0.2 < rd.hp) data.sta = `Failing`;
+                        if (data.ptm + 0.05 < rd.hp) data.sta = 'Behind timer';
+                        if (data.ptm + 0.2 < rd.hp) data.sta = 'Failing';
                     }
                 }
 
                 // Status
                 data.sta += rd.isFull ? `, Full (${rd.participants})` :
-                    `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ``}`;
-                data.sta += rd.visited ? `, Visited` : ``;
+                    `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ''}`;
+                data.sta += rd.visited ? ', Visited' : '';
 
                 // Health text
                 data.hpi = `health ${DRMng.Util.getShortNumK(hpMax * rd.hp, 3)} / ` +
                            `${DRMng.Util.getShortNumK(hpMax, 3)} (${Math.ceil(rd.hp * 100)}%)`;
 
                 // Time text
-                data.tmi = `timer ${ri ? `${Math.round(data.ptm * ri.timer)}h / ${ri.timer}h ` : ``}` +
+                data.tmi = `timer ${ri ? `${Math.round(data.ptm * ri.timer)}h / ${ri.timer}h ` : ''}` +
                            `(${Math.ceil(data.ptm * 100)}%)`;
 
                 // Generate info field
-                ifo.className = [``, `n`, `h`, `l`, `nm`][rd.diff];
+                ifo.className = ['', 'n', 'h', 'l', 'nm'][rd.diff];
                 ifo.innerHTML = `<div><span class="title">${data.nam}</span>${data.mag}</div><div>${data.rac}</div>` +
                                 `<div class="status">Status: ${data.sta}</div>` +
                                 `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
@@ -5355,41 +5367,41 @@ function main() {
                 clearTimeout(DRMng.UI.fillInfoTimeout);
                 if (DRMng.hResize.clicked) return;
 
-                const rdl = document.getElementById(`DRMng_RaidList`).getBoundingClientRect();
+                const rdl = document.getElementById('DRMng_RaidList').getBoundingClientRect();
                 const wnd = document.documentElement.clientHeight;
-                const id = e.target.id.split(`_`)[1];
+                const id = e.target.id.split('_')[1];
                 const d = e.target.getBoundingClientRect();
-                const ifo = document.getElementById(`DRMng_info`);
-                ifo.style.display = `block`;
-                ifo.style.left = d.left - ifo.offsetWidth + `px`;
+                const ifo = document.getElementById('DRMng_info');
+                ifo.style.display = 'block';
+                ifo.style.left = d.left - ifo.offsetWidth + 'px';
 
                 if (d.top + ifo.offsetHeight > rdl.top + rdl.height / 2) {
-                    ifo.style.top = ``;
-                    ifo.style.bottom = Math.max(wnd - d.bottom, 0) + `px`;
+                    ifo.style.top = '';
+                    ifo.style.bottom = Math.max(wnd - d.bottom, 0) + 'px';
                 }
                 else {
-                    ifo.style.top = d.top - 1 + `px`;
-                    ifo.style.bottom = ``;
+                    ifo.style.top = d.top - 1 + 'px';
+                    ifo.style.bottom = '';
                 }
                 DRMng.UI.fillInfoTimeout = setTimeout(DRMng.UI.fillInfo, 30, id);
             },
             handleChatClick: (e, sbs) => {
-                const usr = e.target.getAttribute(`username`);
+                const usr = e.target.getAttribute('username');
                 if (usr) {
                     const a = DRMng.PrivateChat.getActive();
                     e.stopPropagation();
                     e.preventDefault();
-                    DRMng.log(`info`, `{${a ? `Private::${a.conf.channel}` : `Kong`}::PM} User <${usr}>`);
+                    DRMng.log('info', `{${a ? `Private::${a.conf.channel}` : 'Kong'}::PM} User <${usr}>`);
                     if (a || sbs) {
                         a.input.focus();
-                        a.input.dispatchEvent(new Event(`focus`));
+                        a.input.dispatchEvent(new Event('focus'));
                         a.input.value = `/w ${usr} `;
                     }
                     else holodeck._active_dialogue.setInput(`/w ${usr} `);
                 }
-                else if (e.target.className.indexOf(`DRMng_info_picker`) > -1) {
+                else if (e.target.className.indexOf('DRMng_info_picker') > -1) {
                     e = e.target;
-                    const raid = e.className.split(` `)[1];
+                    const raid = e.className.split(' ')[1];
                     if (!raid) return false;
                     const data = DRMng.Config.get(`raidData::${raid}`);
                     if (!data) return false;
@@ -5397,16 +5409,16 @@ function main() {
                     e = e.parentNode;
                     e.style.backgroundImage = `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${data ?
                         data.banner :
-                        ``}.jpg)`;
-                    e.classList.add(`raidinfo`);
+                        ''}.jpg)`;
+                    e.classList.add('raidinfo');
                     e.innerHTML = DRMng.UI.raidInfo(raid);
                     setTimeout(() => e.parentNode.parentNode.scrollTop = 500000, 10); //131072
                 }
                 return false;
             },
             addListenerToChat: () => {
-                const el = document.getElementById(`chat_rooms_container`);
-                if (el) el.addEventListener(`click`, DRMng.UI.handleChatClick, true);
+                const el = document.getElementById('chat_rooms_container');
+                if (el) el.addEventListener('click', DRMng.UI.handleChatClick, true);
                 else setTimeout(DRMng.UI.addListenerToChat, 250);
             },
             attachListeners: function () {
@@ -5414,9 +5426,9 @@ function main() {
                 setTimeout(DRMng.UI.addListenerToChat, 1000);
 
                 // Message listeners
-                document.addEventListener(`DRMng.joinRaid`, DRMng.Raids.joinResponse, false);
-                document.addEventListener(`DRMng.joinRaids`, DRMng.Raids.joinMultiResponse, false);
-                document.addEventListener(`DRMng.lightShot`, DRMng.Gate.lightShotCb, false);
+                document.addEventListener('DRMng.joinRaid', DRMng.Raids.joinResponse, false);
+                document.addEventListener('DRMng.joinRaids', DRMng.Raids.joinMultiResponse, false);
+                document.addEventListener('DRMng.lightShot', DRMng.Gate.lightShotCb, false);
 
                 // Script Hide automation
                 /*new DRMng.Node(`#DRMng_main`)
@@ -5429,198 +5441,198 @@ function main() {
                  .on(`mouseenter`, () => clearTimeout(DRMng.UI.hideUITimeout));*/
 
                 // menu buttons
-                document.querySelectorAll(`#DRMng_nav > div`).forEach(mnuItem => {
-                    mnuItem.addEventListener(`click`, e => {
-                        document.getElementById(`DRMng_main`).className = `active`;
-                        const contItems = document.getElementById(`DRMng_content`).children;
-                        document.querySelectorAll(`#DRMng_nav > div`).forEach((item, i) => {
-                            item.className = ``;
-                            contItems[i].className = ``;
+                document.querySelectorAll('#DRMng_nav > div').forEach(mnuItem => {
+                    mnuItem.addEventListener('click', e => {
+                        document.getElementById('DRMng_main').className = 'active';
+                        const contItems = document.getElementById('DRMng_content').children;
+                        document.querySelectorAll('#DRMng_nav > div').forEach((item, i) => {
+                            item.className = '';
+                            contItems[i].className = '';
                         });
-                        document.getElementById(`DRMng_${e.target.innerHTML}`).className = `active`;
-                        e.target.className = `active`;
+                        document.getElementById(`DRMng_${e.target.innerHTML}`).className = 'active';
+                        e.target.className = 'active';
                     });
                 });
 
                 // Sorting
-                new DRMng.Node(`#DRMng_sortOrderBy`).on(`click`, e => {
+                new DRMng.Node('#DRMng_sortOrderBy').on('click', e => {
                     const el = e.target;
-                    if (el.className.indexOf(`active`) === -1) {
-                        const act = el.parentNode.getElementsByClassName(`active`);
-                        if (act.length > 0) act[0].className = ``;
-                        el.className = `active`;
+                    if (el.className.indexOf('active') === -1) {
+                        const act = el.parentNode.getElementsByClassName('active');
+                        if (act.length > 0) act[0].className = '';
+                        el.className = 'active';
                         DRMng.Raids.setComp(el.innerHTML.toLowerCase());
                     }
                 });
 
                 // RaidList joining
-                new DRMng.Node(`#DRMng_RaidList`).on(`click`, e => {
+                new DRMng.Node('#DRMng_RaidList').on('click', e => {
                     let el = e.target;
-                    if (el.nodeName !== `DIV`) el = el.parentNode;
-                    if (el.id === `DRMng_RaidList`) return;
-                    DRMng.Raids.joinOne(el.id.split(`_`)[1]);
+                    if (el.nodeName !== 'DIV') el = el.parentNode;
+                    if (el.id === 'DRMng_RaidList') return;
+                    DRMng.Raids.joinOne(el.id.split('_')[1]);
                 });
 
                 // Info box hiding
-                new DRMng.Node(`#DRMng_RaidList`).on(`mouseleave`, () =>
-                    document.getElementById(`DRMng_info`).style.display = `none`);
+                new DRMng.Node('#DRMng_RaidList').on('mouseleave', () =>
+                    document.getElementById('DRMng_info').style.display = 'none');
 
                 // raids filtering field
-                new DRMng.Node(`#DRMng_txtFilter`)
-                    .on(`focus`, e => {
-                        if (e.target.textContent === `Filter raids here`) {
-                            e.target.textContent = ``;
-                            e.target.className = ``;
+                new DRMng.Node('#DRMng_txtFilter')
+                    .on('focus', e => {
+                        if (e.target.textContent === 'Filter raids here') {
+                            e.target.textContent = '';
+                            e.target.className = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.textContent === ``) {
-                            e.target.textContent = `Filter raids here`;
-                            e.target.className = `default`;
+                    .on('blur', e => {
+                        if (e.target.textContent === '') {
+                            e.target.textContent = 'Filter raids here';
+                            e.target.className = 'default';
                         }
                     })
-                    .on(`keyup`, e => {
+                    .on('keyup', e => {
                         if (window.filterTOut) clearTimeout(window.filterTOut);
-                        const data = e.target.textContent.replace(/[\n\r\t]/g, ``).trim();
+                        const data = e.target.textContent.replace(/[\n\r\t]/g, '').trim();
                         window.filterTOut = setTimeout(DRMng.Raids.processFilter.bind(DRMng.Raids, data), 500);
                     });
 
                 // Apply filter button
-                new DRMng.Node(`#DRMng_filterApply`).on(`click`, e => {
-                    e.target.parentNode.style.display = `none`;
+                new DRMng.Node('#DRMng_filterApply').on('click', e => {
+                    e.target.parentNode.style.display = 'none';
                     DRMng.Engine.reconnect();
                 });
 
                 // filter groups rollovers
                 [
-                    document.getElementById(`DRMng_filterSmall`),
-                    document.getElementById(`DRMng_filterMedium`),
-                    document.getElementById(`DRMng_filterLarge`),
-                    document.getElementById(`DRMng_filterEpic`),
-                    document.getElementById(`DRMng_filterColossal`),
-                    document.getElementById(`DRMng_filterGuild`),
-                    document.getElementById(`DRMng_filterGigantic`)
+                    document.getElementById('DRMng_filterSmall'),
+                    document.getElementById('DRMng_filterMedium'),
+                    document.getElementById('DRMng_filterLarge'),
+                    document.getElementById('DRMng_filterEpic'),
+                    document.getElementById('DRMng_filterColossal'),
+                    document.getElementById('DRMng_filterGuild'),
+                    document.getElementById('DRMng_filterGigantic')
                 ].forEach(div => {
                     if (div) {
-                        div.parentNode.addEventListener(`transitionend`, e => {
-                            if (e.target.className.indexOf(`hide`) !== -1)
-                                e.target.children[1].style.display = `none`;
+                        div.parentNode.addEventListener('transitionend', e => {
+                            if (e.target.className.indexOf('hide') !== -1)
+                                e.target.children[1].style.display = 'none';
                         }, false);
                     }
                 });
 
                 // delayed submission
-                new DRMng.Node(`#DRMng_submitRaidLink`)
-                    .on(`focus`, e => {
-                        if (e.target.innerHTML === `Paste raid link here`) {
-                            e.target.innerHTML = ``;
-                            e.target.className = ``;
+                new DRMng.Node('#DRMng_submitRaidLink')
+                    .on('focus', e => {
+                        if (e.target.innerHTML === 'Paste raid link here') {
+                            e.target.innerHTML = '';
+                            e.target.className = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.innerHTML === ``) {
-                            e.target.innerHTML = `Paste raid link here`;
-                            e.target.className = `default`;
+                    .on('blur', e => {
+                        if (e.target.innerHTML === '') {
+                            e.target.innerHTML = 'Paste raid link here';
+                            e.target.className = 'default';
                         }
                     });
 
-                document.querySelectorAll(`[group=DRMng_submitDelay]`).forEach(flt => {
-                    flt.addEventListener(`click`, e => {
-                        document.querySelectorAll(`[group=DRMng_submitDelay]`).forEach(item => item.className = ``);
-                        e.target.className = `crimson`;
+                document.querySelectorAll('[group=DRMng_submitDelay]').forEach(flt => {
+                    flt.addEventListener('click', e => {
+                        document.querySelectorAll('[group=DRMng_submitDelay]').forEach(item => item.className = '');
+                        e.target.className = 'crimson';
                     });
                 });
 
                 // alliance chat
-                new DRMng.Node(`#DRMng_allianceChnl`)
-                    .on(`focus`, e => {
-                        if (e.target.getAttribute(`class`) === `default`) {
-                            e.target.removeAttribute(`class`);
-                            e.target.value = ``;
+                new DRMng.Node('#DRMng_allianceChnl')
+                    .on('focus', e => {
+                        if (e.target.getAttribute('class') === 'default') {
+                            e.target.removeAttribute('class');
+                            e.target.value = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.value === ``) {
-                            e.target.setAttribute(`class`, `default`);
-                            e.target.value = `Channel`;
+                    .on('blur', e => {
+                        if (e.target.value === '') {
+                            e.target.setAttribute('class', 'default');
+                            e.target.value = 'Channel';
                         }
                     });
 
-                new DRMng.Node(`#DRMng_alliancePass`)
-                    .on(`focus`, e => {
-                        if (e.target.getAttribute(`class`) === `default`) {
-                            e.target.removeAttribute(`class`);
-                            e.target.setAttribute(`type`, `password`);
-                            e.target.value = ``;
+                new DRMng.Node('#DRMng_alliancePass')
+                    .on('focus', e => {
+                        if (e.target.getAttribute('class') === 'default') {
+                            e.target.removeAttribute('class');
+                            e.target.setAttribute('type', 'password');
+                            e.target.value = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.value === ``) {
-                            e.target.setAttribute(`class`, `default`);
-                            e.target.setAttribute(`type`, `text`);
-                            e.target.value = `Password`;
+                    .on('blur', e => {
+                        if (e.target.value === '') {
+                            e.target.setAttribute('class', 'default');
+                            e.target.setAttribute('type', 'text');
+                            e.target.value = 'Password';
                         }
                     });
 
-                new DRMng.Node(`#DRMng_allianceName`)
-                    .on(`focus`, e => {
-                        if (e.target.getAttribute(`class`) === `default`) {
-                            e.target.removeAttribute(`class`);
-                            e.target.value = ``;
+                new DRMng.Node('#DRMng_allianceName')
+                    .on('focus', e => {
+                        if (e.target.getAttribute('class') === 'default') {
+                            e.target.removeAttribute('class');
+                            e.target.value = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.value === ``) {
-                            e.target.setAttribute(`class`, `default`);
-                            e.target.value = `Name`;
+                    .on('blur', e => {
+                        if (e.target.value === '') {
+                            e.target.setAttribute('class', 'default');
+                            e.target.value = 'Name';
                         }
                     });
 
-                new DRMng.Node(`#DRMng_allianceColor`)
-                    .on(`focus`, e => {
-                        if (e.target.getAttribute(`class`) === `default`) {
-                            e.target.removeAttribute(`class`);
-                            e.target.value = ``;
+                new DRMng.Node('#DRMng_allianceColor')
+                    .on('focus', e => {
+                        if (e.target.getAttribute('class') === 'default') {
+                            e.target.removeAttribute('class');
+                            e.target.value = '';
                         }
                     })
-                    .on(`blur`, e => {
-                        if (e.target.value === ``) {
-                            e.target.setAttribute(`class`, `default`);
-                            e.target.value = `Color`;
+                    .on('blur', e => {
+                        if (e.target.value === '') {
+                            e.target.setAttribute('class', 'default');
+                            e.target.value = 'Color';
                         }
                     });
 
                 // resize listeners
-                DRMng.hResize.regPanes.push(`chat_container`);
+                DRMng.hResize.regPanes.push('chat_container');
                 DRMng.hResize.regSide.push(0);
-                document.getElementById(`chat_container`)
-                    .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
-                DRMng.hResize.regPanes.push(`DRMng_main`);
+                document.getElementById('chat_container')
+                    .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                DRMng.hResize.regPanes.push('DRMng_main');
                 DRMng.hResize.regSide.push(1);
-                document.getElementById(`DRMng_main`)
-                    .addEventListener(`mousedown`, DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                document.getElementById('DRMng_main')
+                    .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
             },
             roll: function (elem) {
                 const gr = elem ? elem.parentNode : null;
                 if (gr) {
-                    const group = gr.getAttribute(`group`);
+                    const group = gr.getAttribute('group');
                     if (group) {
                         gr.parentNode.childNodes.forEach(d => {
                             if (d.tagName === undefined) return;
-                            if (d !== `gr` && d.getAttribute(`group`) === group) {
-                                if (d.className.indexOf(`hide`) === -1) d.className += ` hide`;
-                                d.children[1].style.display = `none`;
+                            if (d !== 'gr' && d.getAttribute('group') === group) {
+                                if (d.className.indexOf('hide') === -1) d.className += ' hide';
+                                d.children[1].style.display = 'none';
                             }
                         });
                     }
-                    if (gr.className.indexOf(`group`) === 0) {
-                        if (gr.className.indexOf(`hide`) > -1) {
-                            gr.children[1].removeAttribute(`style`);
-                            gr.className = gr.className.replace(` hide`, ``);
+                    if (gr.className.indexOf('group') === 0) {
+                        if (gr.className.indexOf('hide') > -1) {
+                            gr.children[1].removeAttribute('style');
+                            gr.className = gr.className.replace(' hide', '');
                         }
                         else {
-                            gr.className += ` hide`;
-                            gr.children[1].style.display = `none`;
+                            gr.className += ' hide';
+                            gr.children[1].style.display = 'none';
                         }
                     }
                 }
@@ -5630,7 +5642,7 @@ function main() {
                 this.createCSS();
 
                 // script html code
-                new DRMng.Node(`div`).attr({ id: `DRMng_main` }).html(`\
+                new DRMng.Node('div').attr({ id: 'DRMng_main' }).html(`\
                     <div id="DRMng_wrapper">\
                         <div id="DRMng_nav">\
                             <div class="active">Raids</div><div>Filters</div><div>Tools</div><div>Options</div>\
@@ -5751,36 +5763,36 @@ function main() {
                             <div class="" id="DRMng_Options"></div>\
                         </div>\
                     </div>`)
-                    .attach(`to`, document.body);
+                    .attach('to', document.body);
 
                 // Info dialog
-                new DRMng.Node(`div`).attr({ id: `DRMng_info` }).attach(`to`, document.body);
+                new DRMng.Node('div').attr({ id: 'DRMng_info' }).attach('to', document.body);
 
                 // Status bar
-                new DRMng.Node(`#headerwrap`)
-                    .data(new DRMng.Node(`div`).attr({ id: `DRMng_header` })
-                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_server` })
+                new DRMng.Node('#headerwrap')
+                    .data(new DRMng.Node('div').attr({ id: 'DRMng_header' })
+                        .data(new DRMng.Node('div').attr({ id: 'DRMng_server' })
                             .txt(DRMng.Config.local.server)
-                            .on(`click`, DRMng.Engine.changeServer))
-                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_status` })
-                            .txt(`DRMng Loading...`))
-                        .data(new DRMng.Node(`div`).attr({ id: `DRMng_onoff`, class: `hidden` })
-                            .data(new DRMng.Node(`div`).txt(`\uf1cc`))
-                            .on(`click`, () => {
+                            .on('click', DRMng.Engine.changeServer))
+                        .data(new DRMng.Node('div').attr({ id: 'DRMng_status' })
+                            .txt('DRMng Loading...'))
+                        .data(new DRMng.Node('div').attr({ id: 'DRMng_onoff', class: 'hidden' })
+                            .data(new DRMng.Node('div').txt('\uf1cc'))
+                            .on('click', () => {
                                 clearTimeout(DRMng.UI.hideUITimeout);
                                 const el = document.getElementById(
-                                    `DRMng_main`);
-                                if (el.className === `hidden`) {
-                                    el.removeAttribute(`class`);
-                                    new DRMng.Node(`#DRMng_onoff`).remove(
-                                        `class`);
+                                    'DRMng_main');
+                                if (el.className === 'hidden') {
+                                    el.removeAttribute('class');
+                                    new DRMng.Node('#DRMng_onoff').remove(
+                                        'class');
                                     DRMng.Kong.setWrapperWidth(
-                                        DRMng.Config.get(`scriptWidth`));
+                                        DRMng.Config.get('scriptWidth'));
                                 }
                                 else {
-                                    el.className = `hidden`;
-                                    new DRMng.Node(`#DRMng_onoff`).attr(
-                                        { class: `hidden` });
+                                    el.className = 'hidden';
+                                    new DRMng.Node('#DRMng_onoff').attr(
+                                        { class: 'hidden' });
                                     DRMng.Kong.setWrapperWidth();
                                 }
                             })));
@@ -5845,7 +5857,7 @@ function main() {
         },
         postMessage: function (data) {
             document.dispatchEvent(
-                new MessageEvent(`DRMng.xhrReq`, {
+                new MessageEvent('DRMng.xhrReq', {
                     origin: `${document.location.protocol}//${document.location.hostname}`,
                     lastEventId: 0,
                     source: window,
@@ -5853,13 +5865,13 @@ function main() {
                 })
             );
         },
-        postGameMessage: function (type, data = ``) {
-            const game = document.getElementById(`gameiframe`);
+        postGameMessage: function (type, data = '') {
+            const game = document.getElementById('gameiframe');
             if (game) {
                 type = `DRMng.${type}`;
-                data = typeof data === `string` ? data : JSON.stringify(data);
-                type = data ? type + `#` + data : type;
-                game.contentWindow.postMessage(type, `https://dotd-web1.5thplanetgames.com`);
+                data = typeof data === 'string' ? data : JSON.stringify(data);
+                type = data ? type + '#' + data : type;
+                game.contentWindow.postMessage(type, 'https://dotd-web1.5thplanetgames.com');
             }
         },
         init: function () {
@@ -5892,21 +5904,21 @@ function main() {
         }
     };
 
-    DRMng.log(`Main class created. Initializing components`);
+    DRMng.log('Main class created. Initializing components');
 
     // include socket.io engine
-    new DRMng.Node(`script`)
+    new DRMng.Node('script')
         .attr({
-            type: `text/javascript`,
-            async: ``,
-            src: `https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js`
+            type: 'text/javascript',
+            async: '',
+            src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
         })
-        .attach(`to`, document.head);
+        .attach('to', document.head);
 
     DRMng.init();
 
     setTimeout(() => {
-        const s = document.getElementById(`DRMng_TempScriptField`);
+        const s = document.getElementById('DRMng_TempScriptField');
         s.parentNode.removeChild(s);
     }, 10000);
 }
@@ -5915,14 +5927,14 @@ function load() {
     window.DRMng = {
         config: {
             version: {
-                game: `0`,
-                chat: `0`
+                game: '0',
+                chat: '0'
             },
             user: {
-                name: ``,
-                id: ``,
-                auth: ``,
-                version: ``
+                name: '',
+                id: '',
+                auth: '',
+                version: ''
             },
             removeWChat: false,
             leftWChat: false,
@@ -5931,12 +5943,12 @@ function load() {
         loadCount: 0,
         counter: 0,
         load: () => {
-            const data = JSON.parse(localStorage[`DRMng`] || `{}`);
+            const data = JSON.parse(localStorage['DRMng'] || '{}');
             Object.keys(data).forEach(key => DRMng.config[key] = data[key]);
             DRMng.save();
         },
         save: () => {
-            localStorage[`DRMng`] = JSON.stringify(DRMng.config);
+            localStorage['DRMng'] = JSON.stringify(DRMng.config);
         },
         getParamObject: () => {
             const u = DRMng.config.user;
@@ -5945,115 +5957,115 @@ function load() {
                 kongregate_user_id: u.id,
                 kongregate_game_auth_token: u.auth,
                 kongregate_game_id: 138636,
-                kongregate_host: `https://www.kongregate.com`,
-                kongregate_game_url: `https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons`,
-                kongregate_api_host: `https://api.kongregate.com`,
-                kongregate_channel_id: `b1388511-e7e4-4c62-92fa-e6852fea27aa`,
-                kongregate_api_path: `https://chat.kongregate.com/flash/API_AS3_c1822959535ef5eff514ac20899abf96.swf`,
-                kongregate_ansible_path: `https://chat.kongregate.com/flash/ansible_68b66936d53ca6dd18a685bfcb55b2cf.swf`,
+                kongregate_host: 'https://www.kongregate.com',
+                kongregate_game_url: 'https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons',
+                kongregate_api_host: 'https://api.kongregate.com',
+                kongregate_channel_id: 'b1388511-e7e4-4c62-92fa-e6852fea27aa',
+                kongregate_api_path: 'https://chat.kongregate.com/flash/API_AS3_c1822959535ef5eff514ac20899abf96.swf',
+                kongregate_ansible_path: 'https://chat.kongregate.com/flash/ansible_68b66936d53ca6dd18a685bfcb55b2cf.swf',
                 kongregate_preview: false,
                 kongregate_game_version: u.version,
-                kongregate_language: `en`,
-                kongregate_split_treatments: `dawn-of-the-dragons-skin%2Ccontrol`,
+                kongregate_language: 'en',
+                kongregate_split_treatments: 'dawn-of-the-dragons-skin%2Ccontrol',
                 kongregate: true,
-                kongregate_svid: `7cc0eaba-d07e-4e85-8d7c-09a4f2f5fcfa`,
+                kongregate_svid: '7cc0eaba-d07e-4e85-8d7c-09a4f2f5fcfa',
                 kongregate_js_api: true,
                 kongregate_flash_postmessage: true,
                 user_id: `kong_${u.name}`,
-                server_xml_url: `https://web1.dawnofthedragons.com/kong/`,
-                content_url: `https://content.5thplanetgames.com/dotd_live/`,
-                xml_content_url: `https://content.5thplanetgames.com/dotd_live/xml/`,
+                server_xml_url: 'https://web1.dawnofthedragons.com/kong/',
+                content_url: 'https://content.5thplanetgames.com/dotd_live/',
+                xml_content_url: 'https://content.5thplanetgames.com/dotd_live/xml/',
                 app_id: 138636,
-                page_url: `https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons`,
-                auth_url: `https://web1.dawnofthedragons.com/kong/lib/authenticate.php`,
-                action_type: ``,
-                raid_id: ``,
-                hash: ``,
-                queueid: ``,
-                charter_id: ``,
-                trk: ``,
-                retrk: ``,
-                fbuid: ``
+                page_url: 'https://www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons',
+                auth_url: 'https://web1.dawnofthedragons.com/kong/lib/authenticate.php',
+                action_type: '',
+                raid_id: '',
+                hash: '',
+                queueid: '',
+                charter_id: '',
+                trk: '',
+                retrk: '',
+                fbuid: ''
             };
             return {
-                wmode: `transparent`,
-                allowscriptaccess: `always`,
-                flashvars: Object.keys(vars).reduce((a, v) => `${a}&${v}=${encodeURIComponent(vars[v])}`, ``)
+                wmode: 'transparent',
+                allowscriptaccess: 'always',
+                flashvars: Object.keys(vars).reduce((a, v) => `${a}&${v}=${encodeURIComponent(vars[v])}`, '')
             };
         },
         createSwf: function (data, id, width, height) {
             const swf = document.getElementById(id);
-            if (swf) swf.setAttribute(`data`, data);
+            if (swf) swf.setAttribute('data', data);
             else {
-                const div = document.createElement(`div`);
-                const obj = document.createElement(`object`);
+                const div = document.createElement('div');
+                const obj = document.createElement('object');
                 const param = this.getParamObject();
-                div.style.position = `absolute`;
-                div.style.top = `0`;
-                div.style.left = `0`;
-                if (id === `swfdiv` && this.config.leftWChat) div.style.left = `265px`;
-                if (id === `chatdiv` && !this.config.leftWChat) div.style.left = `760px`;
-                obj.setAttribute(`type`, `application/x-shockwave-flash`);
-                obj.setAttribute(`id`, id);
-                obj.setAttribute(`width`, width);
-                obj.setAttribute(`height`, height);
+                div.style.position = 'absolute';
+                div.style.top = '0';
+                div.style.left = '0';
+                if (id === 'swfdiv' && this.config.leftWChat) div.style.left = '265px';
+                if (id === 'chatdiv' && !this.config.leftWChat) div.style.left = '760px';
+                obj.setAttribute('type', 'application/x-shockwave-flash');
+                obj.setAttribute('id', id);
+                obj.setAttribute('width', width);
+                obj.setAttribute('height', height);
                 Object.keys(param).forEach(key => {
-                    const p = document.createElement(`param`);
-                    p.setAttribute(`name`, key);
-                    p.setAttribute(`value`, param[key]);
+                    const p = document.createElement('param');
+                    p.setAttribute('name', key);
+                    p.setAttribute('value', param[key]);
                     obj.appendChild(p);
                 });
-                obj.setAttribute(`data`, data);
+                obj.setAttribute('data', data);
                 div.appendChild(obj);
                 document.body.appendChild(div);
-                obj.style.visibility = `visible`;
+                obj.style.visibility = 'visible';
             }
         },
         applyChatSettings: function () {
-            const swfDiv = document.getElementById(`swfdiv`);
-            const chatDiv = document.getElementById(`chatdiv`);
+            const swfDiv = document.getElementById('swfdiv');
+            const chatDiv = document.getElementById('chatdiv');
             if (this.config.removeWChat) {
-                if (swfDiv) swfDiv.parentNode.style.left = `0`;
+                if (swfDiv) swfDiv.parentNode.style.left = '0';
                 if (chatDiv) {
                     const remDiv = chatDiv.parentNode;
                     remDiv.parentNode.removeChild(remDiv);
                 }
             }
             else if (this.config.leftWChat && !this.config.hideWChat) {
-                if (chatDiv) chatDiv.parentNode.style.left = `0`;
+                if (chatDiv) chatDiv.parentNode.style.left = '0';
                 else {
                     setTimeout(this.reloadChat.bind(this), 0);
                     return;
                 }
-                if (swfDiv) swfDiv.parentNode.style.left = `265px`;
+                if (swfDiv) swfDiv.parentNode.style.left = '265px';
             }
             else {
-                if (chatDiv) chatDiv.parentNode.style.left = `760px`;
+                if (chatDiv) chatDiv.parentNode.style.left = '760px';
                 else {
                     setTimeout(this.reloadChat.bind(this), 0);
                     return;
                 }
-                if (swfDiv) swfDiv.parentNode.style.left = `0`;
+                if (swfDiv) swfDiv.parentNode.style.left = '0';
             }
         },
         reloadChat: function () {
             if (this.config.version.chat)
                 this.createSwf(
-                    `https://content.5thplanetgames.com/dotd_live/chat/` + this.config.version.chat + `/chatclient.swf`,
-                    `chatdiv`, `265`, `690`
+                    'https://content.5thplanetgames.com/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf',
+                    'chatdiv', '265', '690'
                 );
             setTimeout(this.applyChatSettings.bind(this), 100);
         },
         reloadGame: function () {
             if (this.config.version.game)
                 this.createSwf(
-                    `https://content.5thplanetgames.com/dotd_live/swf/` + this.config.version.game + `/dotd.swf`,
-                    `swfdiv`, `760`, `690`
+                    'https://content.5thplanetgames.com/dotd_live/swf/' + this.config.version.game + '/dotd.swf',
+                    'swfdiv', '760', '690'
                 );
         },
         init: function () {
-            const swfDiv = document.getElementById(`swfdiv`);
-            const chatDiv = document.getElementById(`chatdiv`);
+            const swfDiv = document.getElementById('swfdiv');
+            const chatDiv = document.getElementById('chatdiv');
             this.load();
             if (swfDiv && chatDiv && swfDiv.data && chatDiv.data) {
                 this.config.version.game = /^.+\/([\da-z]+?)\/.+$/.exec(swfDiv.data)[1];
@@ -6066,8 +6078,8 @@ function load() {
                     this.config.user.auth = data.kongregate_game_auth_token;
                     this.config.user.version = data.kongregate_game_version;
                 }
-                console.log(`%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>`,
-                    `color: #108030`, this.config.version.game, this.config.version.chat,
+                console.log('%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>',
+                    'color: #108030', this.config.version.game, this.config.version.chat,
                     this.config.user.name, this.config.user.id
                 );
                 this.save();
@@ -6077,19 +6089,19 @@ function load() {
             else {
                 this.reloadGame();
                 this.reloadChat();
-                console.warn(`[DRMng] Game is probably in maintenance mode, generated missing data to fire up chat`);
+                console.warn('[DRMng] Game is probably in maintenance mode, generated missing data to fire up chat');
             }
         }
     };
 
-    window.addEventListener(`message`, e => {
-        if (!e.data || typeof e.data !== `string`) return;
-        const c = e.data.split(`#`);
-        if (c.length > 0 && c[0].indexOf(`DRMng.`) === 0) {
+    window.addEventListener('message', e => {
+        if (!e.data || typeof e.data !== 'string') return;
+        const c = e.data.split('#');
+        if (c.length > 0 && c[0].indexOf('DRMng.') === 0) {
             switch (c[0].slice(6)) {
-                case `chatSettings`:
+                case 'chatSettings':
                     if (c[1]) {
-                        const data = JSON.parse(c[1] || `{}`);
+                        const data = JSON.parse(c[1] || '{}');
                         DRMng.config.removeWChat = data.removeWChat || false;
                         DRMng.config.hideWChat = data.hideWChat || false;
                         DRMng.config.leftWChat = data.leftWChat || false;
@@ -6097,17 +6109,17 @@ function load() {
                         DRMng.applyChatSettings();
                     }
                     break;
-                case `chatReload`:
+                case 'chatReload':
                     DRMng.reloadChat();
                     break;
-                case `gameReload`:
+                case 'gameReload':
                     DRMng.reloadGame();
                     break;
-                case `killGame`:
-                    document.getElementById(`swfdiv`).data = ``;
+                case 'killGame':
+                    document.getElementById('swfdiv').data = '';
                     break;
-                case `killChat`:
-                    document.getElementById(`chatdiv`).data = ``;
+                case 'killChat':
+                    document.getElementById('chatdiv').data = '';
             }
         }
     }, false);
@@ -6115,9 +6127,9 @@ function load() {
     DRMng.init();
 }
 
-if (window.location.host === `www.kongregate.com`) {
+if (window.location.host === 'www.kongregate.com') {
     if (window.top === window.self) {
-        document.addEventListener(`DRMng.xhrReq`, param => {
+        document.addEventListener('DRMng.xhrReq', param => {
             const p = JSON.parse(param.data);
             p.callback = function (e, r) {
                 delete this.onload;
@@ -6133,22 +6145,22 @@ if (window.location.host === `www.kongregate.com`) {
                     data: JSON.stringify(this)
                 }));
             };
-            p.onload = p.callback.bind(p, `load`);
-            p.onerror = p.callback.bind(p, `error`);
-            p.ontimeout = p.callback.bind(p, `timeout`);
+            p.onload = p.callback.bind(p, 'load');
+            p.onerror = p.callback.bind(p, 'error');
+            p.ontimeout = p.callback.bind(p, 'timeout');
             setTimeout(GM_xmlhttpRequest, 1, p);
         });
 
-        console.log(`%c[DotD Raids Manager] Bootstrap`, `color: #108030`);
+        console.log('%c[DotD Raids Manager] Bootstrap', 'color: #108030');
 
-        const scr = document.createElement(`script`);
-        scr.id = `DRMng_TempScriptField`;
+        const scr = document.createElement('script');
+        scr.id = 'DRMng_TempScriptField';
         scr.appendChild(document.createTextNode(`(${main})()`));
         document.head.appendChild(scr);
     }
 }
-else if (window.location.host === `dotd-web1.5thplanetgames.com`) {
-    const scr = document.createElement(`script`);
+else if (window.location.host === 'dotd-web1.5thplanetgames.com') {
+    const scr = document.createElement('script');
     scr.appendChild(document.createTextNode(`(${load})()`));
     document.head.appendChild(scr);
 }

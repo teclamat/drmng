@@ -472,12 +472,14 @@ div#kong_game_ui a:hover,
 div#kong_game_ui a:link:hover {
     color: #eee;
 }
-div#chat_room_tabs {
+div#chat_room_tabs,
+div#private_chat_sbs_tabs {
     display: flex;
     height: 22px;
     background-color: #555;
 }
-div#chat_room_tabs > div.chat_room_tab {
+div#chat_room_tabs > div.chat_room_tab,
+div#private_chat_sbs_tabs > div.chat_room_tab {
     flex-grow: 1;
     width: 1px;
     height: 16px;
@@ -488,16 +490,19 @@ div#chat_room_tabs > div.chat_room_tab {
     padding-top: 2px;
     z-index: 2;
 }
-div#chat_room_tabs > div.chat_room_tab:hover {
+div#chat_room_tabs > div.chat_room_tab:hover,
+div#private_chat_sbs_tabs > div.chat_room_tab:hover {
     background-color: #4c4c4c
 }
-div#chat_room_tabs > div.chat_room_tab.active {
+div#chat_room_tabs > div.chat_room_tab.active,
+div#private_chat_sbs_tabs > div.chat_room_tab.active {
     border-bottom-color: #555;
     background-color: #555;
     color: #fff;
     text-transform: uppercase;
 }
-div#chat_room_tabs > div.chat_room_tab a {
+div#chat_room_tabs > div.chat_room_tab a,
+div#private_chat_sbs_tabs > div.chat_room_tab a {
     font-size: 7pt;
     display: flex;
     justify-content: center;
@@ -507,7 +512,8 @@ div#chat_room_tabs > div.chat_room_tab a {
     background-color: transparent !important;
     text-decoration: none;
 }
-div#chat_room_tabs > div.chat_room_tab a span.unread_chat_messages {
+div#chat_room_tabs > div.chat_room_tab a span.unread_chat_messages,
+div#private_chat_sbs_tabs > div.chat_room_tab a span.unread_chat_messages {
     flex-grow: 0;
     right: 5px;
     top: 3px;

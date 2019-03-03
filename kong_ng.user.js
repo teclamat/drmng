@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.1.18
+// @version         2.2.1
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -1355,7 +1355,8 @@ function main() {
                         );
                     };
                     ChatRoom.prototype.show = function () {
-                        if (DRMng && DRMng.PrivateChat.anyActive()) {
+                        if (DRMng && !DRMng.PrivateChat.sbsActive &&
+                            DRMng.PrivateChat.anyActive()) {
                             DRMng.PrivateChat.getActive().deactivate();
                         }
                         this._node.show();
@@ -1366,7 +1367,8 @@ function main() {
                         this.scrollToBottom();
                     };
                     ChatRoom.prototype.isActive = function () {
-                        return !(DRMng && DRMng.PrivateChat.anyActive()) &&
+                        return !(DRMng && !DRMng.PrivateChat.sbsActive &&
+                                 DRMng.PrivateChat.anyActive()) &&
                                 (this === this._chat_window.activeRoom());
                     };
                     DRMng.log('debug', '{Kong::ChatRoom} Patched');
@@ -1771,8 +1773,8 @@ function main() {
                 new DRMng.Node('link')
                     .attr({
                         id: 'DRMng_kongCSS',
-                        //href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
-                        href: 'https://raw.githubusercontent.com/teclamat/drmng/side_by_side/kong_dark.css',
+                        href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
+                        //href: 'https://mutikt.ml/kong_dark.css',
                         rel: 'stylesheet'
                     })
                     .on('load', DRMng.Kong.setHeaderWidth)
@@ -2533,10 +2535,10 @@ function main() {
         },
         PrivateChat: class {
 
-            constructor(config) {
+            constructor(config, forceActive = false) {
 
                 if (DRMng.PrivateChat.Rooms === undefined) {
-                    DRMng.PrivateChat.Rooms = {};
+                    DRMng.PrivateChat.Rooms = new Map();
                     DRMng.PrivateChat.initSbsContainer();
                 }
 
@@ -2558,9 +2560,10 @@ function main() {
                             el.html = document.createElement('div');
                             el.html.setAttribute('class', 'userlist');
 
+
                             let span = document.createElement('span');
                             span.setAttribute('class', 'guildtag');
-                            span.textContent = el.guild ? DRMng.PrivateChat.getGuildTag(el.guild) : '???';
+                            span.textContent = DRMng.PrivateChat.getGuildTag(el.guild) || '\u2014';
                             el.html.appendChild(span);
 
                             span = document.createElement('span');
@@ -2577,7 +2580,7 @@ function main() {
                         }
                     },
                 };
-                this.active = false;
+                this.active = forceActive;
                 this.count = null;
                 this.conf = config;
                 this.unr = null;
@@ -2592,7 +2595,7 @@ function main() {
                 this.messageLock = false;
                 this.messageBuffer = [];
 
-                DRMng.PrivateChat.Rooms[this.conf.channel] = this;
+                DRMng.PrivateChat.Rooms.set(this.conf.channel, this);
 
                 setTimeout(() => this.initTab(), 10);
             }
@@ -2735,7 +2738,9 @@ function main() {
             }
 
             countUpdate() {
-                if (this.active) this.count.textContent = this.users.count;
+                if (this.active && !DRMng.PrivateChat.sbsActive) {
+                    this.count.textContent = this.users.count;
+                }
             }
 
             nameUpdate() {
@@ -2746,7 +2751,7 @@ function main() {
             static getGuildTag(guild) {
                 const roman = /^(.+\s)([IXV]+)$/.exec(guild);
                 if (roman) guild = roman[1] + DRMng.Util.deRomanize(roman[2]);
-                const reg = /([A-Z]+|\w)\w*/g;
+                const reg = /([A-Z]+|[\w'`´])[\w'`´]*/g;
                 let tag = '', part;
                 while ((part = reg.exec(guild))) tag += part[1];
                 return tag;
@@ -2824,6 +2829,9 @@ function main() {
                         
                         this.sbsCreated = true;
                         this.sbsActive = DRMng.Config.local.alliance.sbs || false;
+
+                        DRMng.UI.setChatWidth();
+
                         DRMng.log('debug', 'SBS Container initialized');
                     } else {
                         DRMng.log('debug', 'SBS Container failed to init, retry in 10ms');
@@ -2858,6 +2866,7 @@ function main() {
                     this.tab.appendChild(a);
 
                     if (DRMng.PrivateChat.sbsActive) {
+                        if (this.active) this.tab.classList.add('active');
                         DRMng.PrivateChat.sbsTabs.appendChild(this.tab);
                     } else {
                         this.tabs.insertBefore(this.tab, this.tabActions);
@@ -2934,7 +2943,7 @@ function main() {
                     const cntCont = document.createElement('span');
                     cntCont.setAttribute('class', 'chat_char_countdown');
                     cntCont.appendChild(this.inputCnt);
-                    cntCont.appendChild(document.createTextNode('2000'));
+                    cntCont.appendChild(document.createTextNode('/2000'));
 
                     inputDiv.appendChild(this.input);
                     inputDiv.appendChild(cntCont);
@@ -2946,6 +2955,7 @@ function main() {
                 }
 
                 if (DRMng.PrivateChat.sbsActive) {
+                    if (this.active) this.body.style.removeProperty('display');
                     DRMng.PrivateChat.sbsContainer.style.removeProperty('display');
                     DRMng.PrivateChat.sbsContainer.appendChild(this.body);
                 } else {
@@ -2955,11 +2965,13 @@ function main() {
 
                 console.info('[DRMng] {PrivateChat} Chat body attached to DOM.');
 
+                DRMng.UI.setChatWidth();
+
                 setTimeout(() => this.connect(), 0);
             }
 
             remove() {
-                if (this.active) {
+                if (!DRMng.PrivateChat.sbsActive && this.active) {
                     if (holodeck._chat_window._rooms_by_type.guild) {
                         holodeck._chat_window._rooms_by_type.guild.show();
                     } else {
@@ -3109,7 +3121,7 @@ function main() {
                             userCls: e.join(' '),
                             ign: data.usr.ign || '',
                             ignCls: data.usr.ign ? 'guildname truncate' : '',
-                            tag: DRMng.PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld) || '???',
+                            tag: DRMng.PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
                             msg: msg
                         });
                     }
@@ -3159,9 +3171,11 @@ function main() {
                         .style({ 'flex-grow': '1' })
                         .txt(d.ts).attach('to', hdr);
                     // Guild tag
-                    new DRMng.Node('span')
-                        .attr({ class: 'sticker' })
-                        .txt(d.tag).attach('to', hdr);
+                    if (d.tag) {
+                        new DRMng.Node('span')
+                            .attr({ class: 'sticker' })
+                            .txt(d.tag).attach('to', hdr);
+                    }
 
                     hdr.attach('to', p);
 
@@ -3219,13 +3233,13 @@ function main() {
 
                         return `<p class="${pc.join(' ')}">
                                     <span class="header">
-                                        <span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>
+                                        ${g ? `<span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>` : ''}
                                         <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
                                         <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
                                     </span>
                                     <span style="display: flex">
                                         <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
-                                        <span class="guildname truncate">${ign}</span>
+                                        ${ign ? `<span class="guildname truncate">${ign}</span>` : ''}
                                         <span class="separator">${s}</span>
                                         <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
                                     </span>
@@ -3240,30 +3254,40 @@ function main() {
                 if (this.Rooms === undefined) {
                     return null;
                 } else {
-                    return Object.keys(this.Rooms).includes(name) ? this.Rooms[name] : null;
+                    return this.Rooms.get(name) || null;
                 }
             }
 
             static getActive(nameOnly = false) {
-                if (this.Rooms === undefined) return null;
-                const r = Object.keys(this.Rooms);
-                for (let i = 0; i < r.length; ++i)
-                    if (this.Rooms[r[i]].active) return nameOnly ? r[i] : this.Rooms[r[i]];
+                if (this.Rooms === undefined) {
+                    return null;
+                }
+                for (let [name, room] of this.Rooms) {
+                    if (room.active) return nameOnly ? name : room;
+                }
                 return null;
             }
 
             static anyActive() {
-                if (DRMng.Config.local.alliance.sbs || this.Rooms === undefined) return false;
-                const r = Object.keys(this.Rooms);
-                for (let i = 0; i < r.length; ++i) if (this.Rooms[r[i]].active) return true;
+                if (this.Rooms === undefined) {
+                    return false;
+                }
+                for (let room of this.Rooms.values()) {
+                    if (room.active) return true;
+                }
                 return false;
             }
 
             static createAll() {
                 const rooms = DRMng.Config.local.alliance.rooms;
-                rooms.forEach(room => {
-                    if (room.enabled) {
-                        if (this.getChat(room.channel) === null) new this(room);
+                rooms.forEach((room, index) => {
+                    if (room.enabled && this.getChat(room.channel) === null) {
+                        if (index === 0 && DRMng.Config.local.alliance.sbs) {
+                            DRMng.log('debug', 'Setting up default sbs room');
+                            new this(room, true);
+                        } else {
+                            new this(room);
+                        }
                     }
                 });
             }
@@ -3329,7 +3353,27 @@ function main() {
             }
 
             static moveChats() {
-                //Object.entries(DRMng.PrivateChat.Rooms)
+                DRMng.PrivateChat.sbsActive = DRMng.Config.local.alliance.sbs;
+
+                for (let room of DRMng.PrivateChat.Rooms.values()) {
+                    if (DRMng.PrivateChat.sbsActive) {
+                        DRMng.PrivateChat.sbsTabs.appendChild(room.tab);
+                        DRMng.PrivateChat.sbsContainer.appendChild(room.body);
+                    } else {
+                        room.deactivate();
+                        room.tabs.insertBefore(room.tab, room.tabActions);
+                        DRMng.PrivateChat.container.appendChild(room.body);
+                    }
+                }
+
+                if (DRMng.PrivateChat.sbsActive) {
+                    holodeck._chat_window._active_room.show();
+                    if (!DRMng.PrivateChat.anyActive()) {
+                        DRMng.PrivateChat.Rooms.values().next().value.activate();
+                    }
+                }
+
+                DRMng.UI.setChatWidth();
             }
 
             static removeChat(chatID) {
@@ -3337,8 +3381,8 @@ function main() {
                 new DRMng.Node(`#${chatID}`).detach();
                 const chat = this.getChat(id);
                 if (chat) {
-                    this.Rooms[id].remove();
-                    delete this.Rooms[id];
+                    chat.remove();
+                    this.Rooms.delete(id);
                 }
             }
 
@@ -4164,7 +4208,8 @@ function main() {
                     margin-top: auto;\
                     border-top: 1px solid #111;\
                 }\
-                div#chat_room_tabs > div.drmng_room_tab:nth-last-child(2) {\
+                div#chat_room_tabs > div.drmng_room_tab.active:nth-last-child(2),
+                div#private_chat_sbs_tabs > div:last-child {\
                     border-right: 0;\
                 }\
                 #private_chat_sbs {\
@@ -4173,8 +4218,9 @@ function main() {
                     align-items: flex-end;\
                     margin-left: 7px;\
                     box-shadow: 0 0 10px -4px #000;\
+                    flex-direction: column;\
                 }\
-                #private_chat_sbs div.users_in_room { height: 125px; }\
+                #private_chat_sbs div.users_in_room { height: 123px; }\
                 .drmng_scroll_wrapper {\
                     overflow: hidden;\
                     width: 100%;\
@@ -4182,6 +4228,10 @@ function main() {
                     position: relative;\
                     z-index: 1;\
                     float: left;\
+                }\
+                div#private_chat_sbs_tabs {\
+                    padding-bottom: 3px;
+                    width: 100%;
                 }\
                 .drmng_scroll_content {\
                     height: 100%;\
@@ -4347,9 +4397,8 @@ function main() {
                     div#kong_game_ui div.chat_controls textarea.chat_input,\
                     #DRMng_content div.group.flex > div:last-child,\
                     #DRMng_content div.group.flexible {\
-                        scrollbar-color: #444 #222;\
+                        scrollbar-color: #4a4a4a #2a2a2a;\
                         scrollbar-width: thin;\
-                        margin-right: -1px;\
                     }\
                     ';
                 }
@@ -4512,9 +4561,16 @@ function main() {
             setChatWidth: () => {
                 const el = document.getElementById('chat_container');
                 if (el) {
-                    const a = DRMng.Config.get('alliance::sbs') && DRMng.Config.get('alliance::enabled');
+                    const sc = DRMng.PrivateChat.sbsContainer;
+                    const a = DRMng.Config.get('alliance::sbs') && sc && sc.childElementCount > 1;
                     const w = DRMng.Config.get('kong::chatWidth');
-                    el.style.width = `${a ? (w * 2 + 7) : w}px`;
+                    if (a) {
+                        if (sc) sc.style.removeProperty('display');
+                        el.style.width = `${w * 2 + 7}px`;
+                    } else {
+                        if (sc) sc.style.setProperty('display', 'none');
+                        el.style.width = `${w}px`;
+                    }
                 }
             },
             loadDefaults: function () {
@@ -4639,19 +4695,20 @@ function main() {
                 opt = new this.Option();
                 opt.setup('alliance_sbs', 'Side by side', 'bool', false)
                     .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
-                         ' (doubles width taken by chat area).')
-                    .event(function () {
-                        // make sure initial variable setting wont fire this
-                        if (DRMng.Alliance.tab) {
-                            const a = DRMng.Alliance;
-                            if (this.conf[this.field]) a.body.style.removeProperty('display');
-                            else a.tab.className = 'chat_room_tab';
-                            DRMng.UI.setChatWidth();
-                            a.active = false;
-                            holodeck._chat_window.showActiveRoom();
-                            a.initBody.call(a);
-                        }
-                    })
+                        ' (doubles width taken by chat area).')
+                    .event(() => DRMng.PrivateChat.moveChats())
+                    // .event(function () {
+                    //     // make sure initial variable setting wont fire this
+                    //     if (DRMng.Alliance.tab) {
+                    //         const a = DRMng.Alliance;
+                    //         if (this.conf[this.field]) a.body.style.removeProperty('display');
+                    //         else a.tab.className = 'chat_room_tab';
+                    //         DRMng.UI.setChatWidth();
+                    //         a.active = false;
+                    //         holodeck._chat_window.showActiveRoom();
+                    //         a.initBody.call(a);
+                    //     }
+                    // })
                     .make(group, true);
 
                 /**

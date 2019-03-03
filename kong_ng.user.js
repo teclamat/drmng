@@ -1207,12 +1207,12 @@ function main() {
                 }
             },
             /**
-             * Add container for Side-by-Side alliance chat window
+             * Add container for Side-by-Side private chat window
              */
             addSbsChatContainer: () => {
                 if (document.getElementById('chat_window')) {
                     new DRMng.Node('div')
-                        .attr({ id: 'alliance_chat_sbs' })
+                        .attr({ id: 'private_chat_sbs' })
                         .style({ display: 'none' })
                         .on('click', DRMng.PrivateChat.sbsEvent)
                         .attach('to', 'chat_tab_pane');
@@ -1751,7 +1751,7 @@ function main() {
                 this.killDealSpot();
                 this.addSlimButton();
                 this.addReloadButton();
-                this.addSbsChatContainer();
+                //this.addSbsChatContainer();
                 this.searchFieldIcon();
                 this.modifyKongEngine();
                 this.addChatCommands();
@@ -1771,7 +1771,8 @@ function main() {
                 new DRMng.Node('link')
                     .attr({
                         id: 'DRMng_kongCSS',
-                        href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
+                        //href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
+                        href: 'https://raw.githubusercontent.com/teclamat/drmng/side_by_side/kong_dark.css',
                         rel: 'stylesheet'
                     })
                     .on('load', DRMng.Kong.setHeaderWidth)
@@ -2534,7 +2535,10 @@ function main() {
 
             constructor(config) {
 
-                if (DRMng.PrivateChat.Rooms === undefined) DRMng.PrivateChat.Rooms = {};
+                if (DRMng.PrivateChat.Rooms === undefined) {
+                    DRMng.PrivateChat.Rooms = {};
+                    DRMng.PrivateChat.initSbsContainer();
+                }
 
                 this.users = {
                     html: null,
@@ -2578,6 +2582,7 @@ function main() {
                 this.conf = config;
                 this.unr = null;
                 this.tabs = null;
+                this.tabActions = null;
                 this.tab = null;
                 this.body = null;
                 this.input = null;
@@ -2620,7 +2625,7 @@ function main() {
                     DRMng.UM.user.qualified && !DRMng.Raids.bootstrap) {
 
                     if (DRMng.Config.local.alliance.sbs) {
-                        document.getElementById('alliance_chat_sbs').style.removeProperty('display');
+                        document.getElementById('private_chat_sbs').style.removeProperty('display');
                     } else {
                         this.tab.style.removeProperty('display');
                     }
@@ -2640,7 +2645,7 @@ function main() {
 
                     this.client.on('error', err => {
                         DRMng.log('warn', '{PrivateChat} Client error:', err);
-                        document.getElementById('alliance_chat_sbs').style.setProperty('display', 'none');
+                        document.getElementById('private_chat_sbs').style.setProperty('display', 'none');
                         this.tab.style.setProperty('display', 'none');
                         //destroyChat();
                     });
@@ -2802,15 +2807,42 @@ function main() {
                 if (chatHeight <= elHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
             }
 
+            static initSbsContainer() {
+                if (!this.sbsCreated) {
+                    if (document.getElementById('chat_window')) {
+                        this.sbsContainer = new DRMng.Node('div')
+                            .attr({ id: 'private_chat_sbs' })
+                            .style({ display: 'none' })
+                            .on('click', e => this.sbsEvent(e))
+                            .attach('to', 'chat_tab_pane')
+                            .node;
+                        
+                        this.sbsTabs = new DRMng.Node('div')
+                            .attr({ id: 'private_chat_sbs_tabs' })
+                            .attach('to', this.sbsContainer)
+                            .node;
+                        
+                        this.sbsCreated = true;
+                        this.sbsActive = DRMng.Config.local.alliance.sbs || false;
+                        DRMng.log('debug', 'SBS Container initialized');
+                    } else {
+                        DRMng.log('debug', 'SBS Container failed to init, retry in 10ms');
+                        return setTimeout(() => this.initSbsContainer(), 10);
+                    }
+                }
+            }
+
             initTab() {
                 this.tabs = document.getElementById('chat_room_tabs');
-                const actions = document.getElementById('chat_actions_container');
+                this.tabActions = document.getElementById('chat_actions_container');
                 const gr = document.getElementById('guild_room_tab');
-                if (this.tabs && actions && gr && actions.parentNode === this.tabs) {
+                if (DRMng.PrivateChat.sbsCreated &&
+                    this.tabs && this.tabActions && gr &&
+                    this.tabActions.parentNode === this.tabs) {
                     this.tab = document.createElement('div');
                     this.tab.setAttribute('id', `drmng_${this.conf.channel}_room_tab`);
                     this.tab.setAttribute('class', 'chat_room_tab drmng_room_tab');
-                    this.tab.style.setProperty('display', 'none');
+                    //this.tab.style.setProperty('display', 'none');
 
                     this.unr = document.createElement('span');
                     this.unr.setAttribute('class', 'unread_chat_messages spriteall spritegame');
@@ -2824,29 +2856,33 @@ function main() {
                     a.appendChild(this.unr);
 
                     this.tab.appendChild(a);
-                    this.tabs.insertBefore(this.tab, actions);
+
+                    if (DRMng.PrivateChat.sbsActive) {
+                        DRMng.PrivateChat.sbsTabs.appendChild(this.tab);
+                    } else {
+                        this.tabs.insertBefore(this.tab, this.tabActions);
+                    }
+
                     this.count = document.querySelector('.number_in_room');
 
                     console.info('[DRMng] {PrivateChat} Chat tab created.');
-
                     setTimeout(() => this.initBody(), 0);
                 } else {
+                    DRMng.log('debug', 'Tab failed to init, retry in 50ms');
                     setTimeout(() => this.initTab(), 50);
                 }
             }
 
             initBody() {
                 if (!DRMng.PrivateChat.container) {
-                    DRMng.PrivateChat.container = document.getElementById(
-                        this.conf.sbs ? 'alliance_chat_sbs' : 'chat_rooms_container');
+                    DRMng.PrivateChat.container = document.getElementById('chat_rooms_container');
                     if (!DRMng.PrivateChat.container) return setTimeout(() => this.initBody(), 100);
                 }
 
                 if (this.body === null) {
                     this.body = document.createElement('div');
                     this.body.style.setProperty('width', '100%');
-
-                    if (!this.conf.sbs) this.body.style.setProperty('display', 'none');
+                    this.body.style.setProperty('display', 'none');
 
                     const usr = document.createElement('div');
                     usr.setAttribute('class', 'chat_tabpane users_in_room clear');
@@ -2898,7 +2934,7 @@ function main() {
                     const cntCont = document.createElement('span');
                     cntCont.setAttribute('class', 'chat_char_countdown');
                     cntCont.appendChild(this.inputCnt);
-                    cntCont.appendChild(document.createTextNode('/Inf'));
+                    cntCont.appendChild(document.createTextNode('2000'));
 
                     inputDiv.appendChild(this.input);
                     inputDiv.appendChild(cntCont);
@@ -2909,10 +2945,13 @@ function main() {
                     console.info('[DRMng] {PrivateChat} Chat body created.');
                 }
 
-                const sbs = document.getElementById('alliance_chat_sbs');
-                if (!this.conf.sbs) sbs.style.setProperty('display', 'none');
-
-                DRMng.PrivateChat.container.appendChild(this.body);
+                if (DRMng.PrivateChat.sbsActive) {
+                    DRMng.PrivateChat.sbsContainer.style.removeProperty('display');
+                    DRMng.PrivateChat.sbsContainer.appendChild(this.body);
+                } else {
+                    DRMng.PrivateChat.sbsContainer.style.setProperty('display', 'none');
+                    DRMng.PrivateChat.container.appendChild(this.body);
+                }
 
                 console.info('[DRMng] {PrivateChat} Chat body attached to DOM.');
 
@@ -2929,8 +2968,15 @@ function main() {
                 }
 
                 this.client.disconnect();
-                this.tabs.removeChild(this.tab);
-                DRMng.PrivateChat.container.removeChild(this.body);
+
+                if (DRMng.PrivateChat.sbsActive) {
+                    DRMng.PrivateChat.sbsTabs.removeChild(this.tab);
+                    DRMng.PrivateChat.sbsContainer.removeChild(this.body);
+                } else {
+                    this.tabs.removeChild(this.tab);
+                    DRMng.PrivateChat.container.removeChild(this.body);
+                }
+                
 
                 for (let i = 0, len = DRMng.Config.local.alliance.rooms.length; i < len; ++i) {
                     if (DRMng.Config.local.alliance.rooms[i].channel === this.conf.channel) {
@@ -3076,7 +3122,7 @@ function main() {
                     }
                     this.chat.appendChild(msg);
 
-                    if (this.active || this.conf.sbs) {
+                    if (this.active) {
                         this.scrollToBottom(f);
                     } else {
                         this.setUnread();
@@ -3191,8 +3237,11 @@ function main() {
             }
 
             static getChat(name) {
-                if (this.Rooms === undefined) return null;
-                return Object.keys(this.Rooms).includes(name) ? this.Rooms[name] : null;
+                if (this.Rooms === undefined) {
+                    return null;
+                } else {
+                    return Object.keys(this.Rooms).includes(name) ? this.Rooms[name] : null;
+                }
             }
 
             static getActive(nameOnly = false) {
@@ -3223,7 +3272,10 @@ function main() {
                 const elChannel = document.getElementById('DRMng_allianceChnl');
                 const elPasswd = document.getElementById('DRMng_alliancePass');
 
-                if (elChannel.classList.contains('default') || elPasswd.classList.contains('default')) return;
+                if (elChannel.classList.contains('default') ||
+                    elPasswd.classList.contains('default')) {
+                    return;
+                }
 
                 const rooms = DRMng.Config.local.alliance.rooms;
                 let replace = -1;
@@ -3233,12 +3285,13 @@ function main() {
 
                 const elName = document.getElementById('DRMng_allianceName');
                 const elColor = document.getElementById('DRMng_allianceColor');
+                const isDefaultName = elName.classList.contains('default');
+                const isDefaultColor = elColor.classList.contains('default');
                 const room = {
                     channel: elChannel.value,
                     pass: elPasswd.value,
-                    name: elName.classList.contains('default') ?
-                        elChannel.value.charAt(0).toUpperCase() + elChannel.value.slice(1) : elName.value,
-                    color: elColor.classList.contains('default') ? '#336699' : elColor.value,
+                    name: isDefaultName ? DRMng.Util.capitalize(elChannel.value) : elName.value,
+                    color: isDefaultColor ? '#336699' : elColor.value,
                     enabled: true
                 };
 
@@ -3273,6 +3326,10 @@ function main() {
                             .on('click', () => this.removeChat(id)))
                         .attach('to', 'DRMng_privateChat');
                 }
+            }
+
+            static moveChats() {
+                //Object.entries(DRMng.PrivateChat.Rooms)
             }
 
             static removeChat(chatID) {
@@ -4110,14 +4167,14 @@ function main() {
                 div#chat_room_tabs > div.drmng_room_tab:nth-last-child(2) {\
                     border-right: 0;\
                 }\
-                #alliance_chat_sbs {\
+                #private_chat_sbs {\
                     border: 1px solid #222;\
                     display: flex;\
                     align-items: flex-end;\
                     margin-left: 7px;\
                     box-shadow: 0 0 10px -4px #000;\
                 }\
-                #alliance_chat_sbs div.users_in_room { height: 145px; }\
+                #private_chat_sbs div.users_in_room { height: 125px; }\
                 .drmng_scroll_wrapper {\
                     overflow: hidden;\
                     width: 100%;\
@@ -4272,7 +4329,7 @@ function main() {
                     margin-right: 4px;
                     padding-bottom: 1px;
                 }\
-                div.username > span.userign {
+                div.userlist > span.userign {
                     flex-grow: 1;
                     flex-shrink: 1;
                     color: #ddd;

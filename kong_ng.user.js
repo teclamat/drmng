@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.2.1
+// @version         2.2.2
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -51,7 +51,7 @@ function main() {
         },
         About: {
             name: 'DotD Raids Manager next gen',
-            major: '2', minor: '1', build: '18',
+            major: '2', minor: '2', build: '2',
             version: function () {
                 return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
                        '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';

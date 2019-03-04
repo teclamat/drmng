@@ -1773,7 +1773,7 @@ function main() {
                 new DRMng.Node('link')
                     .attr({
                         id: 'DRMng_kongCSS',
-                        href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_dark.css',
+                        href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css',
                         //href: 'https://mutikt.ml/kong_dark.css',
                         rel: 'stylesheet'
                     })

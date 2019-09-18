@@ -18,7 +18,14 @@
         ],
         "quotes": [
             "error",
-            "backtick"
+            "single"
+        ],
+        "brace-style": [
+            "error",
+            "1tbs",
+            {
+                "allowSingleLine": true
+            }
         ],
         "semi": [
             "error",

@@ -90,6 +90,7 @@ td#gameholder {
 }
 td#gameholder {
     overflow: hidden;
+    min-width: 480px;
 }
 div#maingamecontent table.game_table {
     position: inherit;

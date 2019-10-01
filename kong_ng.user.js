@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.2.2
+// @version         2.2.3
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -30,6 +30,41 @@
  */
 
 function main() {
+  window.Log = class {
+    static drmngify(color, args) {
+      const drmngBadge = color ? '%c[DRMng]' : '[DRMng]';
+      if ((typeof args[0] === 'string') && /%[csd]/.test(args[0])) {
+        args[0] = `${drmngBadge} ${args[0]}`;
+        if (color) {
+          args.splice(1, 0, `color:${color}`);
+        }
+      } else {
+        if (color) {
+          const temp = [drmngBadge];
+          while (typeof args[0] === 'string') temp.push(args.shift());
+          args.unshift(temp.join(' '), `color:${color}`);
+        } else {
+          args.unshift(drmngBadge);
+        }
+      }
+      return args;
+    }
+    static out(...args) {
+      console.log.apply(console, this.drmngify(null, args));
+    }
+    static debug(...args) {
+      console.debug.apply(console, this.drmngify('purple', args));
+    }
+    static info(...args) {
+      console.info.apply(console, this.drmngify('#1070f0', args));
+    }
+    static warn(...args) {
+      console.warn.apply(console, this.drmngify(null, args));
+    }
+    static error(...args) {
+      console.error.apply(console, this.drmngify(null, args));
+    }
+  };
   /**
    * DOM nodes creation and manipulation
    */
@@ -130,7 +165,7 @@ function main() {
         target = target.node;
       }
       if (!(target instanceof Node)) {
-        DRMng.log('warn', `{ DomNode::attach } Invalid destination: ${target}`);
+        Log.warn(`{DomNode::attach} Invalid destination: ${target}`);
         return this;
       }
       switch (method) {
@@ -148,7 +183,7 @@ function main() {
           }
           break;
         default:
-          DRMng.log('warn', `{ DomNode::attach } Invalid method: ${method}`);
+          Log.warn(`{DomNode::attach} Invalid method: ${method}`);
       }
       return this;
     }
@@ -312,6 +347,15 @@ function main() {
     }
 
     /**
+     * Returns random element from given array
+     * @param {any[]} [arr] Input array
+     * @returns {any} Random element from input array
+     */
+    static getRandArray(arr) {
+      return arr[this.getRand(arr.length - 1)];
+    }
+
+    /**
      * Converts Roman numbers to Arabic
      * @param {string} roman String with roman number
      * @returns {number} Arabic number
@@ -353,328 +397,254 @@ function main() {
     }
   };
 
+  /**
+   * Gestures classes group
+   */
+  window.Gestures = {
+    Kiss: class {
+      static get SmittenAdjective() {
+        const smittenAdjective = ['smitten', 'enamored', 'infatuated', 'taken', 'in love', 'inflamed'];
+        return Util.getRandArray(smittenAdjective);
+      }
+      static generate() {
+        let txt = '';
+        switch (Util.getRand(8)) {
+          case 0:
+            txt = '@from gives @who a puckered kiss on the lips.';
+            break;
+          case 1:
+            txt = '@from plants a gentle kiss on the cheek of @who.';
+            break;
+          case 2:
+            txt = '@from kisses @who... might have used tongue on that one.';
+            break;
+          case 3:
+          case 4:
+            txt = '@from seems ' + this.SmittenAdjective + ' with @who.';
+            break;
+          default:
+            txt = '@from tickles the lips of @who with a sensual kiss.';
+        }
+        return txt;
+      }
+    },
+    Poke: class {
+      static get PokeBodyPlace() {
+        const pokeBodyPlace = [
+          'on the cheek', 'on the navel', 'in the nose', 'in the belly button', 'in the rib cage',
+          'in a really ticklish spot', 'square on the forehead', 'with a wet willy in the ear', 'on the arm',
+          'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
+          'up the butt'
+        ];
+        return Util.getRandArray(pokeBodyPlace);
+      }
+      static generate() {
+        let txt = '';
+        switch (Util.getRand(6)) {
+          case 0:
+            txt = '@from with a tickling finger of doom, pokes @who ';
+            break;
+          case 1:
+            txt = '@from jumps out from the shadows and prods @who ';
+            break;
+          case 2:
+            txt = '@from playfully pokes @who ';
+            break;
+          case 3:
+            txt = '@from cheerfully pokes @who ';
+            break;
+          case 4:
+            txt = '@from gleefully pokes @who ';
+            break;
+          case 5:
+            txt = '@from pokes @who repeatedly ';
+            break;
+          default:
+            txt = '@from, with index finger stern and pointy, pokes @who ';
+            break;
+        }
+        return `${txt}${this.PokeBodyPlace}.`;
+      }
+    },
+    Hit: class {
+      static get StrikeAction() {
+        const strikeAction = [
+          'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel',
+          'strike', 'beat'
+        ];
+        return Util.getRandArray(strikeAction);
+      }
+      static get LeapingAction() {
+        const leapingAction = [
+          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
+          'sprints', 'dashes', 'charges', 'lunges'
+        ];
+        return Util.getRandArray(leapingAction);
+      }
+      static get AimModifier() {
+        const aimModifier = [
+          'a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
+        ];
+        return Util.getRandArray(aimModifier);
+      }
+      static get WrestlingMove() {
+        const wrestlingMove = [
+          ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack',
+          ' flying forearm', ' low dropkick', ' jumping thigh kick', ' roundhouse',
+          ' left and right hook combo', ' jab and middle kick combo',
+          ' spinning backfist and shin kick combo', ' delayed backbrain wheel kick',
+          ' somersault kick to an uppercut combo', ' jab to the face', ' stomping hook punch',
+          ' palm thrust to the solar plexus', ' shin kick', ' side headbutt',
+          ' fast lowerbody roundhouse kick', ' fast upperbody roundhouse kick', 'n uppercut palm strike',
+          'n uppercut to midsection jab combo', ' downward chop'
+        ];
+        return Util.getRandArray(wrestlingMove);
+      }
+      static get Meal() {
+        const meal = [
+          'midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch', '2 o\'clock tea time',
+          'midafternoon snack', 'lunch'
+        ];
+        return Util.getRandArray(meal);
+      }
+      static get ThrowAction() {
+        const throwAction = ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'];
+        return Util.getRandArray(throwAction);
+      }
+      static get Crying() {
+        const crying = ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'];
+        return Util.getRandArray(crying);
+      }
+      static get SportsWeapon() {
+        const sportsWeapon = [
+          'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
+          'barbell', 'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
+        ];
+        return Util.getRandArray(sportsWeapon);
+      }
+      static get MidsectionStrikePlace() {
+        const midsectionStrikePlace = ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'];
+        return Util.getRandArray(midsectionStrikePlace);
+      }
+      static get RandomItemWeapon() {
+        const randomItemWeapon = [
+          'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick',
+          'a board of education', 'an unidentified implement of mayhem and destruction',
+          'a rubber ducky *SQUEAK*', 'a rolling pin', 'a tire iron', 'a sock full of oranges',
+          'a slinky, a slink [fun for a girl or a boy]', 'a chinese finger puzzle', 'a whip of wet noodles',
+          'a humungous spicey italian meatstick', 'a giant garlic dill', 'an ACME hammer of pain'
+        ];
+        return Util.getRandArray(randomItemWeapon);
+      }
+      static get WithDescriptors() {
+        const withDescriptors = [
+          'with lightning reflexes, ', 'with finesse and poise, ', 'with mediocre skill, ',
+          'with half-cocked attitude, ', 'with fervor and oomph, ', 'with vitality and gusto, ',
+          'with ambition and enthusiasm, ', '', '', '', ''
+        ];
+        return Util.getRandArray(withDescriptors);
+      }
+      static get StrikeActionVerb() {
+        const strikeActionVerb = [
+          'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
+          'punishes', 'pummels', 'strikes', 'assaults', 'beats'
+        ];
+        return Util.getRandArray(strikeActionVerb);
+      }
+      static generate() {
+        let txt = '';
+        switch (Util.getRand(8)) {
+          case 0:
+            txt = `@from attempts to ${this.StrikeAction} @who but fails...`;
+            break;
+          case 1:
+            txt = `@from ${this.LeapingAction} towards @who and lands ${this.AimModifier}${this.WrestlingMove}.`;
+            break;
+          case 2:
+            txt = `@from takes what's left of ${this.Meal}, ${this.ThrowAction} it towards @who ${this.Crying}, 'FOOD FIGHT'!`;
+            break;
+          case 4:
+            txt = '@from rolls up a magazine planting a blow upside the head of @who.';
+            break;
+          case 5:
+            txt = '@from hits @who on the head with a frying pan.';
+            break;
+          case 6:
+            txt = `@from plants a ${this.SportsWeapon} to the ${this.MidsectionStrikePlace} of @who.`;
+            break;
+          default:
+            txt = `@from pulls out ${this.RandomItemWeapon} and ${this.WithDescriptors}${this.StrikeActionVerb} @who with it.`;
+        }
+        return txt;
+      }
+    },
+    Slap: class {
+      static get SlapWeapon() {
+        const slapWeapon = [
+          'white glove', 'rubber chicken', 'well placed backhand', 'piece of moldy pizza',
+          'big dildo', 'loaf of french bread', 'smile of devious pleasure', 'dead >0))>-<',
+          'left over chicken drumstick', 'limp and slightly dirty french fry', 'brick of moldy cheese',
+          'grilled cheese', 'big dildo'
+        ];
+        return Util.getRandArray(slapWeapon);
+      }
+      static get TargetAction() {
+        const targetAction = [
+          'deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers', 'unleashes'
+        ];
+        return Util.getRandArray(targetAction);
+      }
+      static get SassySynonym() {
+        const sassySynonym = [
+          'an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy', 'a sassy'
+        ];
+        return Util.getRandArray(sassySynonym);
+      }
+      static get Place() {
+        const place = [['side', '\'s head.'], ['face', '.'], ['cheek', '.']];
+        return Util.getRandArray(place);
+      }
+      static get LeapingAction() {
+        const leapingAction = [
+          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
+          'sprints', 'dashes', 'charges', 'lunges'
+        ];
+        return Util.getRandArray(leapingAction);
+      }
+      static get LeadSpeed() {
+        const leadSpeed = [
+          ' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile', 'n accelerated', ' quick'
+        ];
+        return Util.getRandArray(leadSpeed);
+      }
+      static generate() {
+        let txt = '';
+        switch (Util.getRand(2)) {
+          case 0:
+            txt = `@from slaps @who with a ${this.SlapWeapon}.`;
+            break;
+          case 1:
+            txt = `@from ${this.TargetAction} ${this.SassySynonym} slap to the ${this.Place.join(' of @who')}`;
+            break;
+          default:
+            txt = `@from ${this.LeapingAction} forward and with a ${this.SlapWeapon}, deals a${this.LeadSpeed} slap to @who.`;
+        }
+        return txt;
+      }
+    }
+  };
+
   window.DRMng = {
     ServerWS: 'wss://mutikt.ml:3000',
-    logColors: { debug: 'purple', info: '#1070f0', log: '#108030' },
-    log: function (...args) {
-      const type = ['info', 'warn', 'error', 'debug'].indexOf(args[0]) > -1 ? args[0] : 'log';
-      if (type !== 'log') args = args.slice(1);
-      if (['warn', 'error'].indexOf(type) === -1) {
-        if (typeof args[0] === 'string' && /%[csd]/.test(args[0])) {
-          args[0] = `%c[DRMng] ${args[0]}`;
-          args.splice(1, 0, `color:${DRMng.logColors[type]}`);
-        }
-        else {
-          const temp = ['%c[DRMng]'];
-          while (typeof args[0] === 'string') temp.push(args.shift());
-          args.unshift(temp.join(' '), `color:${DRMng.logColors[type]}`);
-        }
-      }
-      console[type].apply(console, args);
-    },
     About: {
       name: 'DotD Raids Manager next gen',
-      major: '2', minor: '2', build: '2',
+      major: '2', minor: '3', build: '0',
       version: function () {
         return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
           '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
       },
       ver: function () {
         return `${this.major}.${this.minor}.${this.build}`;
-      }
-    },
-    /**
-     * DOM Node manipulation class
-     */
-    Node: class {
-      /**
-       * Creates a Node
-       * @param {(string|Node)} element Element to create or reference
-       * @return {DomNode} Custom Node instance
-       */
-      constructor(element) {
-        this._el = null;
-        if (typeof element === 'string')
-          this._el = element.charAt(0) === '#' ?
-            document.getElementById(element.slice(1)) :
-            document.createElement(element);
-        else if (element instanceof Node) this._el = element;
-      }
-
-      get node() { return this._el; }
-
-      get notNull() { return this._el !== null; }
-
-      attr(param) {
-        Object.keys(param).forEach(attr => this._el.setAttribute(attr, param[attr]));
-        return this;
-      }
-
-      remove(param) {
-        if (!(param instanceof Array)) param = [param];
-        param.forEach(attr => this._el.removeAttribute(attr));
-        return this;
-      }
-
-      style(param) {
-        Object.keys(param).forEach(prop => this._el.style.setProperty(prop, param[prop]));
-        return this;
-      }
-
-      clear() {
-        while (this._el.firstChild) this._el.removeChild(this._el.firstChild);
-        return this;
-      }
-
-      txt(text = '', overwrite = false) {
-        if (overwrite) this.clear();
-        this._el.appendChild(document.createTextNode(text));
-        return this;
-      }
-
-      html(text = '', overwrite = false) {
-        if (overwrite) this.clear();
-        if (typeof text === 'string') this._el.innerHTML += text;
-        else {
-          if (text instanceof DomNode) text = text.node;
-          if (text instanceof Node) this._el.appendChild(text);
-        }
-        return this;
-      }
-
-      data(data) {
-        if (data) {
-          if (typeof data === 'string' && /<.{3,}?>/.test(data) === false) this.txt(data);
-          else this.html(data);
-        }
-        return this;
-      }
-
-      on(event, func, bubble) {
-        this._el.addEventListener(event, func, bubble);
-        return this;
-      }
-
-      off(event, func, bubble) {
-        this._el.removeEventListener(event, func, bubble);
-        return this;
-      }
-
-      detach() {
-        if (this._el.parentNode) this._el = this._el.parentNode.removeChild(this._el);
-        return this;
-      }
-
-      attach(method, dst) {
-        if (typeof dst === 'string') dst = document.getElementById(dst);
-        else if (dst instanceof DomNode) dst = dst._el;
-        if (!(dst instanceof Node)) {
-          DRMng.log('warn', `{Node:attach} Invalid destination : ${dst}`);
-          return this;
-        }
-        if (!/^(?:to|before|after)$/i.test(method)) {
-          DRMng.log('warn', `{Node:attach} Invalid method ${method}`);
-          return this;
-        }
-        if (method === 'to') dst.appendChild(this._el);
-        else if (method === 'before') dst.parentNode.insertBefore(this._el, dst);
-        else if (dst.nextSibling === null) dst.parentNode.appendChild(this._el);
-        else dst.parentNode.insertBefore(this._el, dst.nextSibling);
-        return this;
-      }
-    },
-    /**
-     * Factory class with various utils
-     */
-    Util: class {
-      /**
-       * Creates, updates or removes CSS stylesheet with given ID
-       * @param {string} id Stylesheet id
-       * @param {?string} [content] Stylesheet content to create/update
-       */
-      static cssStyle(id, content = null) {
-        let s = new DomNode(`#${id}`);
-        if (content !== null) {
-          if (!s.notNull) {
-            s = new DomNode('style')
-              .attr({ type: 'text/css', id: id })
-              .attach('to', document.head);
-          }
-          s.txt(content, true);
-        } else if (s.notNull) {
-          s.detach();
-        }
-      }
-
-      /**
-       * Copies fields from src to dst. If fields is null, all fields from src are copied.
-       * If additionally dst is not defined, method creates shallow copy of src.
-       * @param {Object} src Source object
-       * @param {Object} [dst] Destination object
-       * @param {?Array.<string>} [fields] Fields to copy from source object
-       * @return {Object} Merge of src and dst objects (shallow)
-       */
-      static copyFields(src, dst = {}, fields = null) {
-        const keys = fields ? Object.keys(src).filter(f => fields.indexOf(f) > -1) : Object.keys(src);
-        keys.forEach(field => dst[field] = src[field]);
-        return dst;
-      }
-
-      /**
-       * Returns value from given HTTP GET query string
-       * @param {string} field Name of the field to search
-       * @param {string} [query] HTTP GET query string. If not given,
-       *                         [window.location.search] will be used
-       * @return {string} Value of given field or empty string if field not found
-       */
-      static getQueryVariable(field, query = window.location.search) {
-        const fldStart = query.indexOf(field);
-        if (fldStart > -1) {
-          const valEnd = query.indexOf('&', fldStart);
-          if (valEnd < 0) {
-            return query.slice(fldStart + field.length + 1);
-          } else {
-            return query.slice(fldStart + field.length + 1, valEnd);
-          }
-        } else {
-          return '';
-        }
-      }
-
-      /**
-       * Generates 32 bit Cyclic Redundancy Check
-       * @param {Object} str Input data. Objects are JSON stringified before calculation
-       * @return {string} Hex representation of CRC32 hash
-       */
-      static crc32(str = '') {
-        if (!Util.crcTbl) Util.crcTbl = new Uint32Array(256).map(
-          (itm, i) => new Array(8).fill(0)
-            .reduce(c => c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1, i));
-
-        const crc = new Uint32Array(1);
-        crc[0] = 0xffffffff;
-        str = (typeof str !== 'string' ? JSON.stringify(str) : str).split('');
-        str.forEach(c => crc[0] = (crc[0] >>> 8) ^ Util.crcTbl[(crc[0] ^ c.charCodeAt(0)) & 0xff]);
-        crc[0] ^= 0xffffffff;
-        return crc[0].toString(16);
-      }
-
-      /**
-       * Creates raid object from join url
-       * @param {string} url Raid join url
-       * @param {string} [poster] Optional poster of peocessed raid
-       * @return {?raidObject} Filled raid object or null if parsing failed
-       */
-      static getRaidFromUrl(url, poster = '') {
-        const r = { createtime: new Date().getTime(), poster: poster };
-        const reg = /[?&]([^=]+)=([^?&]+)/ig;
-        const p = url.replace(/&amp;/gi, '&').replace(/kv_&/gi, '&kv_');
-        let cnt = 0, i;
-        while ((i = reg.exec(p))) {
-          switch (i[1]) {
-            case 'kv_raid_id':
-            case 'raid_id':
-              r.id = i[2];
-              cnt++;
-              break;
-            case 'kv_difficulty':
-            case 'difficulty':
-              r.diff = parseInt(i[2]);
-              cnt++;
-              break;
-            case 'kv_raid_boss':
-            case 'raid_boss':
-              r.boss = i[2];
-              cnt++;
-              break;
-            case 'kv_hash':
-            case 'hash':
-              r.hash = i[2];
-              cnt++;
-              break;
-            case 'kv_serverid':
-            case 'serverid':
-              r.sid = parseInt(i[2]);
-              break;
-          }
-        }
-        if (cnt < 4) {
-          return null;
-        } else {
-          r.pid = r.sid === 2 ? 0 : 1;
-          return r;
-        }
-      }
-
-      /**
-       * Formats number to human readable form
-       * @param {number} num Number to format
-       * @param {number} [p] Precision (number of digits)
-       * @return {string} Formatted number
-       */
-      static getShortNum(num, p = 4) {
-        num = parseInt(num);
-        if (isNaN(num) || num < 0) return num;
-        if (num >= 1000000000000000) return (num / 1000000000000000).toPrecision(p) + 'q';
-        if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 't';
-        if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 'b';
-        if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'm';
-        if (num >= 1000) return (num / 1000).toPrecision(p) + 'k';
-        return num + '';
-      }
-
-      /**
-       * Formats number to human readable form, lowest number is in kilos
-       * @param {number} num Number to format
-       * @param {number} [p=4] Precision (number of digits)
-       * @return {string} Formatted number
-       */
-      static getShortNumK(num, p = 4) {
-        num = parseInt(num);
-        if (isNaN(num) || num < 0) return num + '';
-        if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 'q';
-        if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 't';
-        if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'b';
-        if (num >= 1000) return (num / 1000).toPrecision(p) + 'm';
-        return num.toPrecision(p) + 'k';
-      }
-
-      /**
-       * Returns random integer number between selected minimum and maximum (inclusive)
-       * @param {number} [max=1] Highest possible integer
-       * @param {number} [min=0] Lowest possible integer
-       * @return {number} Pseudorandom integer between selected constraints
-       */
-      static getRand(max = 1, min = 0) {
-        return Math.floor(min + Math.random() * (max + 1));
-      }
-
-      /**
-       * Converts Roman numbers to Arabic
-       * @param {string} roman String with roman number
-       * @return {number} Arabic number
-       */
-      static deRomanize(roman) {
-        const lut = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
-        let arabic = 0, i = roman.length;
-        while (i--) {
-          if (lut[roman[i]] < lut[roman[i + 1]]) arabic -= lut[roman[i]];
-          else arabic += lut[roman[i]];
-        }
-        return arabic;
-      }
-
-      /**
-       * Makes first letter of a word uppercase
-       * @param {string} text Text to process
-       * @return {string} Processed text
-       */
-      static capitalize(text) {
-        if (typeof text === 'string' && text.length > 1) {
-          return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-        } else {
-          return text;
-        }
       }
     },
     // TODO: Remove when new one's ready
@@ -709,8 +679,7 @@ function main() {
             if (this.regSide[idx]) {
               this.regLeft = true;
               this.regRight = false;
-            }
-            else {
+            } else {
               this.regLeft = false;
               this.regRight = true;
             }
@@ -875,204 +844,22 @@ function main() {
             setTimeout(() => DRMng.Gate.lightShot(img[1], d.id, d.ch, true), 0);
             return;
           }
-          img = d.responseType === 'arraybuffer' ? `data:image/png;base64,${btoa(d.responseText)}` : img[1];
+          if (d.responseType === 'arraybuffer') {
+            img = `data:image/png;base64,${btoa(d.responseText)}`;
+          } else if (img instanceof Array && img.length > 1) {
+            img = img[1];
+          } else {
+            i.detach();
+            return;
+          }
           if (img && c)
             i.on('load',
-              () => { setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250); })
+              () => {
+                setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250);
+              })
               .attr({ src: img })
               .remove('id');
           else i.detach();
-        }
-      }
-    },
-    /**
-     * Gestures class
-     */
-    Gestures: {
-      Kiss: {
-        smittenAdjective: ['smitten', 'enamored', 'infatuated', 'taken', 'in love', 'inflamed'],
-        getSmittenAdjective: function () { return this.smittenAdjective[Util.getRand(5)]; },
-        generate: function () {
-          let txt = '';
-          switch (Util.getRand(8)) {
-            case 0:
-              txt = '@from gives @who a puckered kiss on the lips.';
-              break;
-            case 1:
-              txt = '@from plants a gentle kiss on the cheek of @who.';
-              break;
-            case 2:
-              txt = '@from kisses @who... might have used tongue on that one.';
-              break;
-            case 3:
-            case 4:
-              txt = '@from seems ' + this.getSmittenAdjective() + ' with @who.';
-              break;
-            default:
-              txt = '@from tickles the lips of @who with a sensual kiss.';
-          }
-          return txt;
-        }
-      },
-      Poke: {
-        pokeBodyPlace: [
-          'on the cheek', 'on the navel', 'in the nose', 'in the belly button', 'in the rib cage',
-          'in a really ticklish spot', 'square on the forehead', 'with a wet willy in the ear', 'on the arm',
-          'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
-          'up the butt'
-        ],
-        getPokeBodyPlace: function () { return this.pokeBodyPlace[Util.getRand(14)]; },
-        generate: function () {
-          let txt = '';
-          switch (Util.getRand(6)) {
-            case 0:
-              txt = '@from with a tickling finger of doom, pokes @who ';
-              break;
-            case 1:
-              txt = '@from jumps out from the shadows and prods @who ';
-              break;
-            case 2:
-              txt = '@from playfully pokes @who ';
-              break;
-            case 3:
-              txt = '@from cheerfully pokes @who ';
-              break;
-            case 4:
-              txt = '@from gleefully pokes @who ';
-              break;
-            case 5:
-              txt = '@from pokes @who repeatedly ';
-              break;
-            default:
-              txt = '@from, with index finger stern and pointy, pokes @who ';
-              break;
-          }
-          return txt + this.getPokeBodyPlace() + '.';
-        }
-      },
-      Hit: {
-        strikeAction: [
-          'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel',
-          'strike', 'beat'
-        ],
-        leapingAction: [
-          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
-          'sprints', 'dashes', 'charges', 'lunges'
-        ],
-        aimModifier: [
-          'a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
-        ],
-        wrestlingMove: [
-          ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack',
-          ' flying forearm', ' low dropkick', ' jumping thigh kick', ' roundhouse',
-          ' left and right hook combo', ' jab and middle kick combo',
-          ' spinning backfist and shin kick combo', ' delayed backbrain wheel kick',
-          ' somersault kick to an uppercut combo', ' jab to the face', ' stomping hook punch',
-          ' palm thrust to the solar plexus', ' shin kick', ' side headbutt',
-          ' fast lowerbody roundhouse kick', ' fast upperbody roundhouse kick', 'n uppercut palm strike',
-          'n uppercut to midsection jab combo', ' downward chop'
-        ],
-        meal: [
-          'midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch', '2 o\'clock tea time',
-          'midafternoon snack', 'lunch'
-        ],
-        throwAction: ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'],
-        crying: ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'],
-        sportsWeapon: [
-          'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
-          'barbell', 'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
-        ],
-        midsectionStrikePlace: ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'],
-        randomItemWeapon: [
-          'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick',
-          'a board of education', 'an unidentified implement of mayhem and destruction',
-          'a rubber ducky *SQUEAK*', 'a rolling pin', 'a tire iron', 'a sock full of oranges',
-          'a slinky, a slink [fun for a girl or a boy]', 'a chinese finger puzzle', 'a whip of wet noodles',
-          'a humungous spicey italian meatstick', 'a giant garlic dill', 'an ACME hammer of pain'
-        ],
-        withDescriptors: [
-          'with lightning reflexes, ', 'with finesse and poise, ', 'with mediocre skill, ',
-          'with half-cocked attitude, ', 'with fervor and oomph, ', 'with vitality and gusto, ',
-          'with ambition and enthusiasm, ', '', '', '', ''
-        ],
-        strikeActionVerb: [
-          'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
-          'punishes', 'pummels', 'strikes', 'assaults', 'beats'
-        ],
-        generate: function () {
-          let txt = '';
-          switch (Util.getRand(7)) {
-            case 0:
-              txt += '@from attempts to ';
-              txt += this.strikeAction[Util.getRand(12)] + ' @who but fails...';
-              break;
-            case 1:
-              txt += '@from ' + this.leapingAction[Util.getRand(12)];
-              txt += ' towards @who and lands ' + this.aimModifier[Util.getRand(10)];
-              txt += this.wrestlingMove[Util.getRand(20)] + '.';
-              break;
-            case 2:
-              txt += '@from takes what\'s left of ' + this.meal[Util.getRand(7)] + ', ';
-              txt += this.throwAction[Util.getRand(5)] + ' it towards @who ';
-              txt += this.crying[Util.getRand(4)] + ', \'FOOD FIGHT\'!';
-              break;
-            case 4:
-              txt = '@from rolls up a magazine planting a blow upside the head of @who.';
-              break;
-            case 5:
-              txt = '@from hits @who on the head with a frying pan.';
-              break;
-            case 6:
-              txt += '@from plants a ' + this.sportsWeapon[Util.getRand(12)] + ' to the ';
-              txt += this.midsectionStrikePlace[Util.getRand(4)] + ' of @who.';
-              break;
-            default:
-              txt += '@from pulls out ' + this.randomItemWeapon[Util.getRand(15)];
-              txt += ' and ' + this.withDescriptors[Util.getRand(10)];
-              txt += this.strikeActionVerb[Util.getRand(13)] + ' @who with it.';
-          }
-          return txt;
-        }
-      },
-      Slap: {
-        slapWeapon: [
-          'white glove', 'rubber chicken', 'well placed backhand', 'failing Euryino', 'piece of moldy pizza',
-          'big dildo', 'loaf of french bread', 'smile of devious pleasure', 'dead >0))>-<',
-          'left over chicken drumstick', 'limp and slightly dirty french fry', 'brick of moldy cheese',
-          'tickle me Elmo', 'grilled cheese'
-        ],
-        targetAction: [
-          'deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers', 'unleashes'
-        ],
-        sassySynonym: [
-          'an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy', 'a sassy'
-        ],
-        place: [['side', '\'s head.'], ['face', '.'], ['cheek', '.']],
-        leapingAction: [
-          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
-          'sprints', 'dashes', 'charges', 'lunges'
-        ],
-        leadSpeed: [
-          ' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile', 'n accelerated', ' quick'
-        ],
-        generate: function () {
-          let txt = '', place;
-          switch (Util.getRand(2)) {
-            case 0:
-              txt = '@from slaps @who with a ' + this.slapWeapon[Util.getRand(13)] + '.';
-              break;
-            case 1:
-              place = this.place[Util.getRand(2)];
-              txt += '@from ' + this.targetAction[Util.getRand(7)];
-              txt += ' ' + this.sassySynonym[Util.getRand(6)] + ' slap to the ';
-              txt += place[0] + ' of @who' + place[1];
-              break;
-            default:
-              txt += '@from ' + this.leapingAction[Util.getRand(12)] + ' forward and with a ';
-              txt += this.slapWeapon[Util.getRand(13)] + ', deals a';
-              txt += this.leadSpeed[Util.getRand(7)] + ' slap to @who.';
-          }
-          return txt;
         }
       }
     },
@@ -1103,9 +890,6 @@ function main() {
           tiersData: '',
         },
         alliance: {
-          //enabled: false,
-          //channel: ``,
-          //pass: ``,
           sbs: false,
           rooms: []
         },
@@ -1140,8 +924,7 @@ function main() {
               const sub = keys.reduce((t, l, i) => (i < keys.length - 1 ? t[l] : t), loc);
               const lastKey = keys[keys.length - 1];
               sub[lastKey] = params[key];
-            }
-            else loc[key] = params[key];
+            } else loc[key] = params[key];
           });
           setTimeout(DRMng.Config.saveLocal, 0);
         }
@@ -1153,21 +936,12 @@ function main() {
         const data = localStorage['DRMng'] ? JSON.parse(localStorage['DRMng']) : {};
         const loc = DRMng.Config.local;
         if (data) {
-          Object.keys(loc).forEach(key => { if (data[key]) loc[key] = data[key]; });
-          // TODO: Remove after 3 consecutive versions (chat options migration)
-          if (loc.alliance.rooms === undefined && loc.alliance.pass) {
-            loc.alliance.rooms = [];
-            loc.alliance.rooms.push({
-              name: loc.alliance.channel.charAt(0).toUpperCase() +
-                loc.alliance.channel.slice(1),
-              channel: loc.alliance.channel, pass: loc.alliance.pass,
-              color: '336699', enabled: true
-            });
-            delete loc.alliance.pass;
-            delete loc.alliance.channel;
-            delete loc.alliance.enabled;
-          }
-          Object.keys(data).forEach(key => { if (loc[key] === undefined) loc[key] = data[key]; });
+          Object.keys(loc).forEach(key => {
+            if (data[key]) loc[key] = data[key];
+          });
+          Object.keys(data).forEach(key => {
+            if (loc[key] === undefined) loc[key] = data[key];
+          });
         }
         //else DRMng.Config.saveLocal();
         loc.raidKeys = Object.keys(loc.raidData);
@@ -1214,22 +988,30 @@ function main() {
           if (this._pm.recv) {
             this._class.main.push('received_whisper');
             this._prefix = 'from ';
-          }
-          else {
+          } else {
             this._class.main.push('sent_whisper');
             this._prefix = 'to ';
           }
         }
       }
 
+      /**
+       * @param {string} val
+       */
       set type(val) {
         this._type = val || 'game';
       }
 
+      /**
+       * @param {string} val
+       */
       set room(val) {
         this._room = val || 'none';
       }
 
+      /**
+       * @param {string} val
+       */
       set user(val) {
         if (val) this._user = val.toString();
         else this._user = 'Unknown';
@@ -1266,8 +1048,7 @@ function main() {
           if (this.getRaid(val)) this._msg = this._raid.text;
           else this._msg = this.formatLinks(val).trim();
           if (!this._msg) this._msg = null;
-        }
-        else {
+        } else {
           if (val instanceof DomNode) val = val.node;
           if (val instanceof Node) this._msg = val;
           else this._msg = null;
@@ -1298,8 +1079,7 @@ function main() {
             new DomNode('span').attr({ class: 'message hyphenate' }).data(this._msg).attach('to', p);
           }
           p.attach('to', this._node);
-        }
-        else new DomNode('div')
+        } else new DomNode('div')
           .attr({ class: 'script' + this._addClass, style: this._addStyle })
           .data(this._msg).attach('to', this._node);
 
@@ -1312,19 +1092,19 @@ function main() {
         if (match) {
           const r = Util.getRaidFromUrl(match[2], this._user);
           if (r) {
-            const config = DRMng.Config;
-            const srv = config.get('server').toLowerCase();
-            const vis = config.get(`visited::${srv}`).indexOf(r.id) > -1;
-            const ded = config.get(`dead::${srv}`).hasOwnProperty(r.id);
-            const flt = config.get(`filterRaids_${srv}_${r.boss}`);
-            const ifo = config.get(`raidData::${r.boss}`);
+            const config = DRMng.Config.local;
+            const srv = config.server.toLowerCase();
+            const vis = config.visited[srv].indexOf(r.id) > -1;
+            const ded = Util.hasProperty(config.dead[srv], r.id);
+            const flt = config.filterRaids[srv][r.boss];
+            const ifo = config.raidData[r.boss];
             const rnm = [
               ['n', 'h', 'l', 'nm'][r.diff - 1],
               ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
             ];
             this._class.main.push('raid', r.id, rnm[0]);
-            ded && this._class.main.push('dead');
-            vis && this._class.main.push('visited');
+            if (ded) this._class.main.push('dead');
+            if (vis) this._class.main.push('visited');
 
             this._raid = {
               link: new DomNode('a')
@@ -1342,10 +1122,11 @@ function main() {
             if (this._room === 'none' || this._type !== 'game') {
               const filter = flt ? !flt[r.diff - 1] : true;
               if (!ded && !vis && filter && DRMng.Raids.filter.indexOf(`@${r.boss}_${r.diff}`) > -1) {
-                if (DRMng.Raids.isJoining)
+                if (DRMng.Raids.isJoining) {
                   setTimeout(DRMng.Raids.pushToQueue.bind(DRMng.Raids, r), 1);
-                else
+                } else {
                   setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
+                }
               }
             }
 
@@ -1379,8 +1160,8 @@ function main() {
         if (DRMng.CSS.rules === undefined) {
           DRMng.CSS.rules = {};
         }
+        const replace = Util.hasProperty(DRMng.CSS.rules, alias);
         DRMng.CSS.rules[alias] = { name: name, value: value };
-        const replace = DRMng.CSS.rules.hasOwnProperty(alias);
         if (replace) {
           DRMng.CSS.compile();
         } else {
@@ -1434,7 +1215,7 @@ function main() {
             counter++;
           }
         });
-        DRMng.log('debug', `{Kong} Removed intrusive script tags (${counter})`);
+        Log.debug(`{Kong} Removed intrusive script tags (${counter})`);
       },
       /**
        * Adjusts kong_ads object
@@ -1443,7 +1224,7 @@ function main() {
         if (typeof window.kong_ads === 'object') {
           window.kong_ads._slots = {};
           window.kong_ads._refreshAds = false;
-          DRMng.log('debug', '{Kong::kong_ads} Adjusted');
+          Log.debug('{Kong::kong_ads} Adjusted');
         } else {
           setTimeout(DRMng.Kong.killAds, 10);
         }
@@ -1455,7 +1236,7 @@ function main() {
         const like = document.getElementById('quicklinks_facebook');
         if (like) {
           like.parentNode.removeChild(like);
-          DRMng.log('debug', '{Kong} Removed \'FB like\'');
+          Log.debug('{Kong} Removed \'FB like\'');
         } else {
           setTimeout(DRMng.Kong.killFBlike, 50);
         }
@@ -1467,7 +1248,7 @@ function main() {
         const ds = document.getElementById('dealspot_banner_holder');
         if (ds) {
           ds.parentNode.removeChild(ds);
-          DRMng.log('debug', '{Kong} Removed \'Dealspot banner\'');
+          Log.debug('{Kong} Removed \'Dealspot banner\'');
         } else {
           setTimeout(DRMng.Kong.killDealSpot, 50);
         }
@@ -1513,7 +1294,7 @@ function main() {
                   document.body.classList.remove('slim');
                   new DomNode('#DRMng_KongSlimHeader').txt('Slim', true);
                 }
-                DRMng.Config.set({ 'kong::kongSlimHeader': isSlim });
+                DRMng.Config.local.kong.kongSlimHeader = isSlim;
                 return false;
               }))
             .attach('to', 'nav_welcome_box');
@@ -1559,9 +1340,8 @@ function main() {
             return a;
           };
           Element.addMethods(Element.Methods);
-          DRMng.log('debug', '{Kong::Element} Patched');
-        }
-        else setTimeout(DRMng.Kong.modifyElement, 10);
+          Log.debug('{Kong::Element} Patched');
+        } else setTimeout(DRMng.Kong.modifyElement, 10);
       },
       /**
        * Modifies ChatDialogue prototype
@@ -1653,7 +1433,7 @@ function main() {
             while (c.lastChild && c.lastChild.nodeName === 'DIV') c.removeChild(c.lastChild);
             this._messages_count = 0;
           };
-          DRMng.log('debug', '{Kong::ChatDialogue} Patched');
+          Log.debug('{Kong::ChatDialogue} Patched');
         } else {
           setTimeout(DRMng.Kong.modifyChatDialogue, 10);
         }
@@ -1694,9 +1474,8 @@ function main() {
               DRMng.PrivateChat.anyActive()) &&
               (this === this._chat_window.activeRoom());
           };
-          DRMng.log('debug', '{Kong::ChatRoom} Patched');
-        }
-        else setTimeout(DRMng.Kong.modifyChatRoom, 10);
+          Log.debug('{Kong::ChatRoom} Patched');
+        } else setTimeout(DRMng.Kong.modifyChatRoom, 10);
       },
       /**
        * Modifies FayeEvent (part of guild chat API)
@@ -1715,7 +1494,7 @@ function main() {
               }
             });
           };
-          DRMng.log('debug', '{Kong::FayeEventDispatcher} Patched');
+          Log.debug('{Kong::FayeEventDispatcher} Patched');
         } else {
           setTimeout(DRMng.Kong.modifyFayeEvent, 10);
         }
@@ -1735,7 +1514,7 @@ function main() {
               self.trigger('history', a, b.history.length);
             });
           };
-          DRMng.log('debug', '{Kong::FayeHistory} Patched');
+          Log.debug('{Kong::FayeHistory} Patched');
         } else {
           setTimeout(DRMng.Kong.modifyFayeHistory, 10);
         }
@@ -1764,7 +1543,7 @@ function main() {
               history: a[12] || false
             };
           };
-          DRMng.log('debug', '{Kong::FayeTransformer} Patched');
+          Log.debug('{Kong::FayeTransformer} Patched');
         } else {
           setTimeout(DRMng.Kong.modifyFayeTransformer, 10);
         }
@@ -1783,7 +1562,7 @@ function main() {
               return true;
             }
           };
-          DRMng.log('debug', '{Kong::Holodeck} Patched');
+          Log.debug('{Kong::Holodeck} Patched');
         } else {
           setTimeout(this.modifyHolodeck, 10);
         }
@@ -1806,7 +1585,7 @@ function main() {
             const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
             if (part) {
               const command = Util.capitalize(part[1]);
-              const gesture = DRMng.Gestures[command].generate()
+              const gesture = Gestures[command].generate()
                 .replace('@from', DRMng.UM.user.name)
                 .replace('@who', part[2]);
               const gestureText = `** ${gesture} **`;
@@ -1816,10 +1595,6 @@ function main() {
               } else {
                 chat.send(gestureText);
               }
-              //alliance = !(a instanceof Holodeck),
-              //chat = alliance ? a : a.activeDialogue();
-              //if (alliance) DRMng.Alliance.send(gesture);
-              //else chat._holodeck.filterOutgoingMessage(gesture, chat._onInputFunction);
             }
             return false;
           });
@@ -1996,7 +1771,7 @@ function main() {
             }
             return false;
           });
-          DRMng.log('debug', '{Kong} Chat commands added');
+          Log.debug('{Kong} Chat commands added');
         } else {
           setTimeout(self.addChatCommands, 100);
         }
@@ -2052,7 +1827,7 @@ function main() {
         document.querySelectorAll('iframe').forEach(ifr => {
           if (ifr.id !== 'gameiframe') ifr.parentNode.removeChild(ifr);
         });
-        DRMng.log('debug', '{Kong} Removed all redundant iFrames');
+        Log.debug('{Kong} Removed all redundant iFrames');
       },
       serviceMsg: (msg, chat) => {
         if (!chat) {
@@ -2103,7 +1878,7 @@ function main() {
           .on('load', DRMng.Kong.setHeaderWidth)
           .attach('to', document.head);
 
-        DRMng.log('{Kong} Module loaded');
+        Log.info('{Kong} Module loaded');
       }
     },
     /**
@@ -2147,8 +1922,7 @@ function main() {
           r.delay = delay;
           delete r.sid;
           DRMng.Engine.client.emit('service', { action: 'delayedSub', data: r });
-        }
-        else DRMng.UI.submitResponse(0, 'Paste proper raid link before submitting');
+        } else DRMng.UI.submitResponse(0, 'Paste proper raid link before submitting');
         link.textContent = 'Paste raid link here';
         link.className = 'default';
       },
@@ -2195,12 +1969,12 @@ function main() {
             };
             DRMng.postMessage(data);
           } else {
-            DRMng.log('warn', '{Raids::join} User not qualified to join', u);
+            Log.warn('{Raids::join} User not qualified to join', u);
             DRMng.Raids.joined++;
             DRMng.Raids.joinMsg();
           }
         } else {
-          DRMng.log('warn', '{Raids::join} Bad data', r);
+          Log.warn('{Raids::join} Bad data', r);
           DRMng.Raids.joined++;
           DRMng.Raids.joinMsg();
         }
@@ -2394,7 +2168,7 @@ function main() {
           }
         });
         // merge
-        //DRMng.log(`debug`, `FILTERS`, filters);
+        //Log.out(`debug`, `FILTERS`, filters);
         raids = DRMng.Config.get('raidData');
         if (flt.add.raid.length > 0)
           flt.add.raid.forEach(r => {
@@ -2426,8 +2200,8 @@ function main() {
             });
           });
 
-        DRMng.log('debug', '{Raid::Filter} Add filters ::', flt.add.raid.join(', '));
-        DRMng.log('debug', '{Raid::Filter} Sub filters ::', flt.rem.raid.join(', '));
+        Log.debug('{Raid::Filter} Add filters ::', flt.add.raid.join(', '));
+        Log.debug('{Raid::Filter} Sub filters ::', flt.rem.raid.join(', '));
 
         // UI filter
         const content = `.drm_${result.join(', .drm_')} { display: flex !important; }`;
@@ -2584,7 +2358,7 @@ function main() {
         }
       },
       getDead: function (id) {
-        return id && DRMng.Config.get(`dead::${this.srv}`).hasOwnProperty(id);
+        return Util.hasProperty(DRMng.Config.local.dead[this.srv], id);
       },
       remove: function (id, serverNuke) {
         if (this.locked || this.bootstrap) {
@@ -2671,9 +2445,8 @@ function main() {
         return pos;
       },
       init: function () {
-        DRMng.log('{Raids} This', this);
         setTimeout(() => this.cleanDeadCache(), 60000);
-        DRMng.log('{Raids} Module loaded');
+        Log.info('{Raids} Module loaded');
       }
     },
     /**
@@ -2691,7 +2464,7 @@ function main() {
           this.user.authToken = active_user.gameAuthToken();
           setTimeout(() => this.getExtendedUserData(), 0);
         } else {
-          DRMng.log('debug', '{UserManager} User data not ready, trying again in .1 sec');
+          Log.debug('{UserManager} User data not ready, trying again in .1 sec');
           setTimeout(() => this.getBasicUserData(), 100);
         }
       },
@@ -2718,10 +2491,10 @@ function main() {
           if (holodeck._chat_window._rooms_by_type.guild) {
             return setTimeout(() => this.getUserNode(), 0);
           } else if (this.numTries++ <= 20) {
-            DRMng.log('debug', '{UserManager} Guild data missing, trying again in 2 sec (%d/20)', this.numTries);
+            Log.debug('{UserManager} Guild data missing, trying again in 2 sec (%d/20)', this.numTries);
             return setTimeout(() => this.getExtendedUserData(), 2000);
           } else {
-            DRMng.log('warn', '{UserManager} Guild info missing. Protip: Join private guild.');
+            Log.warn('{UserManager} Guild info missing. Protip: Join private guild.');
             this.user.guild = '';
             this.user.IGN = '';
             this.user.qualified = true;
@@ -2747,7 +2520,7 @@ function main() {
         if (typeof server !== 'string') {
           server = (DRMng.Config.get('server') === 'Elyssa' ? 'Kasan' : 'Elyssa');
         }
-        DRMng.log('info', '{Engine} Changing server to <%s>', server);
+        Log.info('{Engine} Changing server to <%s>', server);
         DRMng.Engine.client.disconnect();
         DRMng.Config.set({ server: server });
         DRMng.Engine.client.nsp = `/${server}`;
@@ -2771,12 +2544,12 @@ function main() {
                 transports: ['websocket'],
                 query: { user: DRMng.UM.user.name }
               })
-            .on('error', data => DRMng.log('warn', '{Engine} Error ::', data))
+            .on('error', data => Log.warn('{Engine} Error ::', data))
             .on('msg', DRMng.Engine.handleMessage)
             .on('service', DRMng.Engine.handleService)
-            .on('disconnect', () => DRMng.log('warn', '{Engine} Socket client disconnected.'))
+            .on('disconnect', () => Log.warn('{Engine} Socket client disconnected.'))
             .on('connect', () => {
-              DRMng.log('{Engine} Socket connection established, joining...');
+              Log.info('{Engine} Socket connection established, joining...');
               DRMng.Engine.client.emit('join', {
                 usr: DRMng.UM.user.name,
                 ign: DRMng.UM.user.IGN,
@@ -2784,14 +2557,13 @@ function main() {
                 chk: DRMng.Config.local.checkSums
               });
             });
-        }
-        else {
-          DRMng.log('debug', '{Engine} Resources not ready, trying again in 1 sec...');
+        } else {
+          Log.debug('{Engine} Resources not ready, trying again in 1 sec...');
           setTimeout(DRMng.Engine.init, 1000);
         }
       },
       //handleMessage: msg => DRMng.Kong.serviceMsg(msg.txt),
-      handleMessage: msg => DRMng.log('info', `{Engine::Message} ${msg.txt}`),
+      handleMessage: msg => Log.info(`{Engine::Message} ${msg.txt}`),
       handleService: d => {
         if (!d) return;
         const config = DRMng.Config;
@@ -2801,14 +2573,14 @@ function main() {
         switch (action) {
           case 'raidData':
             if (config.get('checkSums::raidData') !== data.raidDataHash && data.raidDataHash.length > 6) {
-              DRMng.log('info', '{Engine::Service} New raids data. Old hash ' +
+              Log.info('{Engine::Service} New raids data. Old hash ' +
                 `<${config.get('checkSums::raidData')}> | New hash <${data.raidDataHash}>`);
               config.set({
                 raidData: data.raidData,
                 'checkSums::raidData': data.raidDataHash
               });
             } else {
-              DRMng.log('debug', '{Engine::Service} Raids data hash. Old hash ' +
+              Log.debug('{Engine::Service} Raids data hash. Old hash ' +
                 `<${config.get('checkSums::raidData')}> | New hash <${data.raidDataHash}>`);
             }
             setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 0);
@@ -2816,33 +2588,33 @@ function main() {
           case 'filterData':
             if (config.get('checkSums::filterData') !== data.filterDataHash &&
               data.filterDataHash.length > 6) {
-              DRMng.log('info', '{Engine::Service} New keywords data. Old hash ' +
+              Log.info('{Engine::Service} New keywords data. Old hash ' +
                 `<${config.get('checkSums::filterData')}> | New hash <${data.filterDataHash}>`);
               config.set({
                 filterData: data.filterData,
                 'checkSums::filterData': data.filterDataHash
               });
             } else {
-              DRMng.log('debug', '{Engine::Service} Keywords hash. Old hash ' +
+              Log.debug('{Engine::Service} Keywords hash. Old hash ' +
                 `<${config.get('checkSums::filterData')}> | New hash <${data.filterDataHash}>`);
             }
             break;
           case 'tiersData':
             if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
               d.data.tiersDataHash.length > 6) {
-              DRMng.log('info', '{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>',
+              Log.info('{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>',
                 config.get('checkSums::tiersData'), data.tiersDataHash);
               config.set({
                 tiersData: JSON.parse(data.tiersData),
                 'checkSums::tiersData': data.tiersDataHash
               });
             } else {
-              DRMng.log('debug', '{Engine::Service} Tiers hash. Old hash ' +
+              Log.debug('{Engine::Service} Tiers hash. Old hash ' +
                 `<${config.get('checkSums::tiersData')}> | New hash <${data.tiersDataHash}>`);
             }
             break;
           case 'bootStrap':
-            DRMng.log(`{Engine::Service} Raids feed <${d.raids.length}>`);
+            Log.info(`{Engine::Service} Raids feed <${d.raids.length}>`);
             setTimeout(DRMng.Raids.insertAll.bind(DRMng.Raids, d.raids), 0);
             break;
           case 'newRaid':
@@ -2861,7 +2633,7 @@ function main() {
             setTimeout(DRMng.UI.submitResponse.bind(DRMng.UI, d.data.error ? 0 : 1, d.data.msg), 0);
             break;
           default:
-            DRMng.log('warn', '{Engine::Service} Unknown action => ', action);
+            Log.warn('{Engine::Service} Unknown action => ', action);
         }
       }
     },
@@ -2979,28 +2751,27 @@ function main() {
             });
 
           this.client.on('error', err => {
-            DRMng.log('warn', '{PrivateChat} Client error:', err);
+            Log.warn('{PrivateChat} Client error:', err);
             document.getElementById('private_chat_sbs').style.setProperty('display', 'none');
             this.tab.style.setProperty('display', 'none');
             //destroyChat();
           });
 
           this.client.on('disconnect', () => {
-            console.warn('warn', '{PrivateChat} Client disconnected!');
+            Log.warn('{PrivateChat} Client disconnected!');
           });
 
           this.client.on('connect', () => {
             this.clearUsers();              // clear user list
             this.clear();                   // clear chat
             this.client.emit('join', user); // login to server
-            DRMng.log('info', '{PrivateChat} User login data [%s|%s|%s]', user.usr, user.ign, user.gld);
+            Log.info('{PrivateChat} User login data [%s|%s|%s]', user.usr, user.ign, user.gld);
           });
 
           this.client.on('msg', data => this.messageEvent(data));
           this.client.on('service', data => this.serviceEvent(data));
-        }
-        else {
-          DRMng.log('info', '{PrivateChat} Resources not ready, trying again in 1 sec...');
+        } else {
+          Log.debug('{PrivateChat} Resources not ready, trying again in 1 sec...');
           setTimeout(() => this.connect(), 1000);
         }
       }
@@ -3047,7 +2818,7 @@ function main() {
       delUser(name) {
         if (!this.userLock) {
           this.userLock = true;
-          if (this.users.fields.hasOwnProperty(name)) {
+          if (Util.hasProperty(this.users.fields, name)) {
             this.users.html.removeChild(this.users.fields[name].html);
             delete this.users.fields[name];
             const idx = this.users.keys.indexOf(name);
@@ -3164,9 +2935,9 @@ function main() {
 
             DRMng.UI.setChatWidth();
 
-            DRMng.log('debug', 'SBS Container initialized');
+            Log.debug('SBS Container initialized');
           } else {
-            DRMng.log('debug', 'SBS Container failed to init, retry in 10ms');
+            Log.debug('SBS Container failed to init, retry in 10ms');
             return setTimeout(() => this.initSbsContainer(), 10);
           }
         }
@@ -3206,10 +2977,10 @@ function main() {
 
           this.count = document.querySelector('.number_in_room');
 
-          console.info('[DRMng] {PrivateChat} Chat tab created.');
+          Log.info(`{PrivateChat::${this.name}} Chat tab created.`);
           setTimeout(() => this.initBody(), 0);
         } else {
-          DRMng.log('debug', 'Tab failed to init, retry in 50ms');
+          Log.debug('{PrivateChat} Tab failed to init, retry in 50ms');
           setTimeout(() => this.initTab(), 50);
         }
       }
@@ -3283,7 +3054,7 @@ function main() {
           this.body.appendChild(this.chat);
           this.body.appendChild(inputDiv);
 
-          console.info('[DRMng] {PrivateChat} Chat body created.');
+          Log.info(`{PrivateChat::${this.name}} Chat body created`);
         }
 
         if (DRMng.PrivateChat.sbsActive) {
@@ -3295,7 +3066,7 @@ function main() {
           DRMng.PrivateChat.container.appendChild(this.body);
         }
 
-        console.info('[DRMng] {PrivateChat} Chat body attached to DOM.');
+        Log.info(`{PrivateChat::${this.name}} Chat body attached to DOM`);
 
         DRMng.UI.setChatWidth();
 
@@ -3403,7 +3174,7 @@ function main() {
             break;
 
           default:
-            console.log('[DRMng] {PrivateChat} SRV:', data);
+            Log.warn('{PrivateChat} Unhandled service data:', data);
         }
       }
 
@@ -3537,17 +3308,22 @@ function main() {
       }
 
       static raidMessage(data, pc, uc, pfx) {
-        let msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
+        const msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
         if (msg) {
-          let r = Util.getRaidFromUrl(msg[2], data.usr.usr);
+          const r = Util.getRaidFromUrl(msg[2], data.usr.usr);
           if (r) {
-            let srv = DRMng.Config.local.server.toLowerCase(), g = this.getGuildTag(data.usr.gld),
-              v = DRMng.Config.local.visited[srv].indexOf(r.id) > -1,
-              d = DRMng.Config.local.dead[srv].hasOwnProperty(r.id),
-              l, m = msg[1] + msg[3],
-              i = DRMng.Config.local.raidData[r.boss], n = [], s = m ? ':' : '',
-              t = new Date(data.ts).format('mmm d, HH:MM'), u = data.usr.usr,
-              ign = data.usr.ign;
+            const config = DRMng.Config.local;
+            const srv = config.server.toLowerCase();
+            const g = this.getGuildTag(data.usr.gld);
+            const v = config.visited[srv].indexOf(r.id) > -1;
+            const d = Util.hasProperty(config.dead[srv], r.id);
+            const m = msg[1] + msg[3];
+            const i = config.raidData[r.boss];
+            const n = [];
+            const s = m ? ':' : '';
+            const t = new Date(data.ts).format('mmm d, HH:MM');
+            const u = data.usr.usr;
+            const ign = data.usr.ign;
 
             pc.push('raid');
             pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
@@ -3557,7 +3333,7 @@ function main() {
             n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
             n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
 
-            l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
+            let l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
             l = `return DRMng.Raids.joinOne(${l});`;
 
             let f = i ? Util.getShortNumK(i.hp[r.diff - 1] * 1000 / i.maxPlayers) : '';
@@ -3615,7 +3391,7 @@ function main() {
         rooms.forEach((room, index) => {
           if (room.enabled && this.getChat(room.channel) === null) {
             if (index === 0 && DRMng.Config.local.alliance.sbs) {
-              DRMng.log('debug', 'Setting up default sbs room');
+              Log.debug('Setting up default sbs room');
               new this(room, true);
             } else {
               new this(room);
@@ -3782,7 +3558,9 @@ function main() {
           }
           return this;
         };
-        this.getConf = function () { return this.conf[this.field]; };
+        this.getConf = function () {
+          return this.conf[this.field];
+        };
         this.flipConf = function () {
           this.conf[this.field] = !this.conf[this.field];
           DRMng.Config.saveLocal();
@@ -3809,8 +3587,7 @@ function main() {
           if (this.type === 'bool') {
             button.setAttribute('class', this.getConf() ? 'n' : 'l');
             button.textContent = this.getConf() ? 'On' : 'Off';
-          }
-          else {
+          } else {
             button.classList.add('n');
             button.textContent = name;
           }
@@ -4000,7 +3777,9 @@ function main() {
         let r = document.getElementById('DRMng_' + id);
         if (r) r.parentNode.removeChild(r);
       },
-      clearRaidList: function () { document.getElementById('DRMng_RaidList').innerHTML = ''; },
+      clearRaidList: function () {
+        document.getElementById('DRMng_RaidList').innerHTML = '';
+      },
       statusTimer: null,
       displayStatus: function (msg) {
         const status = document.getElementById('DRMng_status');
@@ -4009,8 +3788,7 @@ function main() {
             status.textContent = DRMng.Raids.count + ' raids, ' + DRMng.Raids.joinLen + ' selected';
           else status.textContent = DRMng.Raids.count + ' raids in list';
           this.statusTimer = null;
-        }
-        else if (msg) {
+        } else if (msg) {
           status.innerText = msg;
           if (this.statusTimer) this.statusTimer.restart();
           else this.statusTimer = new DRMng.Timer(DRMng.UI.displayStatus.bind(this), 4000);
@@ -4760,7 +4538,9 @@ function main() {
           document.getElementById('DRMng_filterGuild'),
           document.getElementById('DRMng_filterGigantic')
         ];
-        fltDivs.forEach(div => { if (div) while (div.firstChild) div.removeChild(div.firstChild); });
+        fltDivs.forEach(div => {
+          if (div) while (div.firstChild) div.removeChild(div.firstChild);
+        });
 
         Object.keys(raids).forEach(k => {
           const r = raids[k];
@@ -4810,8 +4590,7 @@ function main() {
           let flts = 0;
           for (i = 0; i < 4; ++i) if (flt[i]) flts += 1 << i;
           diff = (flts !== 15 && flts !== 0) ? flts : 15;
-        }
-        else diff = { n: 1, h: 2, l: 4, nm: 8 }[el.className.split(' ')[0]];
+        } else diff = { n: 1, h: 2, l: 4, nm: 8 }[el.className.split(' ')[0]];
 
         for (i = 0; i < 4; ++i) if (diff & (1 << i)) {
           flt[i] = !flt[i];
@@ -4943,8 +4722,7 @@ function main() {
               new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
               DRMng.CSS.del(this.field);
               DRMng.CSS.del(this.field + 'b');
-            }
-            else {
+            } else {
               new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
               DRMng.CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
               DRMng.CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
@@ -5122,12 +4900,15 @@ function main() {
                 reader.addEventListener('load', e => {
                   const res = `${e.target.result}`;
                   let data = null;
-                  try { data = JSON.parse(res); }
-                  catch (e) { DRMng.log('error', '{Sidebar::Import} Wrong data format ::', res); }
+                  try {
+                    data = JSON.parse(res);
+                  } catch (e) {
+                    Log.error('{Sidebar::Import} Wrong data format ::', res);
+                  }
                   if (data && data.groups && data.buttons) {
                     DRMng.Config.local.sidebar.data = data;
                     DRMng.Config.saveLocal();
-                    DRMng.log('debug', '{Sidebar::Import} Data ::', data);
+                    Log.debug('{Sidebar::Import} Data ::', data);
                     // clear old fields
                     group.fields = group.fields.filter(fld => {
                       if (fld.html.className === 'drmng_config_sb') {
@@ -5305,8 +5086,7 @@ function main() {
         if (d.top + ifo.offsetHeight > rdl.top + rdl.height / 2) {
           ifo.style.top = '';
           ifo.style.bottom = Math.max(wnd - d.bottom, 0) + 'px';
-        }
-        else {
+        } else {
           ifo.style.top = d.top - 1 + 'px';
           ifo.style.bottom = '';
         }
@@ -5315,18 +5095,19 @@ function main() {
       handleChatClick: (e, sbs) => {
         const usr = e.target.getAttribute('username');
         if (usr) {
-          const a = DRMng.PrivateChat.getActive();
           e.stopPropagation();
           e.preventDefault();
-          DRMng.log('info', `{${a ? `Private::${a.conf.channel}` : 'Kong'}::PM} User <${usr}>`);
-          if (a || sbs) {
+          if ((DRMng.PrivateChat.anyActive() && !DRMng.PrivateChat.sbsActive) || sbs) {
+            const a = DRMng.PrivateChat.getActive();
+            Log.info(`{${a ? `Private::${a.conf.channel}` : 'Kong'}::PM} User <${usr}>`);
             a.input.focus();
             a.input.dispatchEvent(new Event('focus'));
             a.input.value = `/w ${usr} `;
+          } else {
+            Log.info(`{Kong::PM} User <${usr}>`);
+            holodeck._active_dialogue.setInput(`/w ${usr} `);
           }
-          else holodeck._active_dialogue.setInput(`/w ${usr} `);
-        }
-        else if (e.target.className.indexOf('DRMng_info_picker') > -1) {
+        } else if (e.target.className.indexOf('DRMng_info_picker') > -1) {
           e = e.target;
           const raid = e.className.split(' ')[1];
           if (!raid) return false;
@@ -5556,8 +5337,7 @@ function main() {
             if (gr.className.indexOf('hide') > -1) {
               gr.children[1].removeAttribute('style');
               gr.className = gr.className.replace(' hide', '');
-            }
-            else {
+            } else {
               gr.className += ' hide';
               gr.children[1].style.display = 'none';
             }
@@ -5715,8 +5495,7 @@ function main() {
                     'class');
                   DRMng.Kong.setWrapperWidth(
                     DRMng.Config.get('scriptWidth'));
-                }
-                else {
+                } else {
                   el.className = 'hidden';
                   new DomNode('#DRMng_onoff').attr(
                     { class: 'hidden' });
@@ -5831,7 +5610,7 @@ function main() {
     }
   };
 
-  DRMng.log('Main class created. Initializing components');
+  Log.info('Main class created. Initializing components');
 
   // include socket.io engine
   new DomNode('script')
@@ -5957,16 +5736,14 @@ function load() {
           const remDiv = chatDiv.parentNode;
           remDiv.parentNode.removeChild(remDiv);
         }
-      }
-      else if (this.config.leftWChat && !this.config.hideWChat) {
+      } else if (this.config.leftWChat && !this.config.hideWChat) {
         if (chatDiv) chatDiv.parentNode.style.left = '0';
         else {
           setTimeout(this.reloadChat.bind(this), 0);
           return;
         }
         if (swfDiv) swfDiv.parentNode.style.left = '265px';
-      }
-      else {
+      } else {
         if (chatDiv) chatDiv.parentNode.style.left = '760px';
         else {
           setTimeout(this.reloadChat.bind(this), 0);
@@ -6011,8 +5788,7 @@ function load() {
         );
         this.save();
         this.applyChatSettings();
-      }
-      else if (this.counter++ < 5) setTimeout(this.init.bind(this), 200);
+      } else if (this.counter++ < 5) setTimeout(this.init.bind(this), 200);
       else {
         this.reloadGame();
         this.reloadChat();
@@ -6085,8 +5861,7 @@ if (window.location.host === 'www.kongregate.com') {
     scr.appendChild(document.createTextNode(`(${main})()`));
     document.head.appendChild(scr);
   }
-}
-else if (window.location.host === 'dotd-web1.5thplanetgames.com') {
+} else if (window.location.host === 'dotd-web1.5thplanetgames.com') {
   const scr = document.createElement('script');
   scr.appendChild(document.createTextNode(`(${load})()`));
   document.head.appendChild(scr);

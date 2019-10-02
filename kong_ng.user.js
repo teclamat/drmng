@@ -30,7 +30,8 @@
  */
 
 function main() {
-  window.Log = class {
+
+  window.Log = class Log {
     static drmngify(color, args) {
       const drmngBadge = color ? '%c[DRMng]' : '[DRMng]';
       if ((typeof args[0] === 'string') && /%[csd]/.test(args[0])) {
@@ -192,7 +193,7 @@ function main() {
   /**
    * Utility class
    */
-  window.Util = class {
+  window.Util = class Util {
     /**
      * Creates, updates or removes CSS stylesheet with given ID
      * @param {string} id Stylesheet id
@@ -227,7 +228,7 @@ function main() {
     /**
      * Returns value from given HTTP GET query string
      * @param {string} parameter Name of the parameter to search
-     * @param {string} [query] HTTP GET query string. If not given, [window.location.search] will be used
+     * @param {string} [query=window.location.search] HTTP GET query string.
      * @returns {string} Value of given parameter or empty string if not found
      */
     static getQueryVariable(parameter, query = window.location.search) {
@@ -267,8 +268,8 @@ function main() {
      */
     static getRaidFromUrl(url, poster = '') {
       const r = { createtime: new Date().getTime(), poster: poster };
-      const reg = /[?&]([^=]+)=([^?&]+)/ig;
-      const p = url.replace(/&amp;/gi, '&').replace(/kv_&/gi, '&kv_');
+      const reg = /[?&]([^=]+)=([^?&]+)/gui;
+      const p = url.replace(/&amp;/gui, '&').replace(/kv_&/gui, '&kv_');
       let cnt = 0, i;
       while ((i = reg.exec(p))) {
         switch (i[1]) {
@@ -309,15 +310,15 @@ function main() {
      * @param {number} [p=4] Precision (number of digits)
      * @returns {string} Formatted number
      */
-    static getShortNum(num, p = 4) {
+    static getShortNum(num, p = 4, suffix = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
       num = parseInt(num);
       if (isNaN(num) || num < 0) return num;
-      if (num >= 1000000000000000) return (num / 1000000000000000).toPrecision(p) + 'q';
-      if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 't';
-      if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 'b';
-      if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'm';
-      if (num >= 1000) return (num / 1000).toPrecision(p) + 'k';
-      return num + '';
+      let count = 0;
+      while (num > 1000) {
+        num /= 1000;
+        ++count;
+      }
+      return num.toPrecision(p) + suffix[count];
     }
 
     /**
@@ -327,13 +328,7 @@ function main() {
      * @returns {string} Formatted number
      */
     static getShortNumK(num, p = 4) {
-      num = parseInt(num);
-      if (isNaN(num) || num < 0) return num + '';
-      if (num >= 1000000000000) return (num / 1000000000000).toPrecision(p) + 'q';
-      if (num >= 1000000000) return (num / 1000000000).toPrecision(p) + 't';
-      if (num >= 1000000) return (num / 1000000).toPrecision(p) + 'b';
-      if (num >= 1000) return (num / 1000).toPrecision(p) + 'm';
-      return num.toPrecision(p) + 'k';
+      return this.getShortNum(num, p, ['k', 'm', 'b', 't', 'q', 'Q']);
     }
 
     /**
@@ -343,6 +338,7 @@ function main() {
      * @returns {number} Pseudorandom integer between selected constraints
      */
     static getRand(max = 1, min = 0) {
+      if (max < 1) return 0;
       return Math.floor(min + Math.random() * (max + 1));
     }
 
@@ -407,25 +403,18 @@ function main() {
         return Util.getRandArray(smittenAdjective);
       }
       static generate() {
-        let txt = '';
-        switch (Util.getRand(8)) {
+        switch (Util.getRand(6)) {
           case 0:
-            txt = '@from gives @who a puckered kiss on the lips.';
-            break;
+            return '@from gives @who a puckered kiss on the lips.';
           case 1:
-            txt = '@from plants a gentle kiss on the cheek of @who.';
-            break;
+            return '@from plants a gentle kiss on the cheek of @who.';
           case 2:
-            txt = '@from kisses @who... might have used tongue on that one.';
-            break;
+            return '@from kisses @who... might have used tongue on that one.';
           case 3:
-          case 4:
-            txt = '@from seems ' + this.SmittenAdjective + ' with @who.';
-            break;
+            return `@from seems ${this.SmittenAdjective} with @who.`;
           default:
-            txt = '@from tickles the lips of @who with a sensual kiss.';
+            return '@from tickles the lips of @who with a sensual kiss.';
         }
-        return txt;
       }
     },
     Poke: class {
@@ -552,30 +541,23 @@ function main() {
         return Util.getRandArray(strikeActionVerb);
       }
       static generate() {
-        let txt = '';
         switch (Util.getRand(8)) {
           case 0:
-            txt = `@from attempts to ${this.StrikeAction} @who but fails...`;
-            break;
+          case 3:
+            return `@from attempts to ${this.StrikeAction} @who but fails...`;
           case 1:
-            txt = `@from ${this.LeapingAction} towards @who and lands ${this.AimModifier}${this.WrestlingMove}.`;
-            break;
+            return `@from ${this.LeapingAction} towards @who and lands ${this.AimModifier}${this.WrestlingMove}.`;
           case 2:
-            txt = `@from takes what's left of ${this.Meal}, ${this.ThrowAction} it towards @who ${this.Crying}, 'FOOD FIGHT'!`;
-            break;
+            return `@from takes what's left of ${this.Meal}, ${this.ThrowAction} it towards @who ${this.Crying}, 'FOOD FIGHT'!`;
           case 4:
-            txt = '@from rolls up a magazine planting a blow upside the head of @who.';
-            break;
+            return '@from rolls up a magazine planting a blow upside the head of @who.';
           case 5:
-            txt = '@from hits @who on the head with a frying pan.';
-            break;
+            return '@from hits @who on the head with a frying pan.';
           case 6:
-            txt = `@from plants a ${this.SportsWeapon} to the ${this.MidsectionStrikePlace} of @who.`;
-            break;
+            return `@from plants a ${this.SportsWeapon} to the ${this.MidsectionStrikePlace} of @who.`;
           default:
-            txt = `@from pulls out ${this.RandomItemWeapon} and ${this.WithDescriptors}${this.StrikeActionVerb} @who with it.`;
+            return `@from pulls out ${this.RandomItemWeapon} and ${this.WithDescriptors}${this.StrikeActionVerb} @who with it.`;
         }
-        return txt;
       }
     },
     Slap: class {
@@ -618,18 +600,15 @@ function main() {
         return Util.getRandArray(leadSpeed);
       }
       static generate() {
-        let txt = '';
-        switch (Util.getRand(2)) {
+        switch (Util.getRand(3)) {
           case 0:
-            txt = `@from slaps @who with a ${this.SlapWeapon}.`;
-            break;
+          case 2:
+            return `@from slaps @who with a ${this.SlapWeapon}.`;
           case 1:
-            txt = `@from ${this.TargetAction} ${this.SassySynonym} slap to the ${this.Place.join(' of @who')}`;
-            break;
+            return `@from ${this.TargetAction} ${this.SassySynonym} slap to the ${this.Place.join(' of @who')}`;
           default:
-            txt = `@from ${this.LeapingAction} forward and with a ${this.SlapWeapon}, deals a${this.LeadSpeed} slap to @who.`;
+            return `@from ${this.LeapingAction} forward and with a ${this.SlapWeapon}, deals a${this.LeadSpeed} slap to @who.`;
         }
-        return txt;
       }
     }
   };

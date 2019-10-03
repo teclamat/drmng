@@ -3,7 +3,7 @@
 // @namespace       tag://kongregate
 // @description     Makes managing raids a lot easier
 // @author          Mutik
-// @version         2.2.3
+// @version         2.3.0
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow
 // @include         *www.kongregate.com/games/5thPlanetGames/dawn-of-the-dragons*
@@ -613,6 +613,205 @@ function main() {
     }
   };
 
+  /**
+   * Handles dynamic CSS rules
+   */
+  window.CSS = class CSS {
+    static add(alias, name, value) {
+      if (this.rules === undefined) this.rules = {};
+      const replace = Util.hasProperty(this.rules, alias);
+      this.rules[alias] = { name: name, value: value };
+      if (replace) {
+        this.compile();
+      } else {
+        this.compile(this.rules[alias]);
+      }
+    }
+
+    static del(alias) {
+      if (this.rules) {
+        if (this.rules[alias] !== undefined) delete this.rules[alias];
+        this.compile();
+      }
+    }
+
+    static compile(obj) {
+      if (this.node === undefined) {
+        this.node = new DomNode('style')
+          .attr({ type: 'text/css' })
+          .attach('to', document.head);
+      }
+      if (obj) {
+        this.node.txt(`${obj.name} {${obj.value}}\n`);
+      } else {
+        this.node.clear();
+        Object.keys(this.rules || {}).forEach(key => {
+          const rule = this.rules[key];
+          this.node.txt(`${rule.name} {${rule.value}}\n`);
+        });
+      }
+    }
+
+    static remove() {
+      this.node.detach();
+    }
+  };
+
+  /**
+   * XHR calls proxy
+   */
+  window.Proxy = class Proxy {
+    /**
+     * Calls lightshot service to get real image url
+     * @param {string} link Link with obfuscated image url
+     * @param {string} id ID of destination Node
+     * @param {string} ch Channel
+     * @param {boolean} arr request array buffer type
+     */
+    static lightShot(link, id, ch, arr = false) {
+      const req = {
+        eventName: 'DRMng.lightShot',
+        url: link,
+        method: 'GET',
+        id: id,
+        ch: ch,
+        timeout: 10000
+      };
+      if (arr) req.responseType = 'arraybuffer';
+      DRMng.postMessage(req);
+    }
+    // TODO: Add support for regular kong chat as well
+    /**
+     * Lightshot callback
+     * @param {Object} e returned data
+     */
+    static lightShotCallback(e) {
+      const d = JSON.parse(e && e.data);
+      const i = new DomNode(`#${d.id}`);
+      const c = d.ch;
+      if (!i.empty) {
+        let img = /og:image.+?content="(.+?)"/.exec(d.responseText);
+        if (img && img[1] && img[1].indexOf('image.prntscr.com') > 0) {
+          setTimeout(() => Proxy.lightShot(img[1], d.id, d.ch, true), 0);
+          return;
+        }
+        if (d.responseType === 'arraybuffer') {
+          img = `data:image/png;base64,${btoa(d.responseText)}`;
+        } else if (img instanceof Array && img.length > 1) {
+          img = img[1];
+        } else {
+          i.detach();
+          return;
+        }
+        if (img && c)
+          i.on('load',
+            () => {
+              setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250);
+            })
+            .attr({ src: img })
+            .remove('id');
+        else i.detach();
+      }
+    }
+  };
+
+
+  window.Config = class Config {
+    /**
+     * Returns configuration object
+     */
+    static get data() {
+      return this.local;
+    }
+    /**
+     * Returns current server mode
+     */
+    static get server() {
+      return this.local.server;
+    }
+    /**
+     * Returns current server mode as server id
+     */
+    static get serverId() {
+      return (this.server === 'Elyssa') ? 1 : 2;
+    }
+    static get visited() {
+      return this.local.visited[this.server.toLowerCase()];
+    }
+    static get dead() {
+      return this.local.dead[this.server.toLowerCase()];
+    }
+    static get filterString() {
+      return this.local.filterString[this.server.toLowerCase()];
+    }
+    static set filterString(value) {
+      this.local.filterString[this.server.toLowerCase()] = value;
+    }
+    static get filterRaids() {
+      return this.local.filterRaids[this.server.toLowerCase()];
+    }
+    static get hardFilter() {
+      return this.local.hardFilter[this.server.toLowerCase()];
+    }
+    /**
+     * Loads local config to object
+     */
+    static load() {
+      this.local = {
+        kong: {
+          kongSlimHeader: false,
+          chatWidth: 250
+        },
+        server: 'Elyssa',
+        sortBy: 'hp',
+        scriptWidth: 300,
+        visited: { kasan: [], elyssa: [] },
+        dead: { kasan: {}, elyssa: {} },
+        raidData: {},
+        raidKeys: [],
+        filterData: {},
+        tiersData: {},
+        filterString: { kasan: '', elyssa: '' },
+        filterRaids: { kasan: {}, elyssa: {} },
+        hardFilter: { kasan: [], elyssa: [] },
+        checkSums: {
+          raidData: '',
+          filterData: '',
+          tiersData: '',
+        },
+        alliance: {
+          sbs: false,
+          rooms: []
+        },
+        gameFrame: {
+          removeWChat: false,
+          leftWChat: false,
+          hideWChat: false
+        },
+        sidebar: {}
+      };
+
+      const data = localStorage['DRMng'] ? JSON.parse(localStorage['DRMng']) : {};
+      if (data) {
+        Object.keys(this.local).forEach(key => {
+          if (data[key]) this.local[key] = data[key];
+        });
+        Object.keys(data).forEach(key => {
+          if (this.local[key] === undefined) this.local[key] = data[key];
+        });
+      }
+      this.local.raidKeys = Object.keys(this.local.raidData);
+      this.save();
+    }
+    /**
+     * Saves config to local storage
+     */
+    static save() {
+      Log.debug('Saving config', JSON.stringify(this.local));
+      // localStorage['DRMng'] = JSON.stringify(this.local);
+    }
+  };
+
   window.DRMng = {
     ServerWS: 'wss://mutikt.ml:3000',
     About: {
@@ -722,14 +921,14 @@ function main() {
           switch (p.id) {
             case 'chat_container':
               w = parseInt(p.style.width.replace('px', ''));
-              DRMng.Config.local.kong.chatWidth =
-                DRMng.Config.local.alliance.sbs ? parseInt((w - 7) / 2) : w;
-              DRMng.Config.saveLocal();
+              Config.data.kong.chatWidth =
+                Config.data.alliance.sbs ? parseInt((w - 7) / 2) : w;
+              Config.save();
               DRMng.Kong.setHeaderWidth();
               break;
             case 'DRMng_main':
-              DRMng.Config.local.scriptWidth = parseInt(p.style.width.replace('px', ''));
-              DRMng.Config.saveLocal();
+              Config.data.scriptWidth = parseInt(p.style.width.replace('px', ''));
+              Config.save();
               p.style.removeProperty('transition');
               document.getElementById('primarywrap').style.removeProperty('transition');
               document.getElementById('headerwrap').style.removeProperty('transition');
@@ -784,152 +983,6 @@ function main() {
           return true;
         }
       }
-    },
-    /**
-     * XHR calls gateway
-     */
-    Gate: {
-      /**
-       * Calls lightshot service to get real image url
-       * @param {string} link Link with obfuscated image url
-       * @param {string} id ID of destination Node
-       * @param {string} ch Channel
-       * @param {boolean} arr request array buffer type
-       */
-      lightShot: (link, id, ch, arr = false) => {
-        const req = {
-          eventName: 'DRMng.lightShot',
-          url: link,
-          method: 'GET',
-          id: id,
-          ch: ch,
-          timeout: 10000
-        };
-        if (arr) req.responseType = 'arraybuffer';
-        DRMng.postMessage(req);
-      },
-      // TODO: Add support for regular kong chat as well
-      /**
-       * Lightshot callback
-       * @param {Object} e returned data
-       */
-      lightShotCb: e => {
-        const d = JSON.parse(e && e.data);
-        const i = new DomNode(`#${d.id}`);
-        const c = d.ch;
-        if (!i.empty) {
-          let img = /og:image.+?content="(.+?)"/.exec(d.responseText);
-          if (img && img[1] && img[1].indexOf('image.prntscr.com') > 0) {
-            setTimeout(() => DRMng.Gate.lightShot(img[1], d.id, d.ch, true), 0);
-            return;
-          }
-          if (d.responseType === 'arraybuffer') {
-            img = `data:image/png;base64,${btoa(d.responseText)}`;
-          } else if (img instanceof Array && img.length > 1) {
-            img = img[1];
-          } else {
-            i.detach();
-            return;
-          }
-          if (img && c)
-            i.on('load',
-              () => {
-                setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250);
-              })
-              .attr({ src: img })
-              .remove('id');
-          else i.detach();
-        }
-      }
-    },
-    Config: {
-      /**
-       * Default local config data
-       */
-      local: {
-        kong: {
-          kongSlimHeader: false,
-          chatWidth: 250
-        },
-        server: 'Elyssa',
-        sortBy: 'hp',
-        scriptWidth: 300,
-        visited: { kasan: [], elyssa: [] },
-        dead: { kasan: {}, elyssa: {} },
-        raidData: {},
-        raidKeys: [],
-        filterData: {},
-        tiersData: {},
-        filterString: { kasan: '', elyssa: '' },
-        filterRaids: { kasan: {}, elyssa: {} },
-        hardFilter: { kasan: [], elyssa: [] },
-        checkSums: {
-          raidData: '',
-          filterData: '',
-          tiersData: '',
-        },
-        alliance: {
-          sbs: false,
-          rooms: []
-        },
-        gameFrame: {
-          removeWChat: false,
-          leftWChat: false,
-          hideWChat: false
-        },
-        sidebar: {}
-      },
-      /**
-       * TODO: Add remote configuration storage
-       * Default remote config data
-       */
-      remote: {},
-      /**
-       * Returns config value of given property name
-       * @param {string} key Property name
-       * @return {*} Data from selected property
-       */
-      get: key => key.split('::').reduce((t, l) => t[l], DRMng.Config.local),
-      /**
-       * Sets config parameters. Saves local configuration afterwards
-       * @param {Object} params Parameters as object properties with values
-       */
-      set: params => {
-        if (params) {
-          const loc = DRMng.Config.local;
-          Object.keys(params).forEach(key => {
-            if (key.indexOf('::' > -1)) {
-              const keys = key.split('::');
-              const sub = keys.reduce((t, l, i) => (i < keys.length - 1 ? t[l] : t), loc);
-              const lastKey = keys[keys.length - 1];
-              sub[lastKey] = params[key];
-            } else loc[key] = params[key];
-          });
-          setTimeout(DRMng.Config.saveLocal, 0);
-        }
-      },
-      /**
-       * Loads local config to object
-       */
-      loadLocal: () => {
-        const data = localStorage['DRMng'] ? JSON.parse(localStorage['DRMng']) : {};
-        const loc = DRMng.Config.local;
-        if (data) {
-          Object.keys(loc).forEach(key => {
-            if (data[key]) loc[key] = data[key];
-          });
-          Object.keys(data).forEach(key => {
-            if (loc[key] === undefined) loc[key] = data[key];
-          });
-        }
-        //else DRMng.Config.saveLocal();
-        loc.raidKeys = Object.keys(loc.raidData);
-        DRMng.Config.saveLocal();
-      },
-      /**
-       * Saves config to local storage
-       */
-      saveLocal: () => localStorage['DRMng'] = JSON.stringify(DRMng.Config.local)
     },
     /**
      * Chat message class
@@ -1071,12 +1124,10 @@ function main() {
         if (match) {
           const r = Util.getRaidFromUrl(match[2], this._user);
           if (r) {
-            const config = DRMng.Config.local;
-            const srv = config.server.toLowerCase();
-            const vis = config.visited[srv].indexOf(r.id) > -1;
-            const ded = Util.hasProperty(config.dead[srv], r.id);
-            const flt = config.filterRaids[srv][r.boss];
-            const ifo = config.raidData[r.boss];
+            const vis = Config.visited.indexOf(r.id) > -1;
+            const ded = Util.hasProperty(Config.dead, r.id);
+            const flt = Config.filterRaids[r.boss];
+            const ifo = Config.data.raidData[r.boss];
             const rnm = [
               ['n', 'h', 'l', 'nm'][r.diff - 1],
               ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
@@ -1129,53 +1180,6 @@ function main() {
           regLink.lastIndex += link.length - l[2].length;
         }
         return msg;
-      }
-    },
-    /**
-     * Handles dynamic css rules
-     */
-    CSS: class {
-      static add(alias, name, value) {
-        if (DRMng.CSS.rules === undefined) {
-          DRMng.CSS.rules = {};
-        }
-        const replace = Util.hasProperty(DRMng.CSS.rules, alias);
-        DRMng.CSS.rules[alias] = { name: name, value: value };
-        if (replace) {
-          DRMng.CSS.compile();
-        } else {
-          DRMng.CSS.compile(DRMng.CSS.rules[alias]);
-        }
-      }
-
-      static del(alias) {
-        if (DRMng.CSS.rules) {
-          if (DRMng.CSS.rules[alias] !== undefined) {
-            delete DRMng.CSS.rules[alias];
-          }
-          DRMng.CSS.compile();
-        }
-      }
-
-      static compile(obj) {
-        if (DRMng.CSS.node === undefined) {
-          DRMng.CSS.node = new DomNode('style')
-            .attr({ type: 'text/css' })
-            .attach('to', document.head);
-        }
-        if (obj) {
-          DRMng.CSS.node.txt(`${obj.name} {${obj.value}}\n`);
-        } else {
-          DRMng.CSS.node.clear();
-          Object.keys(DRMng.CSS.rules || {}).forEach(r => {
-            const rule = DRMng.CSS.rules[r];
-            DRMng.CSS.node.txt(`${rule.name} {${rule.value}}\n`);
-          });
-        }
-      }
-
-      static remove() {
-        DRMng.CSS.node.detach();
       }
     },
     /**
@@ -1252,7 +1256,7 @@ function main() {
        * Add Slim button to kong user bar
        */
       addSlimButton: () => {
-        if (DRMng.Config.local.kong.kongSlimHeader &&
+        if (Config.data.kong.kongSlimHeader &&
           document.body.className.indexOf('slim') === -1) {
           document.body.className += ' slim';
         }
@@ -1261,11 +1265,11 @@ function main() {
           new DomNode('li')
             .data(new DomNode('a')
               .attr({ id: 'DRMng_KongSlimHeader', href: '' })
-              .txt(DRMng.Config.local.kong.kongSlimHeader ? 'Full' : 'Slim')
+              .txt(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
               .on('click', e => {
                 e.preventDefault();
                 e.stopPropagation();
-                const isSlim = !DRMng.Config.get('kong::kongSlimHeader');
+                const isSlim = !Config.data.kong.kongSlimHeader;
                 if (isSlim) {
                   document.body.classList.add('slim');
                   new DomNode('#DRMng_KongSlimHeader').txt('Full', true);
@@ -1273,7 +1277,7 @@ function main() {
                   document.body.classList.remove('slim');
                   new DomNode('#DRMng_KongSlimHeader').txt('Slim', true);
                 }
-                DRMng.Config.local.kong.kongSlimHeader = isSlim;
+                Config.data.kong.kongSlimHeader = isSlim;
                 return false;
               }))
             .attach('to', 'nav_welcome_box');
@@ -1725,7 +1729,7 @@ function main() {
             if (comm) {
               const raid = comm[2].toLowerCase();
               const rarr = raid.split(' ');
-              const data = DRMng.Config.get('raidData');
+              const data = Config.data.raidData;
               const fnd = [];
 
               Object.keys(data).forEach(rd => {
@@ -1790,7 +1794,7 @@ function main() {
        * Resize game frame to account for inactive/hidden world chat
        */
       hideWorldChat: () => {
-        const opts = DRMng.Config.get('gameFrame');
+        const opts = Config.data.gameFrame;
         new DomNode('#game')
           .style({ width: (opts.hideWChat || opts.removeWChat) ? '760px' : '1025px' });
       },
@@ -1865,7 +1869,6 @@ function main() {
      * All raids management related methods
      */
     Raids: {
-      srv: 'elyssa',
       flt: {},
       filter: '',
       all: [],
@@ -1909,7 +1912,7 @@ function main() {
        * Removes old raids from dead cache
        */
       cleanDeadCache: function () {
-        const dead = DRMng.Config.get(`dead::${this.srv}`);
+        const dead = Config.dead;
         const deadThr = Date.now() - 129600000; // 3 days old
 
         Object.keys(dead).forEach(d => {
@@ -1940,7 +1943,7 @@ function main() {
           const u = DRMng.UM.user;
           if (u.qualified) {
             const authData = `kongregate_user_id=${u.ID}&kongregate_game_auth_token=${u.authToken}`;
-            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (DRMng.Config.get('server') === 'Elyssa' ? '1' : '2')}`;
+            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server === 'Elyssa' ? '1' : '2')}`;
             const data = {
               eventName: `DRMng.joinRaid${multi ? 's' : ''}`,
               url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
@@ -1975,8 +1978,8 @@ function main() {
         }
         // chat raids
         let cr = document.querySelectorAll('p.raid:not(.dead):not(.visited) a'),
-          s = DRMng.Config.local.server.toLowerCase(),
-          f = DRMng.Config.local.filterRaids[s], r, hf;
+          s = Config.data.server.toLowerCase(),
+          f = Config.data.filterRaids[s], r, hf;
         for (i = 0, l = cr.length; i < l; ++i) {
           r = Util.getRaidFromUrl(cr[i].search);
           if (r) {
@@ -2070,7 +2073,7 @@ function main() {
 
         if (data && data.status === 200 && data.responseText && data.url) {
           let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
-          let name = DRMng.Config.local.raidData[data.ext.boss];
+          let name = Config.data.raidData[data.ext.boss];
           status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
           name = name ? name.sName : data.ext.boss;
           DRMng.Raids.joinMsg(`Joining ${name} :: ${status}`);
@@ -2084,7 +2087,7 @@ function main() {
           let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
           if (DRMng.Raids.joinLen > 1) DRMng.Raids.joinMsg();
           else {
-            let name = DRMng.Config.local.raidData[data.ext.boss];
+            let name = Config.data.raidData[data.ext.boss];
             name = name ? name.sName : data.ext.boss;
             status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
             DRMng.Raids.joinMsg(`Joining ${name} :: ${status}`);
@@ -2104,8 +2107,11 @@ function main() {
       },
       processFilter: function (filterTxt, loading) {
         DRMng.Raids.isAuto && DRMng.Raids.switchAutoJoin();
-        if (loading) filterTxt = DRMng.Config.get(`filterString::${this.srv}`) || '';
-        else DRMng.Config.set({ [`filterString::${this.srv}`]: filterTxt });
+        if (loading) {
+          filterTxt = Config.filterString || '';
+        } else {
+          Config.filterString = filterTxt;
+        }
 
         const parts = filterTxt.split(/\s?\|\s?|\sor\s|\s?,\s?/ig);
         const regChk = /(\w:)?([\w-]+)(:\w{1,5})?/;
@@ -2125,12 +2131,11 @@ function main() {
               reg = regZone.exec(p[2]);
               raids = [];
               if (reg) for (i = reg[1]; i <= reg[2]; ++i) {
-                d = DRMng.Config.get(`filterData::z${i}`);
+                d = Config.data.filterData[`z${i}`];
                 if (d) raids = raids.concat(d);
               }
               else raids = p[2] === 'all' ?
-                Object.keys(DRMng.Config.get('raidData')) :
-                DRMng.Config.get(`filterData::${p[2]}`);
+                Object.keys(Config.data.raidData) : Config.data.filterData[`${p[2]}`];
 
               if (raids) {
                 diff = this.getDiff(p[3]);
@@ -2138,7 +2143,7 @@ function main() {
               }
               break;
             default:
-              raids = DRMng.Config.get('raidData');
+              raids = Config.data.raidData;
               reg = new RegExp(p[2], 'ig');
               diff = this.getDiff(p[3]);
               Object.keys(raids).forEach(r =>
@@ -2148,7 +2153,7 @@ function main() {
         });
         // merge
         //Log.out(`debug`, `FILTERS`, filters);
-        raids = DRMng.Config.get('raidData');
+        raids = Config.data.raidData;
         if (flt.add.raid.length > 0)
           flt.add.raid.forEach(r => {
             i = raids[r[0]];
@@ -2195,11 +2200,11 @@ function main() {
         for (let i = 0, len = list.length; i < len; ++i) list[i].classList.add(cls);
       },
       setVisited: function (id, drop) {
-        const srv = DRMng.Config.get('server').toLowerCase();
-        let idx = DRMng.Config.get(`visited::${srv}`).indexOf(id);
-        if (drop && idx > -1) DRMng.Config.local.visited[srv].splice(idx, 1);
-        else if (idx === -1) {
-          DRMng.Config.local.visited[srv].push(id);
+        let idx = Config.visited.indexOf(id);
+        if (drop && (idx > -1)) {
+          Config.visited.splice(idx, 1);
+        } else if (idx === -1) {
+          Config.visited.push(id);
           idx = this.getIdx(id);
           if (idx > -1) {
             this.all[idx].visited = true;
@@ -2208,7 +2213,7 @@ function main() {
           }
         }
         if (!drop) this.setChat(id, 'visited');
-        DRMng.Config.saveLocal();
+        Config.save();
       },
       comp: (a, b) => a.hp - b.hp,
       _setComp: function (field) {
@@ -2234,7 +2239,7 @@ function main() {
           default:
             field = 'health';
             this.comp = (a, b) => a.hp - b.hp;
-            DRMng.Config.set({ sortBy: field });
+            Config.data.sortBy = field;
         }
       },
       setComp: function (field) {
@@ -2245,7 +2250,7 @@ function main() {
         this.locked = true;
 
         this._setComp(field);
-        DRMng.Config.set({ sortBy: field });
+        Config.data.sortBy = field;
         this.sort();
 
         DRMng.UI.clearRaidList();
@@ -2271,28 +2276,26 @@ function main() {
         this.bootstrap = true;
 
         this.all = [];
-        this.srv = DRMng.Config.get('server').toLowerCase();
-        this.flt = DRMng.Config.get(`filterRaids::${this.srv}`);
+        this.flt = Config.filterRaids;
 
-        const vis = DRMng.Config.get(`visited::${this.srv}`);
-        const rDat = DRMng.Config.get('raidData');
-        let rd, hf;
+        const visitedData = Config.visited;
+        const raidsData = Config.data.raidData;
 
-        raids.forEach(r => {
-          hf = this.flt[r.boss] || null;
-          if (hf === null || !hf[r.diff - 1]) {
-            r.createtime = new Date(r.createtime).getTime();
-            if (vis.indexOf(r.id) > -1) {
-              r.visited = true;
-              this.setChat(r.id, 'visited');
+        raids.forEach(raid => {
+          const hf = this.flt[raid.boss] || false;
+          if (!hf || !hf[raid.diff - 1]) {
+            raid.createtime = new Date(raid.createtime).getTime();
+            if (visitedData.indexOf(raid.id) > -1) {
+              raid.visited = true;
+              this.setChat(raid.id, 'visited');
             }
-            rd = rDat[r.boss];
-            r.isFull = rd && r.participants && rd.maxPlayers === r.participants;
-            DRMng.Raids.all.push(r);
+            const raidData = raidsData[raid.boss];
+            raid.isFull = raidData && raid.participants && (raidData.maxPlayers === raid.participants);
+            DRMng.Raids.all.push(raid);
           }
         });
 
-        this._setComp(DRMng.Config.get('sortBy'));
+        this._setComp(Config.data.sortBy);
         this.all.sort(this.comp);
 
         this.count = this.all.length;
@@ -2314,9 +2317,9 @@ function main() {
         if (hf === null || !hf[raid.diff - 1]) {
           if (this.getIdx(raid.id) === -1 && !this.getDead(raid.id)) {
             const idx = this.location(raid) + 1;
-            const rd = DRMng.Config.get(`raidData::${raid.boss}`);
-            raid.visited = DRMng.Config.get(`visited::${this.srv}`).indexOf(raid.id) > -1;
-            raid.isFull = rd && raid.participants && rd.maxPlayers === raid.participants;
+            const rd = Config.raidData[raid.boss];
+            raid.visited = Config.visited.indexOf(raid.id) > -1;
+            raid.isFull = rd && raid.participants && (rd.maxPlayers === raid.participants);
             this.all.splice(idx, 0, raid);
             DRMng.UI.addRaidField(raid, idx);
             this.count++;
@@ -2332,12 +2335,12 @@ function main() {
       },
       setDead: function (id, save) {
         if (!this.getDead(id)) {
-          DRMng.Config.local.dead[this.srv][id] = new Date().getTime();
-          if (save) DRMng.Config.saveLocal();
+          Config.dead[id] = new Date().getTime();
+          if (save) Config.save();
         }
       },
       getDead: function (id) {
-        return Util.hasProperty(DRMng.Config.local.dead[this.srv], id);
+        return Util.hasProperty(Config.dead, id);
       },
       remove: function (id, serverNuke) {
         if (this.locked || this.bootstrap) {
@@ -2348,10 +2351,8 @@ function main() {
 
         serverNuke && DRMng.Engine.client.emit('service', { action: 'raidNuke', data: id });
 
-        //const cfg = DRMng.Config.local;
-
         this.setDead(id);
-        //this.deadCache[id] = new Date().getTime();
+
         let i = this.getIdx(id);
         if (i > -1) {
           const r = this.get(id);
@@ -2362,12 +2363,7 @@ function main() {
         }
         DRMng.UI.removeRaidField(id);
 
-        // visited strip
-        //i = cfg.visited[this.srv].indexOf(id);
-        //i > -1 && cfg.visited[this.srv].splice(i, 1);
-
         this.setChat(id, 'dead');
-        //this.setVisited(id, true);
         DRMng.UI.displayStatus();
 
         this.locked = false;
@@ -2379,14 +2375,12 @@ function main() {
         }
         this.locked = true;
 
-        const cfg = DRMng.Config.local;
-
         let r = this.get(raid.id);
         if (r && !this.getDead(raid.id)) {
           const keys = ['hp', 'participants', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6'];
           full && keys.push('mnum', 'size');
 
-          const rd = cfg.raidData[r.boss];
+          const rd = Config.data.raidData[r.boss];
 
           r = Util.copyFields(raid, r, keys);
 
@@ -2497,11 +2491,11 @@ function main() {
       client: null,
       changeServer: server => {
         if (typeof server !== 'string') {
-          server = (DRMng.Config.get('server') === 'Elyssa' ? 'Kasan' : 'Elyssa');
+          server = (Config.server === 'Elyssa' ? 'Kasan' : 'Elyssa');
         }
         Log.info('{Engine} Changing server to <%s>', server);
         DRMng.Engine.client.disconnect();
-        DRMng.Config.set({ server: server });
+        Config.data.server = server;
         DRMng.Engine.client.nsp = `/${server}`;
         DRMng.Raids.processFilter('', true);
         DRMng.UI.setupFilterBox();
@@ -2517,7 +2511,7 @@ function main() {
       init: () => {
         if (typeof io === 'function' && DRMng.UM.user.qualified) {
           DRMng.Engine.client = io
-            .connect(`${DRMng.ServerWS}/${DRMng.Config.local.server}`,
+            .connect(`${DRMng.ServerWS}/${Config.data.server}`,
               {
                 secure: true,
                 transports: ['websocket'],
@@ -2533,7 +2527,7 @@ function main() {
                 usr: DRMng.UM.user.name,
                 ign: DRMng.UM.user.IGN,
                 gld: DRMng.UM.user.guild,
-                chk: DRMng.Config.local.checkSums
+                chk: Config.data.checkSums
               });
             });
         } else {
@@ -2545,51 +2539,36 @@ function main() {
       handleMessage: msg => Log.info(`{Engine::Message} ${msg.txt}`),
       handleService: d => {
         if (!d) return;
-        const config = DRMng.Config;
+        const config = Config.data;
         const action = d.action;
         const data = d.data;
 
         switch (action) {
           case 'raidData':
-            if (config.get('checkSums::raidData') !== data.raidDataHash && data.raidDataHash.length > 6) {
+            if (config.checkSums.raidData !== data.raidDataHash && data.raidDataHash.length > 6) {
               Log.info('{Engine::Service} New raids data. Old hash ' +
-                `<${config.get('checkSums::raidData')}> | New hash <${data.raidDataHash}>`);
-              config.set({
-                raidData: data.raidData,
-                'checkSums::raidData': data.raidDataHash
-              });
-            } else {
-              Log.debug('{Engine::Service} Raids data hash. Old hash ' +
-                `<${config.get('checkSums::raidData')}> | New hash <${data.raidDataHash}>`);
+                `<${config.checkSums.raidData}> | New hash <${data.raidDataHash}>`);
+              config.raidData = data.raidData;
+              config.checkSums.raidData = data.raidDataHash;
             }
             setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 0);
             break;
           case 'filterData':
-            if (config.get('checkSums::filterData') !== data.filterDataHash &&
+            if (config.checkSums.filterData !== data.filterDataHash &&
               data.filterDataHash.length > 6) {
               Log.info('{Engine::Service} New keywords data. Old hash ' +
-                `<${config.get('checkSums::filterData')}> | New hash <${data.filterDataHash}>`);
-              config.set({
-                filterData: data.filterData,
-                'checkSums::filterData': data.filterDataHash
-              });
-            } else {
-              Log.debug('{Engine::Service} Keywords hash. Old hash ' +
-                `<${config.get('checkSums::filterData')}> | New hash <${data.filterDataHash}>`);
+                `<${config.checkSums.filterData}> | New hash <${data.filterDataHash}>`);
+              config.filterData = data.filterData;
+              config.checkSums.filterData = data.filterDataHash;
             }
             break;
           case 'tiersData':
-            if (DRMng.Config.local.checkSums.tiersData !== d.data.tiersDataHash &&
+            if (config.checkSums.tiersData !== d.data.tiersDataHash &&
               d.data.tiersDataHash.length > 6) {
               Log.info('{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>',
-                config.get('checkSums::tiersData'), data.tiersDataHash);
-              config.set({
-                tiersData: JSON.parse(data.tiersData),
-                'checkSums::tiersData': data.tiersDataHash
-              });
-            } else {
-              Log.debug('{Engine::Service} Tiers hash. Old hash ' +
-                `<${config.get('checkSums::tiersData')}> | New hash <${data.tiersDataHash}>`);
+                config.checkSums.tiersData, data.tiersDataHash);
+              config.tiersData = JSON.parse(data.tiersData);
+              config.checkSums.tiersData = data.tiersDataHash;
             }
             break;
           case 'bootStrap':
@@ -2710,7 +2689,7 @@ function main() {
         if (typeof io === 'function' && this.tab && this.chat &&
           DRMng.UM.user.qualified && !DRMng.Raids.bootstrap) {
 
-          if (DRMng.Config.local.alliance.sbs) {
+          if (Config.data.alliance.sbs) {
             document.getElementById('private_chat_sbs').style.removeProperty('display');
           } else {
             this.tab.style.removeProperty('display');
@@ -2826,7 +2805,7 @@ function main() {
       }
 
       nameUpdate() {
-        if (DRMng.Config.local.alliance.sbs || !this.active) return;
+        if (Config.data.alliance.sbs || !this.active) return;
         document.querySelector('.room_name.h6').textContent = this.name;
       }
 
@@ -2844,7 +2823,7 @@ function main() {
       }
 
       activate() {
-        if (!DRMng.Config.local.alliance.sbs) holodeck._chat_window._active_room.hide();
+        if (!Config.data.alliance.sbs) holodeck._chat_window._active_room.hide();
         if (DRMng.PrivateChat.getActive()) DRMng.PrivateChat.getActive().deactivate();
         this.tab.classList.add('active');
         //this.tab.style.setProperty(`border-right`, `0`);
@@ -2910,7 +2889,7 @@ function main() {
               .node;
 
             this.sbsCreated = true;
-            this.sbsActive = DRMng.Config.local.alliance.sbs || false;
+            this.sbsActive = Config.data.alliance.sbs || false;
 
             DRMng.UI.setChatWidth();
 
@@ -3072,10 +3051,10 @@ function main() {
         }
 
 
-        for (let i = 0, len = DRMng.Config.local.alliance.rooms.length; i < len; ++i) {
-          if (DRMng.Config.local.alliance.rooms[i].channel === this.conf.channel) {
-            DRMng.Config.local.alliance.rooms.splice(i, 1);
-            DRMng.Config.saveLocal();
+        for (let i = 0, len = Config.data.alliance.rooms.length; i < len; ++i) {
+          if (Config.data.alliance.rooms[i].channel === this.conf.channel) {
+            Config.data.alliance.rooms.splice(i, 1);
+            Config.save();
             break;
           }
         }
@@ -3184,7 +3163,7 @@ function main() {
               } else if (/(prntscr.com|prnt.sc)/.test(l[1])) {
                 let id = `prntsc_${new Date().getTime()}`;
                 link = `<img id="${id}" onclick="window.open(this.src)">`;
-                DRMng.Gate.lightShot(l[1], id, this.conf.channel);
+                Proxy.lightShot(l[1], id, this.conf.channel);
               } else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1]))) {
                 link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
               } else {
@@ -3291,13 +3270,11 @@ function main() {
         if (msg) {
           const r = Util.getRaidFromUrl(msg[2], data.usr.usr);
           if (r) {
-            const config = DRMng.Config.local;
-            const srv = config.server.toLowerCase();
             const g = this.getGuildTag(data.usr.gld);
-            const v = config.visited[srv].indexOf(r.id) > -1;
-            const d = Util.hasProperty(config.dead[srv], r.id);
+            const v = Config.visited.indexOf(r.id) > -1;
+            const d = Util.hasProperty(Config.dead, r.id);
             const m = msg[1] + msg[3];
-            const i = config.raidData[r.boss];
+            const i = Config.data.raidData[r.boss];
             const n = [];
             const s = m ? ':' : '';
             const t = new Date(data.ts).format('mmm d, HH:MM');
@@ -3366,10 +3343,10 @@ function main() {
       }
 
       static createAll() {
-        const rooms = DRMng.Config.local.alliance.rooms;
+        const rooms = Config.data.alliance.rooms;
         rooms.forEach((room, index) => {
           if (room.enabled && this.getChat(room.channel) === null) {
-            if (index === 0 && DRMng.Config.local.alliance.sbs) {
+            if (index === 0 && Config.data.alliance.sbs) {
               Log.debug('Setting up default sbs room');
               new this(room, true);
             } else {
@@ -3388,7 +3365,7 @@ function main() {
           return;
         }
 
-        const rooms = DRMng.Config.local.alliance.rooms;
+        const rooms = Config.data.alliance.rooms;
         let replace = -1;
         rooms.forEach((room, i) => {
           if (room.channel === elChannel.value) replace = i;
@@ -3409,7 +3386,7 @@ function main() {
         this.addOption(room);
 
         if (replace > -1) {
-          DRMng.Config.local.alliance.rooms[replace] = room;
+          Config.data.alliance.rooms[replace] = room;
           const r = this.getChat(room.channel);
           if (r) {
             r.configUpdate(room);
@@ -3417,10 +3394,10 @@ function main() {
             this.createAll();
           }
         } else {
-          DRMng.Config.local.alliance.rooms.push(room);
+          Config.data.alliance.rooms.push(room);
           this.createAll();
         }
-        DRMng.Config.saveLocal();
+        Config.save();
       }
 
       static addOption(room) {
@@ -3440,7 +3417,7 @@ function main() {
       }
 
       static moveChats() {
-        DRMng.PrivateChat.sbsActive = DRMng.Config.local.alliance.sbs;
+        DRMng.PrivateChat.sbsActive = Config.data.alliance.sbs;
 
         for (let room of DRMng.PrivateChat.Rooms.values()) {
           if (DRMng.PrivateChat.sbsActive) {
@@ -3530,8 +3507,8 @@ function main() {
             this.type = type;
             _title = title || this.field;
             if (type !== 'action') {
-              if (DRMng.Config.local[this.group] === undefined) DRMng.Config.local[this.group] = {};
-              this.conf = DRMng.Config.local[this.group];
+              if (Config.data[this.group] === undefined) Config.data[this.group] = {};
+              this.conf = Config.data[this.group];
               if (this.conf[this.field] === undefined) this.conf[this.field] = value || defaults[type];
             }
           }
@@ -3542,7 +3519,7 @@ function main() {
         };
         this.flipConf = function () {
           this.conf[this.field] = !this.conf[this.field];
-          DRMng.Config.saveLocal();
+          Config.save();
         };
         this.desc = function (desc) {
           if (desc) _desc = desc;
@@ -3671,7 +3648,7 @@ function main() {
       SidebarConfig: class {
         constructor() {
           this.html = null;
-          this.conf = DRMng.Config.local.sidebar.data;
+          this.conf = Config.data.sidebar.data;
           if (this.conf === undefined) {
             this.conf = {
               groups: [
@@ -3715,8 +3692,8 @@ function main() {
                 { name: 'Server', action: 'func', command: 'DRMng.Engine.changeServer' }
               ]
             };
-            DRMng.Config.local.sidebar.data = this.conf;
-            DRMng.Config.saveLocal();
+            Config.data.sidebar.data = this.conf;
+            Config.save();
           }
           setTimeout(DRMng.UI.setupSidebar.bind(DRMng.UI), 0);
         }
@@ -3727,7 +3704,7 @@ function main() {
         }
       },
       addRaidField: function (r, idx) {
-        const ifo = DRMng.Config.local.raidData[r.boss];
+        const ifo = Config.data.raidData[r.boss];
         // classes
         const cls = ['drm_' + r.boss + '_' + r.diff];
         cls.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
@@ -4499,15 +4476,13 @@ function main() {
         DRMng.Raids.processFilter('', true);
       },
       setupFilterBox: () => {
-        const srv = DRMng.Config.get('server').toLowerCase();
-        const fst = DRMng.Config.get(`filterString::${srv}`);
+        const fst = Config.filterString;
         new DomNode('#DRMng_txtFilter')
           .attr({ class: fst ? '' : 'default' }).txt(fst || 'Filter raids here', true);
       },
       setupFilterTab: raidData => {
-        const srv = DRMng.Config.get('server').toLowerCase();
-        const flt = DRMng.Config.get(`filterRaids::${srv}`);
-        const raids = raidData || DRMng.Config.get('raidData');
+        const flt = Config.filterRaids;
+        const raids = raidData || Config.data.raidData;
         const fltDivs = [
           document.getElementById('DRMng_filterSmall'),
           document.getElementById('DRMng_filterMedium'),
@@ -4518,7 +4493,9 @@ function main() {
           document.getElementById('DRMng_filterGigantic')
         ];
         fltDivs.forEach(div => {
-          if (div) while (div.firstChild) div.removeChild(div.firstChild);
+          if (div) {
+            while (div.firstChild) div.removeChild(div.firstChild);
+          }
         });
 
         Object.keys(raids).forEach(k => {
@@ -4545,11 +4522,11 @@ function main() {
           if (diff > 0 && mode > 0) {
             mode = !!(mode - 1);
             diff = diff - 1;
-            let server = DRMng.Config.local.server.toLowerCase();
-            let flt = DRMng.Config.local.filterRaids[server];
+            let server = Config.data.server.toLowerCase();
+            let flt = Config.data.filterRaids[server];
             let fk = Object.keys(flt);
             for (let i = 0, len = fk.length; i < len; ++i) flt[fk[i]][diff] = mode;
-            DRMng.Config.saveLocal();
+            Config.save();
             DRMng.UI.setupFilterTab();
             document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
           }
@@ -4558,11 +4535,11 @@ function main() {
       applyFilter: function (e) {
         let el = e.target;
         if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
-        let server = DRMng.Config.local.server.toLowerCase();
+        let server = Config.data.server.toLowerCase();
         let btns = el.parentNode.getElementsByTagName('BUTTON');
         let id = el.parentNode.id.substr(13);
         let spanHit = el.tagName === 'SPAN';
-        let flt = DRMng.Config.local.filterRaids[server][id];
+        let flt = Config.data.filterRaids[server][id];
         let i, diff;
 
         if (spanHit) {
@@ -4579,7 +4556,7 @@ function main() {
 
         document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
 
-        DRMng.Config.saveLocal();
+        Config.save();
       },
       sidebarLabelOpen: e => {
         document.querySelectorAll('#DRMng_Sidebar > div.label:not(.hidden)')
@@ -4614,7 +4591,7 @@ function main() {
         let sb = document.getElementById('DRMng_Sidebar');
         if (sb) new DomNode(sb).clear();
         else sb = new DomNode('div').attr({ id: 'DRMng_Sidebar' }).node;
-        const scData = DRMng.Config.local.sidebar.data;
+        const scData = Config.data.sidebar.data;
 
         // sidebar buttons routine
         let div, button;
@@ -4652,14 +4629,14 @@ function main() {
         const el = document.getElementById('chat_container');
         if (el) {
           const sc = DRMng.PrivateChat.sbsContainer;
-          const a = DRMng.Config.get('alliance::sbs') && sc && sc.childElementCount > 1;
-          const w = DRMng.Config.get('kong::chatWidth');
+          const a = Config.data.alliance.sbs && sc && sc.childElementCount > 1;
+          const width = Config.data.kong.chatWidth;
           if (a) {
             if (sc) sc.style.removeProperty('display');
-            el.style.width = `${w * 2 + 7}px`;
+            el.style.width = `${width * 2 + 7}px`;
           } else {
             if (sc) sc.style.setProperty('display', 'none');
-            el.style.width = `${w}px`;
+            el.style.width = `${width}px`;
           }
         }
       },
@@ -4673,7 +4650,7 @@ function main() {
         val = document.getElementById('DRMng_main');
         if (val) {
           val.className = 'hidden';
-          val.style.width = `${DRMng.Config.get('scriptWidth')}px`;
+          val.style.width = `${Config.data.scriptWidth}px`;
         }
 
         // Filtering
@@ -4682,11 +4659,13 @@ function main() {
 
         // Sorting
         document.querySelectorAll('#DRMng_sortOrderBy > button').forEach(el => {
-          if (el.textContent.toLowerCase() === DRMng.Config.get('sortBy')) el.className = 'active';
+          if (el.textContent.toLowerCase() === Config.data.sortBy) {
+            el.className = 'active';
+          }
         });
 
         // Private Chats
-        DRMng.Config.local.alliance.rooms.forEach(room => DRMng.PrivateChat.addOption(room));
+        Config.data.alliance.rooms.forEach(room => DRMng.PrivateChat.addOption(room));
       },
       loadOptions: function () {
         let group, opt;
@@ -4699,12 +4678,12 @@ function main() {
           .event(function () {
             if (this.conf[this.field]) {
               new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
-              DRMng.CSS.del(this.field);
-              DRMng.CSS.del(this.field + 'b');
+              CSS.del(this.field);
+              CSS.del(this.field + 'b');
             } else {
               new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
-              DRMng.CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
-              DRMng.CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
+              CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
+              CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
             }
           })
           .make(group);
@@ -4714,8 +4693,8 @@ function main() {
           .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
-            else DRMng.CSS.del(this.field);
+              CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4724,8 +4703,8 @@ function main() {
           .desc('Hides 7px wide frame around game window.')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, 'div#maingame', 'padding: 0');
-            else DRMng.CSS.del(this.field);
+              CSS.add(this.field, 'div#maingame', 'padding: 0');
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4734,8 +4713,8 @@ function main() {
           .desc('Hides game details part located just below game window.')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, 'div.game_details_outer', 'display: none');
-            else DRMng.CSS.del(this.field);
+              CSS.add(this.field, 'div.game_details_outer', 'display: none');
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4744,8 +4723,8 @@ function main() {
           .desc('Hides forum part located below game window.')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
-            else DRMng.CSS.del(this.field);
+              CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4760,9 +4739,9 @@ function main() {
             ' low-end hardware.')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+              CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
                 ' div#DRMng_info *', 'transition: initial !important');
-            else DRMng.CSS.del(this.field);
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4771,8 +4750,8 @@ function main() {
           .desc('Hides sidebar which is located between game window and kongregate chat.')
           .event(function () {
             if (this.conf[this.field])
-              DRMng.CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
-            else DRMng.CSS.del(this.field);
+              CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
+            else CSS.del(this.field);
           })
           .make(group);
 
@@ -4809,7 +4788,7 @@ function main() {
         opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
           .desc('Disables World Chat located next to game window.')
           .event(function () {
-            DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
+            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
             DRMng.Kong.hideWorldChat();
           })
           .make(group, true);
@@ -4817,14 +4796,14 @@ function main() {
         opt = new this.Option();
         opt.setup('gameFrame_leftWChat', 'World Chat on left side', 'bool', false)
           .desc('Moves World Chat to the left side of game window.')
-          .event(DRMng.postGameMessage.bind(this, 'chatSettings', DRMng.Config.local.gameFrame))
+          .event(DRMng.postGameMessage.bind(this, 'chatSettings', Config.data.gameFrame))
           .make(group, true);
 
         opt = new this.Option();
         opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
           .desc('Hides World Chat (without disabling it completely).')
           .event(function () {
-            DRMng.postGameMessage('chatSettings', DRMng.Config.local.gameFrame);
+            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
             DRMng.Kong.hideWorldChat();
           })
           .make(group, true);
@@ -4849,8 +4828,8 @@ function main() {
               }
               if (i < sb.length - 1) dat.groups.push(grp);
             }
-            DRMng.Config.local.sidebar.data = dat;
-            DRMng.Config.saveLocal();
+            Config.data.sidebar.data = dat;
+            Config.save();
             DRMng.UI.setupSidebar();
           })
           .make(group, true);
@@ -4860,7 +4839,7 @@ function main() {
           .desc('Exports sidebar configuration to JSON file.')
           .event(() => {
             const a = document.createElement('a');
-            a.setAttribute('href', `data:text,${JSON.stringify(DRMng.Config.local.sidebar.data)}`);
+            a.setAttribute('href', `data:text,${JSON.stringify(Config.data.sidebar.data)}`);
             a.setAttribute('download', 'sidebar_config.json');
             a.dispatchEvent(new MouseEvent('click'));
           })
@@ -4885,8 +4864,8 @@ function main() {
                     Log.error('{Sidebar::Import} Wrong data format ::', res);
                   }
                   if (data && data.groups && data.buttons) {
-                    DRMng.Config.local.sidebar.data = data;
-                    DRMng.Config.saveLocal();
+                    Config.data.sidebar.data = data;
+                    Config.save();
                     Log.debug('{Sidebar::Import} Data ::', data);
                     // clear old fields
                     group.fields = group.fields.filter(fld => {
@@ -4911,23 +4890,23 @@ function main() {
         DRMng.Kong.hideWorldChat();
 
         // Save all changes made to config file due to introducing new options
-        DRMng.Config.saveLocal();
+        Config.save();
       },
       raidInfo: function (boss) {
         let txt = '';
         if (boss) {
-          let r = DRMng.Config.local.raidData[boss];
+          let r = Config.data.raidData[boss];
           if (r) {
             txt += '<div class="name">' + r.fName + '</div>';
             let race = r.race.join(', ');
             if (race) txt += '<div class="race">(' + race + ')</div>';
-            let t = DRMng.Config.local.tiersData, rt;
+            let t = Config.data.tiersData, rt;
             const Diff = [0, 1, 2, 3];
 
             txt += '<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>';
             txt += Diff.reduce((acc, d) => acc + '<td>' +
               (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000, 4) : '&mdash;') + '</td>',
-            '<tr><td>HP</td>') + '</tr>';
+              '<tr><td>HP</td>') + '</tr>';
             txt += Diff.reduce((acc, d) => acc + '<td>' +
               (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : '&mdash;') +
               '</td>', '<tr><td>FS</td>') + '</tr>';
@@ -4938,23 +4917,23 @@ function main() {
               rt = t.nonTiered.ratio[r.size][3];
               txt += '<tr><td>OS</td>' +
                 '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td></tr>';
+                  '&mdash;') + '</td></tr>';
               rt = t.nonTiered.ratio[r.size][6];
               txt += '<tr><td>MS</td>' +
                 '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td>' +
+                  '&mdash;') + '</td>' +
                 '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                '&mdash;') + '</td></tr>';
+                  '&mdash;') + '</td></tr>';
             }
             txt += '</table>';
 
@@ -4969,8 +4948,8 @@ function main() {
                 '<td>' + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
-                (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
-                '&mdash;') + '</td>';
+                  (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
+                  '&mdash;') + '</td>';
               // Epics OS
               if (t.eOS >= 0) txt += '<tr><td>Epics OS</td><td>' +
                 Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' +
@@ -4978,8 +4957,8 @@ function main() {
                 '<td>' + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
-                (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
-                '&mdash;') + '</td>';
+                  (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
+                  '&mdash;') + '</td>';
               // Max Tier
               let idx = t.tiers.length - 1;
               txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
@@ -5003,7 +4982,7 @@ function main() {
         while (ifo.firstChild) ifo.removeChild(ifo.firstChild);
 
         const rd = DRMng.Raids.get(id);
-        const ri = DRMng.Config.local.raidData[rd.boss];
+        const ri = Config.data.raidData[rd.boss];
         const hpMax = ri ? ri.hp[rd.diff - 1] * 1000 : Infinity;
         const data = {
           nam: rd.boss.replace(/_/g, ' '), mag: '', rac: '', sta: 'Healthy', ptm: 1.0, hpi: '?', tmi: '?'
@@ -5090,13 +5069,12 @@ function main() {
           e = e.target;
           const raid = e.className.split(' ')[1];
           if (!raid) return false;
-          const data = DRMng.Config.get(`raidData::${raid}`);
+          const data = Config.data.raidData[raid];
           if (!data) return false;
 
           e = e.parentNode;
-          e.style.backgroundImage = `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${data ?
-            data.banner :
-            ''}.jpg)`;
+          e.style.backgroundImage =
+            `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${data ? data.banner : ''}.jpg)`;
           e.classList.add('raidinfo');
           e.innerHTML = DRMng.UI.raidInfo(raid);
           setTimeout(() => e.parentNode.parentNode.scrollTop = 500000, 10); //131072
@@ -5104,9 +5082,12 @@ function main() {
         return false;
       },
       addListenerToChat: () => {
-        const el = document.getElementById('chat_rooms_container');
-        if (el) el.addEventListener('click', DRMng.UI.handleChatClick, true);
-        else setTimeout(DRMng.UI.addListenerToChat, 250);
+        const element = document.getElementById('chat_rooms_container');
+        if (element) {
+          element.addEventListener('click', DRMng.UI.handleChatClick, true);
+        } else {
+          setTimeout(DRMng.UI.addListenerToChat, 250);
+        }
       },
       attachListeners: function () {
         // Chat global listener
@@ -5115,7 +5096,7 @@ function main() {
         // Message listeners
         document.addEventListener('DRMng.joinRaid', DRMng.Raids.joinResponse, false);
         document.addEventListener('DRMng.joinRaids', DRMng.Raids.joinMultiResponse, false);
-        document.addEventListener('DRMng.lightShot', DRMng.Gate.lightShotCb, false);
+        document.addEventListener('DRMng.lightShot', Proxy.lightShotCallback, false);
 
         // Script Hide automation
         /*new DomNode(`#DRMng_main`)
@@ -5458,7 +5439,7 @@ function main() {
         new DomNode('#headerwrap')
           .data(new DomNode('div').attr({ id: 'DRMng_header' })
             .data(new DomNode('div').attr({ id: 'DRMng_server' })
-              .txt(DRMng.Config.local.server)
+              .txt(Config.data.server)
               .on('click', DRMng.Engine.changeServer))
             .data(new DomNode('div').attr({ id: 'DRMng_status' })
               .txt('DRMng Loading...'))
@@ -5470,14 +5451,11 @@ function main() {
                   'DRMng_main');
                 if (el.className === 'hidden') {
                   el.removeAttribute('class');
-                  new DomNode('#DRMng_onoff').remove(
-                    'class');
-                  DRMng.Kong.setWrapperWidth(
-                    DRMng.Config.get('scriptWidth'));
+                  new DomNode('#DRMng_onoff').remove('class');
+                  DRMng.Kong.setWrapperWidth(Config.data.scriptWidth);
                 } else {
                   el.className = 'hidden';
-                  new DomNode('#DRMng_onoff').attr(
-                    { class: 'hidden' });
+                  new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
                   DRMng.Kong.setWrapperWidth();
                 }
               })));
@@ -5562,7 +5540,7 @@ function main() {
     init: function () {
 
       // load localStorage
-      this.Config.loadLocal();
+      Config.load();
 
       // init kong features
       this.Kong.init();
@@ -5594,8 +5572,7 @@ function main() {
   // include socket.io engine
   new DomNode('script')
     .attr({
-      type: 'text/javascript',
-      async: '',
+      type: 'text/javascript', async: '',
       src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
     })
     .attach('to', document.head);

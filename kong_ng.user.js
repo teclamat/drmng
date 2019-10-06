@@ -807,8 +807,7 @@ function main() {
      * Saves config to local storage
      */
     static save() {
-      Log.debug('Saving config', JSON.stringify(this.local));
-      // localStorage['DRMng'] = JSON.stringify(this.local);
+      localStorage['DRMng'] = JSON.stringify(this.local);
     }
   };
 
@@ -2317,7 +2316,7 @@ function main() {
         if (hf === null || !hf[raid.diff - 1]) {
           if (this.getIdx(raid.id) === -1 && !this.getDead(raid.id)) {
             const idx = this.location(raid) + 1;
-            const rd = Config.raidData[raid.boss];
+            const rd = Config.data.raidData[raid.boss];
             raid.visited = Config.visited.indexOf(raid.id) > -1;
             raid.isFull = rd && raid.participants && (rd.maxPlayers === raid.participants);
             this.all.splice(idx, 0, raid);

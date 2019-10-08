@@ -991,19 +991,18 @@ function main() {
        * Creates message
        * @param {string|Node|DomNode} message Message content
        * @param {string} [user] User name and optional ign
-       * @param {string} [props] Various message properties
+       * @param {string} [props] Message properties
        */
       constructor(message, user, props) {
-        //console.log(props);
-        this._node = new DomNode('div').attr({ class: 'chat-message' });
-        this._class = { main: [], msg: ['username', 'truncate'] };
-        this._prefix = '';
-        this._addClass = '';
-        this._addStyle = '';
-        this._raid = null;
+        this.body = new DomNode('div').attr({ class: 'chat-message' });
+        this.classes = { main: [], msg: ['username', 'truncate'] };
+        this.prefix = '';
+        this.addClass = '';
+        this.addStyle = '';
+        this.raid = null;
         // Setters
-        this.type = props.type;
-        this.room = props.room;
+        this.type = props.type || 'game';
+        this.room = props.room || 'none';
         this.pm = props.pm;
         this.self = props.self;
         this.ign = props.characterName;
@@ -1015,29 +1014,15 @@ function main() {
       set pm(val) {
         this._pm = val || { any: false, sent: false, recv: false };
         if (this._pm.any) {
-          this._class.main.push('whisper');
+          this.classes.main.push('whisper');
           if (this._pm.recv) {
-            this._class.main.push('received_whisper');
-            this._prefix = 'from ';
+            this.classes.main.push('received_whisper');
+            this.prefix = 'from ';
           } else {
-            this._class.main.push('sent_whisper');
-            this._prefix = 'to ';
+            this.classes.main.push('sent_whisper');
+            this.prefix = 'to ';
           }
         }
-      }
-
-      /**
-       * @param {string} val
-       */
-      set type(val) {
-        this._type = val || 'game';
-      }
-
-      /**
-       * @param {string} val
-       */
-      set room(val) {
-        this._room = val || 'none';
       }
 
       /**
@@ -1046,7 +1031,7 @@ function main() {
       set user(val) {
         if (val) this._user = val.toString();
         else this._user = 'Unknown';
-        if ((this._user === this._self) || this._pm.sent) this._class.msg.push('is_self');
+        if ((this._user === this._self) || this._pm.sent) this.classes.msg.push('is_self');
       }
 
       set self(val) {
@@ -1076,7 +1061,7 @@ function main() {
 
       set msg(val) {
         if (typeof val === 'string') {
-          if (this.getRaid(val)) this._msg = this._raid.text;
+          if (this.getRaid(val)) this._msg = this.raid.text;
           else this._msg = this.formatLinks(val).trim();
           if (!this._msg) this._msg = null;
         } else {
@@ -1089,17 +1074,17 @@ function main() {
       get html() {
         if (this._type !== 'service') {
           const p = new DomNode('p').attr({ timestamp: this.ts });
-          if (this._class.main.length > 0) p.attr({ class: this._class.main.join(' ') });
+          if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
           // Time field + raid link
           new DomNode('span').attr({ class: 'timestamp' }).txt(this.time)
-            .data(this._raid ? new DomNode('span').data(this._raid.link) : null)
+            .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
             .attach('to', p);
           // Extra raid data field
-          if (this._raid && this._raid.extra) this._raid.extra.attach('to', p);
+          if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
           // User field
           new DomNode('span')
-            .attr({ username: this._user, class: this._class.msg.join(' ') })
-            .txt(this._prefix + this._user).attach('to', p);
+            .attr({ username: this._user, class: this.classes.msg.join(' ') })
+            .txt(this.prefix + this._user).attach('to', p);
           // IGN field
           if (this._ign)
             new DomNode('span').attr({ class: 'guildname truncate' }).txt(this._ign).attach('to', p);
@@ -1109,12 +1094,12 @@ function main() {
             // Message field
             new DomNode('span').attr({ class: 'message hyphenate' }).data(this._msg).attach('to', p);
           }
-          p.attach('to', this._node);
+          p.attach('to', this.body);
         } else new DomNode('div')
-          .attr({ class: 'script' + this._addClass, style: this._addStyle })
-          .data(this._msg).attach('to', this._node);
+          .attr({ class: 'script' + this.addClass, style: this.addStyle })
+          .data(this._msg).attach('to', this.body);
 
-        return this._node.node;
+        return this.body.node;
       }
 
       getRaid(link) {
@@ -1131,11 +1116,11 @@ function main() {
               ['n', 'h', 'l', 'nm'][r.diff - 1],
               ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
             ];
-            this._class.main.push('raid', r.id, rnm[0]);
-            if (ded) this._class.main.push('dead');
-            if (vis) this._class.main.push('visited');
+            this.classes.main.push('raid', r.id, rnm[0]);
+            if (ded) this.classes.main.push('dead');
+            if (vis) this.classes.main.push('visited');
 
-            this._raid = {
+            this.raid = {
               link: new DomNode('a')
                 .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(r) })
                 .on('click', DRMng.Raids.joinClick)

@@ -306,19 +306,20 @@ function main() {
 
     /**
      * Formats number to human readable form
-     * @param {number} num Number to format
+     * @param {(number|string)} num Number to format
      * @param {number} [p=4] Precision (number of digits)
+     * @param {string[]} [suffix=['', 'k', 'm', 'b', 't', 'q', 'Q']] Suffix array
      * @returns {string} Formatted number
      */
     static getShortNum(num, p = 4, suffix = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
-      num = parseInt(num);
-      if (isNaN(num) || num < 0) return num;
+      let value = parseInt(num);
+      if (isNaN(value) || value < 0) return num;
       let count = 0;
-      while (num > 1000) {
-        num /= 1000;
+      while (value > 1000) {
+        value /= 1000;
         ++count;
       }
-      return num.toPrecision(p) + suffix[count];
+      return value.toPrecision(p) + suffix[count];
     }
 
     /**
@@ -344,8 +345,8 @@ function main() {
 
     /**
      * Returns random element from given array
-     * @param {any[]} [arr] Input array
-     * @returns {any} Random element from input array
+     * @param {*[]} arr Input array
+     * @returns {*} Random element from input array
      */
     static getRandArray(arr) {
       return arr[this.getRand(arr.length - 1)];
@@ -385,7 +386,7 @@ function main() {
     /**
      * Determines whether an object has a property with the specified name
      * @param {Object} object Object to test for property
-     * @param {(string|number|symbol)} property Tested property
+     * @param {(string|number|Symbol)} property Tested property
      * @returns {boolean} True if property exists in object, False otherwise
      */
     static hasProperty(object, property) {

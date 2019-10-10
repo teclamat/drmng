@@ -30,15 +30,22 @@
  */
 
 function main() {
-
+  /**
+   * Custom logger class
+   * @type {Log}
+   */
   window.Log = class Log {
+    /**
+     * Format log message with DRMng specific badge and colors
+     * @param {?string} color Custom message color or null for default
+     * @param {Array} args Input arguments array
+     * @returns {Array} Modified arguments array
+     */
     static drmngify(color, args) {
       const drmngBadge = color ? '%c[DRMng]' : '[DRMng]';
       if ((typeof args[0] === 'string') && /%[csd]/.test(args[0])) {
         args[0] = `${drmngBadge} ${args[0]}`;
-        if (color) {
-          args.splice(1, 0, `color:${color}`);
-        }
+        if (color) args.splice(1, 0, `color:${color}`);
       } else {
         if (color) {
           const temp = [drmngBadge];
@@ -50,30 +57,56 @@ function main() {
       }
       return args;
     }
+
+    /**
+     * Log to console regular message
+     * @param {...*} args
+     */
     static out(...args) {
       console.log.apply(console, this.drmngify(null, args));
     }
+
+    /**
+     * Log to console debug message
+     * @param {...*} args
+     */
     static debug(...args) {
       console.debug.apply(console, this.drmngify('purple', args));
     }
+
+    /**
+     * Log to console inform message
+     * @param {...*} args
+     */
     static info(...args) {
       console.info.apply(console, this.drmngify('#1070f0', args));
     }
+
+    /**
+     * Log to console warning message
+     * @param {...*} args
+     */
     static warn(...args) {
       console.warn.apply(console, this.drmngify(null, args));
     }
+
+    /**
+     * Log to console error message
+     * @param {...*} args
+     */
     static error(...args) {
       console.error.apply(console, this.drmngify(null, args));
     }
   };
+
   /**
    * DOM nodes creation and manipulation
+   * @type {DomNode}
    */
   window.DomNode = class DomNode {
     /**
      * Creates a Node
      * @param {(string|Node)} element Element to create or reference
-     * @returns {DomNode} DomNode instance
      */
     constructor(element) {
       this._node = null;
@@ -86,10 +119,16 @@ function main() {
       }
     }
 
+    /**
+     * @type {?Node} HTML Node object or null
+     */
     get node() {
       return this._node;
     }
 
+    /**
+     * @type {boolean} Indicates if underlying data is empty
+     */
     get empty() {
       return this._node === null;
     }
@@ -115,28 +154,51 @@ function main() {
       return this;
     }
 
+    /**
+     * Appends text node to this instance
+     * @param {string} [text=''] - Text content to append
+     * @param {boolean} [overwrite=false] - If true, clears container content before appending
+     * @returns {Window.DomNode}
+     */
     txt(text = '', overwrite = false) {
-      if (overwrite) this.clear();
-      this._node.appendChild(document.createTextNode(text));
-      return this;
-    }
-
-    html(text = '', overwrite = false) {
-      if (overwrite) this.clear();
-      if (typeof text === 'string') this._node.innerHTML += text;
-      else {
-        if (text instanceof DomNode) text = text.node;
-        if (text instanceof Node) this._node.appendChild(text);
+      if (typeof text === 'string') {
+        if (overwrite) this.clear();
+        this._node.appendChild(document.createTextNode(text));
+      } else {
+        Log.warn('{DomNode::txt} Attempted to create text node with non string content');
       }
       return this;
     }
 
-    data(data) {
+    /**
+     * Appends any HTML element to this instance
+     * @param {(string|Node|Window.DomNode)} [element=''] - HTML element(s) to append
+     * @param {boolean} [overwrite=false] - If true, clears container content before appending
+     * @returns {Window.DomNode}
+     */
+    html(element = '', overwrite = false) {
+      if (overwrite) this.clear();
+      if (typeof element === 'string') {
+        this._node.innerHTML += element;
+      } else {
+        if (element instanceof Window.DomNode) element = element.node;
+        if (element instanceof Node) this._node.appendChild(element);
+      }
+      return this;
+    }
+
+    /**
+     * Appends any valid data to this instance
+     * @param {(string|Node|Window.DomNode)} data - Any valid data to append
+     * @param {boolean} [overwrite=false] - If true, clears container content before appending
+     * @returns {Window.DomNode}
+     */
+    data(data, overwrite = false) {
       if (data) {
-        if (typeof data === 'string' && /<.{3,}?>/.test(data) === false) {
-          this.txt(data);
+        if ((typeof data === 'string') && (/<.{3,}?>/.test(data) === false)) {
+          this.txt(data, overwrite);
         } else {
-          this.html(data);
+          this.html(data, overwrite);
         }
       }
       return this;
@@ -192,18 +254,21 @@ function main() {
 
   /**
    * Utility class
+   * @type {Window.Util}
    */
   window.Util = class Util {
     /**
      * Creates, updates or removes CSS stylesheet with given ID
-     * @param {string} id Stylesheet id
-     * @param {string} [content] Stylesheet content to create/update
+     * @param {string} id - Stylesheet id
+     * @param {string} [content] - Stylesheet content to create/update
      */
     static style(id, content) {
       let s = new DomNode(`#${id}`);
       if (content) {
         if (s.empty) {
-          s = new DomNode('style').attr({ type: 'text/css', id: id }).attach('to', document.head);
+          s = new DomNode('style')
+            .attr({ type: 'text/css', id: id })
+            .attach('to', document.head);
         }
         s.txt(content, true);
       } else {
@@ -212,12 +277,12 @@ function main() {
     }
 
     /**
-     * Copies fields from src to dst. If fields is null, all fields from src are copied.
-     * If additionally dst is not defined, method creates shallow copy of src.
-     * @param {Object} src Source object
-     * @param {Object} [dst = {}] Destination object
-     * @param {string[]} [fields = null] Fields to copy from source object
-     * @returns {Object} Merge of src and dst objects (shallow)
+     * Copies fields from source to destination. If fields argument is null, all fields from source are copied.
+     * If additionally destination is not defined, shallow copy of source is created.
+     * @param {Object} src - Source object
+     * @param {Object} [dst = {}] - Destination object
+     * @param {?string[]} [fields] - Fields to copy from source object
+     * @returns {Object}
      */
     static copyFields(src, dst = {}, fields = null) {
       const keys = fields ? Object.keys(src).filter(f => fields.indexOf(f) > -1) : Object.keys(src);
@@ -227,9 +292,9 @@ function main() {
 
     /**
      * Returns value from given HTTP GET query string
-     * @param {string} parameter Name of the parameter to search
-     * @param {string} [query=window.location.search] HTTP GET query string.
-     * @returns {string} Value of given parameter or empty string if not found
+     * @param {string} parameter - Name of the parameter to search
+     * @param {string} [query=window.location.search] - HTTP GET query string
+     * @returns {string}
      */
     static getQueryVariable(parameter, query = window.location.search) {
       const paramBegin = query.indexOf(parameter);
@@ -244,9 +309,9 @@ function main() {
     }
 
     /**
-     * Generates 32 bit Cyclic Redundancy Check
-     * @param {Object} str Input data. Objects are JSON stringified before calculation
-     * @returns {string} Hex representation of CRC32 hash
+     * Generates 32 bit Cyclic Redundancy Check (CRC32)
+     * @param {*} [str=''] - Input data. Non string data is JSON stringified before calculation
+     * @returns {string}
      */
     static crc32(str = '') {
       if (!Util.crcTbl) Util.crcTbl = new Uint32Array(256).map(
@@ -262,9 +327,9 @@ function main() {
 
     /**
      * Creates raid object from join url
-     * @param {string} url Raid join url
-     * @param {string} [poster] Optional poster of peocessed raid
-     * @returns {?raidObject} Filled raid object or null if parsing failed
+     * @param {string} url - Raid join url
+     * @param {string} [poster=''] - User name posting the raid
+     * @returns {?raidObject}
      */
     static getRaidFromUrl(url, poster = '') {
       const r = { createtime: new Date().getTime(), poster: poster };
@@ -306,37 +371,37 @@ function main() {
 
     /**
      * Formats number to human readable form
-     * @param {(number|string)} num Number to format
-     * @param {number} [p=4] Precision (number of digits)
-     * @param {string[]} [suffix=['', 'k', 'm', 'b', 't', 'q', 'Q']] Suffix array
-     * @returns {string} Formatted number
+     * @param {(number|string)} number - Number to format
+     * @param {number} [precision=4] - Precision (number of digits)
+     * @param {string[]} [order] - Order array
+     * @returns {string}
      */
-    static getShortNum(num, p = 4, suffix = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
-      let value = parseInt(num);
-      if (isNaN(value) || value < 0) return num;
+    static getShortNum(number, precision = 4, order = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
+      let value = parseInt(number);
+      if (isNaN(value) || value < 0) return number;
       let count = 0;
       while (value > 1000) {
         value /= 1000;
         ++count;
       }
-      return value.toPrecision(p) + suffix[count];
+      return value.toPrecision(precision) + order[count];
     }
 
     /**
-     * Formats number to human readable form, lowest number is in kilos
-     * @param {number} num Number to format
-     * @param {number} [p=4] Precision (number of digits)
-     * @returns {string} Formatted number
+     * Formats number to human readable format, lowest number is in kilos
+     * @param {(number|string)} number - Number to format
+     * @param {number} [precision=4] - Precision (number of digits)
+     * @returns {string}
      */
-    static getShortNumK(num, p = 4) {
-      return this.getShortNum(num, p, ['k', 'm', 'b', 't', 'q', 'Q']);
+    static getShortNumK(number, precision = 4) {
+      return this.getShortNum(number, precision, ['k', 'm', 'b', 't', 'q', 'Q']);
     }
 
     /**
      * Returns random integer number between selected minimum and maximum (inclusive)
-     * @param {number} [max=1] Highest possible integer
-     * @param {number} [min=0] Lowest possible integer
-     * @returns {number} Pseudorandom integer between selected constraints
+     * @param {number} [max=1] - Highest possible integer
+     * @param {number} [min=0] - Lowest possible integer
+     * @returns {number}
      */
     static getRand(max = 1, min = 0) {
       if (max < 1) return 0;
@@ -345,35 +410,38 @@ function main() {
 
     /**
      * Returns random element from given array
-     * @param {*[]} arr Input array
-     * @returns {*} Random element from input array
+     * @param {Array} arr - Input array
+     * @returns {*}
      */
     static getRandArray(arr) {
       return arr[this.getRand(arr.length - 1)];
     }
 
     /**
-     * Converts Roman numbers to Arabic
-     * @param {string} roman String with roman number
-     * @returns {number} Arabic number
+     * Converts roman numbers to arabic
+     * @param {string} roman - String representing roman number
+     * @returns {number}
      */
-    static deRomanize(roman) {
+    static romanToArabic(roman) {
       const lut = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
-      let arabic = 0, i = roman.length;
+      let arabic = 0;
+      let i = roman.length;
       while (i--) {
-        if (lut[roman[i]] < lut[roman[i + 1]]) {
-          arabic -= lut[roman[i]];
-        } else {
-          arabic += lut[roman[i]];
+        if (this.hasProperty(lut, roman[i])) {
+          if (lut[roman[i]] < lut[roman[i + 1]]) {
+            arabic -= lut[roman[i]];
+          } else {
+            arabic += lut[roman[i]];
+          }
         }
       }
       return arabic;
     }
 
     /**
-     * Makes first letter of a word uppercase
-     * @param {string} text Text to process
-     * @return {string} Processed text
+     * Converts first letter of a text uppercase
+     * @param {string} text - Text to process
+     * @return {string}
      */
     static capitalize(text) {
       if (typeof text === 'string' && text.length > 1) {
@@ -385,9 +453,9 @@ function main() {
 
     /**
      * Determines whether an object has a property with the specified name
-     * @param {Object} object Object to test for property
-     * @param {(string|number|Symbol)} property Tested property
-     * @returns {boolean} True if property exists in object, False otherwise
+     * @param {Object} object - Object to test for property
+     * @param {(string|number|Symbol)} property - Property being tested
+     * @returns {boolean}
      */
     static hasProperty(object, property) {
       return Object.prototype.hasOwnProperty.call(object, property);
@@ -403,6 +471,7 @@ function main() {
         const smittenAdjective = ['smitten', 'enamored', 'infatuated', 'taken', 'in love', 'inflamed'];
         return Util.getRandArray(smittenAdjective);
       }
+
       static generate() {
         switch (Util.getRand(6)) {
           case 0:
@@ -428,6 +497,7 @@ function main() {
         ];
         return Util.getRandArray(pokeBodyPlace);
       }
+
       static generate() {
         let txt = '';
         switch (Util.getRand(6)) {
@@ -464,6 +534,7 @@ function main() {
         ];
         return Util.getRandArray(strikeAction);
       }
+
       static get LeapingAction() {
         const leapingAction = [
           'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
@@ -471,12 +542,14 @@ function main() {
         ];
         return Util.getRandArray(leapingAction);
       }
+
       static get AimModifier() {
         const aimModifier = [
           'a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
         ];
         return Util.getRandArray(aimModifier);
       }
+
       static get WrestlingMove() {
         const wrestlingMove = [
           ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack',
@@ -490,6 +563,7 @@ function main() {
         ];
         return Util.getRandArray(wrestlingMove);
       }
+
       static get Meal() {
         const meal = [
           'midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch', '2 o\'clock tea time',
@@ -497,14 +571,17 @@ function main() {
         ];
         return Util.getRandArray(meal);
       }
+
       static get ThrowAction() {
         const throwAction = ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'];
         return Util.getRandArray(throwAction);
       }
+
       static get Crying() {
         const crying = ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'];
         return Util.getRandArray(crying);
       }
+
       static get SportsWeapon() {
         const sportsWeapon = [
           'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
@@ -512,10 +589,12 @@ function main() {
         ];
         return Util.getRandArray(sportsWeapon);
       }
+
       static get MidsectionStrikePlace() {
         const midsectionStrikePlace = ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'];
         return Util.getRandArray(midsectionStrikePlace);
       }
+
       static get RandomItemWeapon() {
         const randomItemWeapon = [
           'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick',
@@ -526,6 +605,7 @@ function main() {
         ];
         return Util.getRandArray(randomItemWeapon);
       }
+
       static get WithDescriptors() {
         const withDescriptors = [
           'with lightning reflexes, ', 'with finesse and poise, ', 'with mediocre skill, ',
@@ -534,6 +614,7 @@ function main() {
         ];
         return Util.getRandArray(withDescriptors);
       }
+
       static get StrikeActionVerb() {
         const strikeActionVerb = [
           'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
@@ -541,6 +622,7 @@ function main() {
         ];
         return Util.getRandArray(strikeActionVerb);
       }
+
       static generate() {
         switch (Util.getRand(8)) {
           case 0:
@@ -571,22 +653,26 @@ function main() {
         ];
         return Util.getRandArray(slapWeapon);
       }
+
       static get TargetAction() {
         const targetAction = [
           'deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers', 'unleashes'
         ];
         return Util.getRandArray(targetAction);
       }
+
       static get SassySynonym() {
         const sassySynonym = [
           'an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy', 'a sassy'
         ];
         return Util.getRandArray(sassySynonym);
       }
+
       static get Place() {
         const place = [['side', '\'s head.'], ['face', '.'], ['cheek', '.']];
         return Util.getRandArray(place);
       }
+
       static get LeapingAction() {
         const leapingAction = [
           'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
@@ -594,12 +680,14 @@ function main() {
         ];
         return Util.getRandArray(leapingAction);
       }
+
       static get LeadSpeed() {
         const leadSpeed = [
           ' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile', 'n accelerated', ' quick'
         ];
         return Util.getRandArray(leadSpeed);
       }
+
       static generate() {
         switch (Util.getRand(3)) {
           case 0:
@@ -616,12 +704,19 @@ function main() {
 
   /**
    * Handles dynamic CSS rules
+   * @type {Window.CSS}
    */
   window.CSS = class CSS {
-    static add(alias, name, value) {
+    /**
+     * Adds new CSS rule
+     * @param {string} alias - alias for the rule
+     * @param {string} selector - css selector(s)
+     * @param {string} definitions - rules definition for given selector(s)
+     */
+    static add(alias, selector, definitions) {
       if (this.rules === undefined) this.rules = {};
       const replace = Util.hasProperty(this.rules, alias);
-      this.rules[alias] = { name: name, value: value };
+      this.rules[alias] = { name: selector, value: definitions };
       if (replace) {
         this.compile();
       } else {
@@ -629,6 +724,10 @@ function main() {
       }
     }
 
+    /**
+     * Removes CSS rule with given alias
+     * @param {string} alias - alias of the rule to remove
+     */
     static del(alias) {
       if (this.rules) {
         if (this.rules[alias] !== undefined) delete this.rules[alias];
@@ -636,6 +735,10 @@ function main() {
       }
     }
 
+    /**
+     * Puts added rules together into one script tag and adds to document head
+     * @param {{name: string, value: string}} [obj] - Optional object with rule to compile
+     */
     static compile(obj) {
       if (this.node === undefined) {
         this.node = new DomNode('style')
@@ -653,6 +756,9 @@ function main() {
       }
     }
 
+    /**
+     * Removes whole style entry from HTML documents head
+     */
     static remove() {
       this.node.detach();
     }
@@ -664,23 +770,24 @@ function main() {
   window.Proxy = class Proxy {
     /**
      * Calls lightshot service to get real image url
-     * @param {string} link Link with obfuscated image url
-     * @param {string} id ID of destination Node
-     * @param {string} ch Channel
-     * @param {boolean} arr request array buffer type
+     * @param {string} link - Link with obfuscated lightshot image url
+     * @param {string} id - ID of destination node for image
+     * @param {string} chat - Name of private chat with placeholder for image
+     * @param {boolean} [getBuffer=false] - request array buffer type
      */
-    static lightShot(link, id, ch, arr = false) {
+    static lightShot(link, id, chat, getBuffer = false) {
       const req = {
         eventName: 'DRMng.lightShot',
         url: link,
         method: 'GET',
         id: id,
-        ch: ch,
+        ch: chat,
         timeout: 10000
       };
-      if (arr) req.responseType = 'arraybuffer';
+      if (getBuffer) req.responseType = 'arraybuffer';
       DRMng.postMessage(req);
     }
+
     // TODO: Add support for regular kong chat as well
     /**
      * Lightshot callback
@@ -709,53 +816,80 @@ function main() {
             () => {
               setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250);
             })
-            .attr({ src: img })
-            .remove('id');
+           .attr({ src: img })
+           .remove('id');
         else i.detach();
       }
     }
   };
 
-
+  /**
+   * Script configuration management
+   * @type {Window.Config}
+   */
   window.Config = class Config {
     /**
-     * Returns configuration object
+     * Configuration data object
+     * @type {Object}
      */
     static get data() {
       return this.local;
     }
+
     /**
-     * Returns current server mode
+     * Current server mode
+     * @type {string}
      */
     static get server() {
       return this.local.server;
     }
+
     /**
-     * Returns current server mode as server id
+     * Current server mode as server id
+     * @type {number}
      */
     static get serverId() {
       return (this.server === 'Elyssa') ? 1 : 2;
     }
+
+    /**
+     * Visited raids IDs from selected server
+     * @type {number[]}
+     */
     static get visited() {
       return this.local.visited[this.server.toLowerCase()];
     }
+
+    /**
+     * Dead raids objects with IDs as keys and completion timestamp as values
+     * @type {Object.<string, number>}
+     */
     static get dead() {
       return this.local.dead[this.server.toLowerCase()];
     }
+
+    /**
+     * String with filtered raid types
+     * @type {string}
+     */
     static get filterString() {
       return this.local.filterString[this.server.toLowerCase()];
     }
+
     static set filterString(value) {
       this.local.filterString[this.server.toLowerCase()] = value;
     }
+
     static get filterRaids() {
       return this.local.filterRaids[this.server.toLowerCase()];
     }
+
     static get hardFilter() {
       return this.local.hardFilter[this.server.toLowerCase()];
     }
+
     /**
-     * Loads local config to object
+     * Loads localstorage config into data object
      */
     static load() {
       this.local = {
@@ -804,8 +938,9 @@ function main() {
       this.local.raidKeys = Object.keys(this.local.raidData);
       this.save();
     }
+
     /**
-     * Saves config to local storage
+     * Saves config to localstorage
      */
     static save() {
       localStorage['DRMng'] = JSON.stringify(this.local);
@@ -814,15 +949,27 @@ function main() {
 
   window.DRMng = {
     ServerWS: 'wss://mutikt.ml:3000',
-    About: {
-      name: 'DotD Raids Manager next gen',
-      major: '2', minor: '3', build: '0',
-      version: function () {
-        return `<b>${this.name}</b><br>version: <b>${this.ver()}</b><br>` +
+    About: class {
+      /**
+       * @type {string}
+       */
+      static get name() {
+        return 'DotD Raids Manager next gen';
+      }
+
+      /**
+       * @type {string}
+       */
+      static get version() {
+        return '2.3.0';
+      }
+
+      /**
+       * @type {string}
+       */
+      static get versionHtml() {
+        return `<b>${this.name}</b><br>version: <b>${this.version}</b><br>` +
           '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
-      },
-      ver: function () {
-        return `${this.major}.${this.minor}.${this.build}`;
       }
     },
     // TODO: Remove when new one's ready
@@ -922,7 +1069,7 @@ function main() {
             case 'chat_container':
               w = parseInt(p.style.width.replace('px', ''));
               Config.data.kong.chatWidth =
-                Config.data.alliance.sbs ? parseInt((w - 7) / 2) : w;
+                Config.data.alliance.sbs ? Math.trunc((w - 7) / 2) : w;
               Config.save();
               DRMng.Kong.setHeaderWidth();
               break;
@@ -944,8 +1091,8 @@ function main() {
         this.redraw = false;
         if (this.clicked && this.clicked.isResizing) {
           if (this.clicked.right)
-            this.pane.style.width = parseInt(Math.max(this.x, 200)) + 'px';
-          const w = parseInt(Math.max(this.clicked.cx - this.ev.clientX + this.clicked.w, 200));
+            this.pane.style.width = `${Math.max(Math.trunc(this.x), 200)}px`;
+          const w = Math.max(Math.trunc(this.clicked.cx - this.ev.clientX + this.clicked.w), 200);
           if (this.clicked.left) {
             this.pane.style.width = w + 'px';
           }
@@ -990,7 +1137,7 @@ function main() {
     Message: class {
       /**
        * Creates message
-       * @param {string|Node|DomNode} message Message content
+       * @param {string|Node|Window.DomNode} message Message content
        * @param {string} [user] User name and optional ign
        * @param {string} [props] Message properties
        */
@@ -1078,8 +1225,8 @@ function main() {
           if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
           // Time field + raid link
           new DomNode('span').attr({ class: 'timestamp' }).txt(this.time)
-            .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
-            .attach('to', p);
+                             .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
+                             .attach('to', p);
           // Extra raid data field
           if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
           // User field
@@ -1234,7 +1381,7 @@ function main() {
         new DomNode('li')
           .attr({ class: 'spritegame' })
           .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
-          .html('<a onclick="DRMng.postGameMessage(\'chatReload\');">Reload Chat</a>', true)
+          .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
           .attach('to', 'quicklinks');
       },
       /**
@@ -1374,7 +1521,7 @@ function main() {
             holodeck.scheduleRender(() => {
               if (opts && opts.timestamp) {
                 const newer = Array.from(chat.querySelectorAll('div > p'))
-                  .filter(node => node.getAttribute('timestamp') > opts.timestamp);
+                                   .filter(node => node.getAttribute('timestamp') > opts.timestamp);
 
                 if (newer.length > 0) {
                   chat.insertBefore(msg, newer[0].parentNode);
@@ -1554,8 +1701,8 @@ function main() {
             if (part) {
               const command = Util.capitalize(part[1]);
               const gesture = Gestures[command].generate()
-                .replace('@from', DRMng.UM.user.name)
-                .replace('@who', part[2]);
+                                               .replace('@from', DRMng.UM.user.name)
+                                               .replace('@who', part[2]);
               const gestureText = `** ${gesture} **`;
 
               if (chat instanceof Holodeck) {
@@ -1703,7 +1850,7 @@ function main() {
             if (chat instanceof Holodeck) {
               chat = chat._active_dialogue;
             }
-            DRMng.Kong.serviceMsg(DRMng.About.version(), chat);
+            DRMng.Kong.serviceMsg(DRMng.About.versionHtml, chat);
             return false;
           });
           self.addChatCommand(['raid', 'rd'], (chat, cmd) => {
@@ -2456,7 +2603,7 @@ function main() {
             this.user.guild = '';
             this.user.IGN = '';
             this.user.qualified = true;
-            return;
+
           }
         } else {
           return setTimeout(() => this.getExtendedUserData(), 100);
@@ -2796,7 +2943,7 @@ function main() {
 
       static getGuildTag(guild) {
         const roman = /^(.+\s)([IXV]+)$/.exec(guild);
-        if (roman) guild = roman[1] + Util.deRomanize(roman[2]);
+        if (roman) guild = roman[1] + Util.romanToArabic(roman[2]);
         const reg = /([A-Z]+|[\w'`´])[\w'`´]*/g;
         let tag = '', part;
         while ((part = reg.exec(guild))) tag += part[1];
@@ -3597,16 +3744,16 @@ function main() {
               .data(
                 new DomNode('input').attr({ type: 'text', value: grp.name, class: 'inp_grp' }))
               .data(new DomNode('span').attr({ class: 'del_grp red' }).txt('\uf272')
-                .on('click', e => {
-                  const el = e.target.parentNode.parentNode;
-                  el.parentNode.removeChild(el);
-                }))
+                                       .on('click', e => {
+                                         const el = e.target.parentNode.parentNode;
+                                         el.parentNode.removeChild(el);
+                                       }))
               .data(new DomNode('span').attr({ class: 'add_grp' }).txt('\uf277')
-                .on('click', e => this.makeSbGroup().attach('before',
-                  e.target.parentNode.parentNode)))
+                                       .on('click', e => this.makeSbGroup().attach('before',
+                                         e.target.parentNode.parentNode)))
               .data(new DomNode('span').txt('\uf275')
-                .on('click', e => this.makeSbButton().attach('to',
-                  e.target.parentNode.parentNode)))
+                                       .on('click', e => this.makeSbButton().attach('to',
+                                         e.target.parentNode.parentNode)))
             );
           if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn)));
           else el.data(this.makeSbButton());
@@ -4545,7 +4692,7 @@ function main() {
       },
       sidebarLabelOpen: e => {
         document.querySelectorAll('#DRMng_Sidebar > div.label:not(.hidden)')
-          .forEach(lbl => lbl.className += ' hidden');
+                .forEach(lbl => lbl.className += ' hidden');
         e.target.className = 'label';
       },
       setupSidebarButton: button => {
@@ -4659,59 +4806,59 @@ function main() {
 
         opt = new this.Option();
         opt.setup('kongui_stickyHeader', 'Sticky header', 'bool', true)
-          .desc('Makes top header always visible on screen.')
-          .event(function () {
-            if (this.conf[this.field]) {
-              new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
-              CSS.del(this.field);
-              CSS.del(this.field + 'b');
-            } else {
-              new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
-              CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
-              CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
-            }
-          })
-          .make(group);
+           .desc('Makes top header always visible on screen.')
+           .event(function () {
+             if (this.conf[this.field]) {
+               new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
+               CSS.del(this.field);
+               CSS.del(this.field + 'b');
+             } else {
+               new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
+               CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
+               CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
+             }
+           })
+           .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideToolbar', 'Hide game toolbar', 'bool', false)
-          .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideFrame', 'Hide game frame', 'bool', false)
-          .desc('Hides 7px wide frame around game window.')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, 'div#maingame', 'padding: 0');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Hides 7px wide frame around game window.')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, 'div#maingame', 'padding: 0');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideGameDetails', 'Hide game details', 'bool', false)
-          .desc('Hides game details part located just below game window.')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, 'div.game_details_outer', 'display: none');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Hides game details part located just below game window.')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, 'div.game_details_outer', 'display: none');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideForum', 'Hide forum area', 'bool', true)
-          .desc('Hides forum part located below game window.')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Hides forum part located below game window.')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         /**
          * RaidsManager UI
@@ -4720,25 +4867,25 @@ function main() {
 
         opt = new this.Option();
         opt.setup('drmui_disableTransitions', 'Disable transitions', 'bool', false)
-          .desc('Disables animated transitions for various UI elements to improve performance on' +
-            ' low-end hardware.')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
-                ' div#DRMng_info *', 'transition: initial !important');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Disables animated transitions for various UI elements to improve performance on' +
+             ' low-end hardware.')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+                 ' div#DRMng_info *', 'transition: initial !important');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         opt = new this.Option();
         opt.setup('drmui_hideSideBar', 'Hide sidebar', 'bool', false)
-          .desc('Hides sidebar which is located between game window and kongregate chat.')
-          .event(function () {
-            if (this.conf[this.field])
-              CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
-            else CSS.del(this.field);
-          })
-          .make(group);
+           .desc('Hides sidebar which is located between game window and kongregate chat.')
+           .event(function () {
+             if (this.conf[this.field])
+               CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
+             else CSS.del(this.field);
+           })
+           .make(group);
 
         /**
          * Alliance UI
@@ -4747,22 +4894,22 @@ function main() {
 
         opt = new this.Option();
         opt.setup('alliance_sbs', 'Side by side', 'bool', false)
-          .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
-            ' (doubles width taken by chat area).')
-          .event(() => DRMng.PrivateChat.moveChats())
-          // .event(function () {
-          //     // make sure initial variable setting wont fire this
-          //     if (DRMng.Alliance.tab) {
-          //         const a = DRMng.Alliance;
-          //         if (this.conf[this.field]) a.body.style.removeProperty('display');
-          //         else a.tab.className = 'chat_room_tab';
-          //         DRMng.UI.setChatWidth();
-          //         a.active = false;
-          //         holodeck._chat_window.showActiveRoom();
-          //         a.initBody.call(a);
-          //     }
-          // })
-          .make(group, true);
+           .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
+             ' (doubles width taken by chat area).')
+           .event(() => DRMng.PrivateChat.moveChats())
+           // .event(function () {
+           //     // make sure initial variable setting wont fire this
+           //     if (DRMng.Alliance.tab) {
+           //         const a = DRMng.Alliance;
+           //         if (this.conf[this.field]) a.body.style.removeProperty('display');
+           //         else a.tab.className = 'chat_room_tab';
+           //         DRMng.UI.setChatWidth();
+           //         a.active = false;
+           //         holodeck._chat_window.showActiveRoom();
+           //         a.initBody.call(a);
+           //     }
+           // })
+           .make(group, true);
 
         /**
          * Game frame UI
@@ -4771,27 +4918,27 @@ function main() {
 
         opt = new this.Option();
         opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
-          .desc('Disables World Chat located next to game window.')
-          .event(function () {
-            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-            DRMng.Kong.hideWorldChat();
-          })
-          .make(group, true);
+           .desc('Disables World Chat located next to game window.')
+           .event(function () {
+             DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
+             DRMng.Kong.hideWorldChat();
+           })
+           .make(group, true);
 
         opt = new this.Option();
         opt.setup('gameFrame_leftWChat', 'World Chat on left side', 'bool', false)
-          .desc('Moves World Chat to the left side of game window.')
-          .event(DRMng.postGameMessage.bind(this, 'chatSettings', Config.data.gameFrame))
-          .make(group, true);
+           .desc('Moves World Chat to the left side of game window.')
+           .event(DRMng.postGameMessage.bind(this, 'chatSettings', Config.data.gameFrame))
+           .make(group, true);
 
         opt = new this.Option();
         opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
-          .desc('Hides World Chat (without disabling it completely).')
-          .event(function () {
-            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-            DRMng.Kong.hideWorldChat();
-          })
-          .make(group, true);
+           .desc('Hides World Chat (without disabling it completely).')
+           .event(function () {
+             DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
+             DRMng.Kong.hideWorldChat();
+           })
+           .make(group, true);
 
         group = new this.Group('sidebar', 'Sidebar');
 
@@ -5259,11 +5406,11 @@ function main() {
         DRMng.hResize.regPanes.push('chat_container');
         DRMng.hResize.regSide.push(0);
         document.getElementById('chat_container')
-          .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
         DRMng.hResize.regPanes.push('DRMng_main');
         DRMng.hResize.regSide.push(1);
         document.getElementById('DRMng_main')
-          .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+                .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
       },
       roll: function (elem) {
         const gr = elem ? elem.parentNode : null;
@@ -5415,7 +5562,7 @@ function main() {
                             <div class="" id="DRMng_Options"></div>\
                         </div>\
                     </div>`)
-          .attach('to', document.body);
+                          .attach('to', document.body);
 
         // Info dialog
         new DomNode('div').attr({ id: 'DRMng_info' }).attach('to', document.body);
@@ -5423,27 +5570,27 @@ function main() {
         // Status bar
         new DomNode('#headerwrap')
           .data(new DomNode('div').attr({ id: 'DRMng_header' })
-            .data(new DomNode('div').attr({ id: 'DRMng_server' })
-              .txt(Config.data.server)
-              .on('click', DRMng.Engine.changeServer))
-            .data(new DomNode('div').attr({ id: 'DRMng_status' })
-              .txt('DRMng Loading...'))
-            .data(new DomNode('div').attr({ id: 'DRMng_onoff', class: 'hidden' })
-              .data(new DomNode('div').txt('\uf1cc'))
-              .on('click', () => {
-                clearTimeout(DRMng.UI.hideUITimeout);
-                const el = document.getElementById(
-                  'DRMng_main');
-                if (el.className === 'hidden') {
-                  el.removeAttribute('class');
-                  new DomNode('#DRMng_onoff').remove('class');
-                  DRMng.Kong.setWrapperWidth(Config.data.scriptWidth);
-                } else {
-                  el.className = 'hidden';
-                  new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
-                  DRMng.Kong.setWrapperWidth();
-                }
-              })));
+                                  .data(new DomNode('div').attr({ id: 'DRMng_server' })
+                                                          .txt(Config.data.server)
+                                                          .on('click', DRMng.Engine.changeServer))
+                                  .data(new DomNode('div').attr({ id: 'DRMng_status' })
+                                                          .txt('DRMng Loading...'))
+                                  .data(new DomNode('div').attr({ id: 'DRMng_onoff', class: 'hidden' })
+                                                          .data(new DomNode('div').txt('\uf1cc'))
+                                                          .on('click', () => {
+                                                            clearTimeout(DRMng.UI.hideUITimeout);
+                                                            const el = document.getElementById(
+                                                              'DRMng_main');
+                                                            if (el.className === 'hidden') {
+                                                              el.removeAttribute('class');
+                                                              new DomNode('#DRMng_onoff').remove('class');
+                                                              DRMng.Kong.setWrapperWidth(Config.data.scriptWidth);
+                                                            } else {
+                                                              el.className = 'hidden';
+                                                              new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
+                                                              DRMng.Kong.setWrapperWidth();
+                                                            }
+                                                          })));
 
         // load default values
         this.loadDefaults();

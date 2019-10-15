@@ -181,7 +181,7 @@ function main() {
       if (typeof element === 'string') {
         this._node.innerHTML += element;
       } else {
-        if (element instanceof Window.DomNode) element = element.node;
+        if (element instanceof DomNode) element = element.node;
         if (element instanceof Node) this._node.appendChild(element);
       }
       return this;
@@ -947,8 +947,251 @@ function main() {
     }
   };
 
+  /**
+   * Chat message class
+   */
+  window.ChatMessage = class ChatMessage {
+    /**
+     * Private message flags
+     * @typedef PrivateFlags
+     * @type {object}
+     * @property {boolean} any - Indicates any private message activity
+     * @property {boolean} sent - Indicates outgoing private message
+     * @property {boolean} recv - Indicates incoming private message
+     */
+
+    /**
+     * Creates message
+     * @param {string|Node|Window.DomNode} message Message content
+     * @param {?string} [user] User name and optional ign
+     * @param {Object} [props={}] Message properties
+     * @param {string} [props.type] Message type
+     * @param {string} [props.room] Target chat room for message
+     * @param {PrivateFlags} [props.pm] Private message flags
+     * @param {(number|Date)} [props.timestamp] Message timestamp
+     */
+    constructor(message, user, props = {}) {
+      this.body = new DomNode('div').attr({ class: 'chat-message' });
+      this.classes = { main: [], msg: ['username', 'truncate'] };
+      this.prefix = '';
+      this.addClass = '';
+      this.addStyle = '';
+      this.raid = null;
+      // Setters
+      this.type = props;
+      this.room = props;
+      this.whisper = props;
+      this.self = props;
+      this.gameName = props;
+      this.timestamp = props;
+      this.user = user;
+      this.message = message;
+    }
+
+    get type() {
+      return this._type;
+    }
+    set type(value) {
+      this._type = value.type || 'game';
+    }
+
+    get room() {
+      return this._room;
+    }
+    set room(value) {
+      this._room = value.room || 'none';
+    }
+
+    /**
+     * @type {PrivateFlags}
+     */
+    get whisper() {
+      return this._whisper;
+    }
+    set whisper(value) {
+      this._whisper = value.pm || { any: false, sent: false, recv: false };
+      if (this._whisper.any) {
+        this.classes.main.push('whisper');
+        if (this._whisper.recv) {
+          this.classes.main.push('received_whisper');
+          this.prefix = 'from ';
+        } else {
+          this.classes.main.push('sent_whisper');
+          this.prefix = 'to ';
+        }
+      }
+    }
+
+    /**
+     * @type {string}
+     */
+    get user() {
+      return this._user;
+    }
+    set user(value) {
+      this._user = value.user || 'Unknown';
+      if ((this._user === this.self) || this.whisper.sent) {
+        this.classes.msg.push('is_self');
+      }
+    }
+
+    get self() {
+      return this._self;
+    }
+    set self(value) {
+      this._self = value.self || DRMng.UM.user.name;
+    }
+
+    get gameName() {
+      return this._gameName;
+    }
+    set gameName(value) {
+      this._gameName = value.characterName || null;
+    }
+
+    get time() {
+      return this._timestamp.format('mmm d, HH:MM');
+    }
+
+    get timestamp() {
+      return this._timestamp.getTime();
+    }
+
+    set timestamp(value) {
+      const ts = value.timestamp;
+      if (ts instanceof Date) {
+        this._timestamp = ts;
+      } else if (typeof ts === 'number') {
+        this._timestamp = new Date(ts.toString().length < 12 ? ts * 1000 : ts);
+      } else {
+        this._timestamp = new Date();
+      }
+    }
+
+    /**
+     * @type {string|Node|null}
+     */
+    get message() {
+      return this._message;
+    }
+
+    set message(value) {
+      if (typeof value === 'string') {
+        if (this.getRaid(value)) {
+          this._message = this.raid.text;
+        } else {
+          this._message = ChatMessage.formatLinks(value);
+        }
+        if (!this._message) this._message = null;
+      } else {
+        if (value instanceof DomNode) {
+          value = value.node;
+        }
+        this._message = value instanceof Node ? value : null;
+      }
+    }
+
+    get html() {
+      if (this.type !== 'service') {
+        const p = new DomNode('p').attr({ timestamp: this.timestamp });
+        if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
+        // Time field + raid link
+        new DomNode('span').attr({ class: 'timestamp' }).txt(this.time)
+                           .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
+                           .attach('to', p);
+        // Extra raid data field
+        if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
+        // User field
+        new DomNode('span')
+          .attr({ username: this.user, class: this.classes.msg.join(' ') })
+          .txt(this.prefix + this.user).attach('to', p);
+        // IGN field
+        if (this.gameName) {
+          new DomNode('span').attr({ class: 'guildname truncate' }).txt(this.gameName).attach('to', p);
+        }
+        if (this.message) {
+          // Separator field
+          new DomNode('span').attr({ class: 'separator' }).txt(': ').attach('to', p);
+          // Message field
+          new DomNode('span').attr({ class: 'message hyphenate' }).data(this.message).attach('to', p);
+        }
+        p.attach('to', this.body);
+      } else {
+        new DomNode('div').attr({ class: 'script' + this.addClass, style: this.addStyle })
+                          .data(this.message).attach('to', this.body);
+      }
+
+      return this.body.node;
+    }
+
+    getRaid(link) {
+      let retVal = false;
+      const match = /(^.*?)(http.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(link);
+      if (match) {
+        const r = Util.getRaidFromUrl(match[2], this._user);
+        if (r) {
+          const vis = Config.visited.indexOf(parseInt(r.id)) > -1;
+          const ded = Util.hasProperty(Config.dead, r.id);
+          const flt = Config.filterRaids[r.boss];
+          const ifo = Config.data.raidData[r.boss];
+          const rnm = [
+            ['n', 'h', 'l', 'nm'][r.diff - 1],
+            ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
+          ];
+          this.classes.main.push('raid', r.id, rnm[0]);
+          if (ded) this.classes.main.push('dead');
+          if (vis) this.classes.main.push('visited');
+
+          this.raid = {
+            link: new DomNode('a')
+              .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(r) })
+              .on('click', DRMng.Raids.joinClick)
+              .txt(rnm.join(' ').toUpperCase()),
+            text: (match[1] + match[3]).trim(),
+            extra: new DomNode('span')
+              .attr({ class: 'extraid' })
+              .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? 'Guild ER' : 'WR/ER') :
+                `FS ${Util.getShortNumK(ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : '')
+          };
+
+          if (this.room === 'none' || this.type !== 'game') {
+            const filter = flt ? !flt[r.diff - 1] : true;
+            if (!ded && !vis && filter && DRMng.Raids.filter.indexOf(`@${r.boss}_${r.diff}`) > -1) {
+              if (DRMng.Raids.isJoining) {
+                setTimeout(DRMng.Raids.pushToQueue.bind(DRMng.Raids, r), 1);
+              } else {
+                setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
+              }
+            }
+          }
+
+          retVal = true;
+        }
+      }
+      return retVal;
+    }
+
+    static formatLinks(message) {
+      const regLink = /(^|[^"])(https?:\/\/\S+[^,\s])/g;
+      const regImg = /\.(jpe?g|png|gif)$/i;
+      const regHttpReplace = /^https?:\/\//;
+      let l;
+      while ((l = regLink.exec(message))) {
+        let link = `<a href="${l[2]}" target="_blank">${l[2].replace(regHttpReplace, '')}</a>`;
+        if (regImg.test(l[2])) {
+          link += `<br><img src="${l[2]}" alt="image" onclick="window.open(this.src)">`;
+        }
+        const prefix = message.slice(0, regLink.lastIndex - l[2].length);
+        const suffix = message.slice(regLink.lastIndex);
+        message = prefix + link + suffix;
+        regLink.lastIndex += link.length - l[2].length;
+      }
+      return message.trim();
+    }
+  };
+
   window.DRMng = {
-    ServerWS: 'wss://mutikt.ml:3000',
+    serverAddress: 'wss://mutikt.ml:3000',
     About: class {
       /**
        * @type {string}
@@ -1132,189 +1375,6 @@ function main() {
       }
     },
     /**
-     * Chat message class
-     */
-    Message: class {
-      /**
-       * Creates message
-       * @param {string|Node|Window.DomNode} message Message content
-       * @param {string} [user] User name and optional ign
-       * @param {string} [props] Message properties
-       */
-      constructor(message, user, props) {
-        this.body = new DomNode('div').attr({ class: 'chat-message' });
-        this.classes = { main: [], msg: ['username', 'truncate'] };
-        this.prefix = '';
-        this.addClass = '';
-        this.addStyle = '';
-        this.raid = null;
-        // Setters
-        this.type = props.type || 'game';
-        this.room = props.room || 'none';
-        this.pm = props.pm;
-        this.self = props.self;
-        this.ign = props.characterName;
-        this.ts = props.timestamp;
-        this.user = user;
-        this.msg = message;
-      }
-
-      set pm(val) {
-        this._pm = val || { any: false, sent: false, recv: false };
-        if (this._pm.any) {
-          this.classes.main.push('whisper');
-          if (this._pm.recv) {
-            this.classes.main.push('received_whisper');
-            this.prefix = 'from ';
-          } else {
-            this.classes.main.push('sent_whisper');
-            this.prefix = 'to ';
-          }
-        }
-      }
-
-      /**
-       * @param {string} val
-       */
-      set user(val) {
-        if (val) this._user = val.toString();
-        else this._user = 'Unknown';
-        if ((this._user === this._self) || this._pm.sent) this.classes.msg.push('is_self');
-      }
-
-      set self(val) {
-        if (val) this._self = val;
-        else this._self = DRMng.UM.user.name;
-      }
-
-      set ign(val) {
-        if (val) this._ign = val;
-        else this._ign = null;
-      }
-
-      get time() {
-        return this._ts.format('mmm d, HH:MM');
-      }
-
-      get ts() {
-        return this._ts.getTime();
-      }
-
-      set ts(val) {
-        if (val instanceof Date) this._ts = val;
-        else if (typeof val === 'number')
-          this._ts = new Date(val.toString().length < 12 ? val * 1000 : val);
-        else this._ts = new Date();
-      }
-
-      set msg(val) {
-        if (typeof val === 'string') {
-          if (this.getRaid(val)) this._msg = this.raid.text;
-          else this._msg = this.formatLinks(val).trim();
-          if (!this._msg) this._msg = null;
-        } else {
-          if (val instanceof DomNode) val = val.node;
-          if (val instanceof Node) this._msg = val;
-          else this._msg = null;
-        }
-      }
-
-      get html() {
-        if (this._type !== 'service') {
-          const p = new DomNode('p').attr({ timestamp: this.ts });
-          if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
-          // Time field + raid link
-          new DomNode('span').attr({ class: 'timestamp' }).txt(this.time)
-                             .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
-                             .attach('to', p);
-          // Extra raid data field
-          if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
-          // User field
-          new DomNode('span')
-            .attr({ username: this._user, class: this.classes.msg.join(' ') })
-            .txt(this.prefix + this._user).attach('to', p);
-          // IGN field
-          if (this._ign)
-            new DomNode('span').attr({ class: 'guildname truncate' }).txt(this._ign).attach('to', p);
-          if (this._msg) {
-            // Separator field
-            new DomNode('span').attr({ class: 'separator' }).txt(': ').attach('to', p);
-            // Message field
-            new DomNode('span').attr({ class: 'message hyphenate' }).data(this._msg).attach('to', p);
-          }
-          p.attach('to', this.body);
-        } else new DomNode('div')
-          .attr({ class: 'script' + this.addClass, style: this.addStyle })
-          .data(this._msg).attach('to', this.body);
-
-        return this.body.node;
-      }
-
-      getRaid(link) {
-        let retVal = false;
-        const match = /(^.*?)(http.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(link);
-        if (match) {
-          const r = Util.getRaidFromUrl(match[2], this._user);
-          if (r) {
-            const vis = Config.visited.indexOf(r.id) > -1;
-            const ded = Util.hasProperty(Config.dead, r.id);
-            const flt = Config.filterRaids[r.boss];
-            const ifo = Config.data.raidData[r.boss];
-            const rnm = [
-              ['n', 'h', 'l', 'nm'][r.diff - 1],
-              ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
-            ];
-            this.classes.main.push('raid', r.id, rnm[0]);
-            if (ded) this.classes.main.push('dead');
-            if (vis) this.classes.main.push('visited');
-
-            this.raid = {
-              link: new DomNode('a')
-                .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(r) })
-                .on('click', DRMng.Raids.joinClick)
-                .txt(rnm.join(' ').toUpperCase()),
-              text: (match[1] + match[3]).trim(),
-              extra: new DomNode('span')
-                .attr({ class: 'extraid' })
-                .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? 'Guild ER' : 'WR/ER') :
-                  `FS ${Util.getShortNumK(
-                    ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : '')
-            };
-
-            if (this._room === 'none' || this._type !== 'game') {
-              const filter = flt ? !flt[r.diff - 1] : true;
-              if (!ded && !vis && filter && DRMng.Raids.filter.indexOf(`@${r.boss}_${r.diff}`) > -1) {
-                if (DRMng.Raids.isJoining) {
-                  setTimeout(DRMng.Raids.pushToQueue.bind(DRMng.Raids, r), 1);
-                } else {
-                  setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
-                }
-              }
-            }
-
-            retVal = true;
-          }
-        }
-        return retVal;
-      }
-
-      formatLinks(msg) {
-        const regLink = /(^|[^"])(https?\S+[^,\s])/g;
-        const regImg = /\.(jpe?g|png|gif)$/;
-        let l, link, prefix, suffix;
-        while ((l = regLink.exec(msg))) {
-          link = regImg.test(l[2]) ?
-            `<img src="${l[2]}" alt="${l[2]}" onclick="window.open(this.src)">` :
-            `<a href="${l[2]}" target="_blank">${l[2].replace(/^https?:\/\//, '')}</a>`;
-          prefix = msg.slice(0, regLink.lastIndex - l[2].length);
-          suffix = msg.slice(regLink.lastIndex);
-          msg = prefix + link + suffix;
-          regLink.lastIndex += link.length - l[2].length;
-        }
-        return msg;
-      }
-    },
-    /**
      * Kongregate module
      */
     Kong: {
@@ -1474,19 +1534,19 @@ function main() {
               d.pm = { sent: d.private || false, recv: d.whisper || false };
               d.pm.any = d.pm.sent || d.pm.recv;
 
-              const msg = new DRMng.Message(b, a, d); // b.a.d message :)
+              const msg = new ChatMessage(b, a, d); // b.a.d message :)
 
-              this.insert(msg.html, null, d.history ? { timestamp: msg.ts } : null);
+              this.insert(msg.html, null, d.history ? { timestamp: msg.timestamp } : null);
               this._messages_count++;
             }
           };
           ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
           ChatDialogue.prototype.serviceMessage = function (cont, raidInfo = null) {
-            const msg = new DRMng.Message(cont, null, { type: 'service' });
+            const msg = new ChatMessage(cont, null, { type: 'service' });
             if (raidInfo) {
               const FPG_CDN_BASE = 'https://content.5thplanetgames.com/dotd_live/images';
-              msg._addClass = ' raidinfo';
-              msg._addStyle = `background-image: url(${FPG_CDN_BASE}/bosses/${raidInfo}.jpg);`;
+              msg.addClass = ' raidinfo';
+              msg.addStyle = `background-image: url(${FPG_CDN_BASE}/bosses/${raidInfo}.jpg);`;
             }
             this.insert(msg.html, null, null);
             this._messages_count++;
@@ -2643,7 +2703,7 @@ function main() {
       init: () => {
         if (typeof io === 'function' && DRMng.UM.user.qualified) {
           DRMng.Engine.client = io
-            .connect(`${DRMng.ServerWS}/${Config.data.server}`,
+            .connect(`${DRMng.serverAddress}/${Config.data.server}`,
               {
                 secure: true,
                 transports: ['websocket'],
@@ -2831,7 +2891,7 @@ function main() {
           const user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
 
           this.client =
-            io.connect(`${DRMng.ServerWS}/${this.conf.channel}`, {
+            io.connect(`${DRMng.serverAddress}/${this.conf.channel}`, {
               query: {
                 user: DRMng.UM.user.name,
                 token: Util.crc32(this.conf.pass)

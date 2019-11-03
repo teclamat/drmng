@@ -1733,7 +1733,7 @@ function main() {
         this.body.style.setProperty('display', 'none');
 
         this.users.html = document.createElement('div');
-        this.users.html.classList.add('chat_tabpane', 'users_in_room clear');
+        this.users.html.classList.add('chat_tabpane', 'users_in_room', 'clear');
 
         this.chat = document.createElement('div');
         this.chat.classList.add('chat_message_window');

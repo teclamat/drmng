@@ -18,7 +18,7 @@
 
 /**
  * Object containing raid info
- * @typedef {Object} raidObject
+ * @typedef {object} raidObject
  * @property {string} id Raid id
  * @property {number} diff Raid difficulty [1-4]
  * @property {string} boss Raid boss name
@@ -29,12 +29,30 @@
  * @property {number} createtime Creation timestamp
  */
 
+/**
+ * @typedef {object} Holodeck
+ * @property {object} Holodeck._chat_window
+ * @property {object} Holodeck._chat_window._rooms_by_type
+ * @property {function(*)} Holodeck.scheduleRender
+ */
+
+/**
+ * @typedef {Holodeck} holodeck
+ */
+
+/**
+ * @typedef {object} active_user
+ * @property {function():string} active_user.username
+ * @property {function():string} active_user.id
+ * @property {function():string} active_user.gameAuthToken
+ */
+
 function main() {
   /**
    * Custom logger class
    * @type {Log}
    */
-  window.Log = class Log {
+  class Log {
     /**
      * Format log message with DRMng specific badge and colors
      * @param {?string} color Custom message color or null for default
@@ -97,13 +115,50 @@ function main() {
     static error(...args) {
       console.error.apply(console, this.drmngify(null, args));
     }
-  };
+  }
+
+  window.Log = Log;
+
+  /**
+   * Enumeration member
+   * @typedef {Symbol} EnumSymbol
+   */
+
+  /**
+   * Enumeration class
+   * @type {Enum}
+   * @property {EnumSymbol} unknown
+   */
+  class Enum {
+    /**
+     * Constructs enumeration
+     * @param {...string} keys Enumeration keys
+     */
+    constructor(...keys) {
+      keys.push('unknown');
+      keys.forEach(key => this[key] = Symbol(key));
+      Object.freeze(this);
+    }
+
+    /**
+     * Converts provided key into enum member (returns unknown symbol if key not found)
+     * @param {string} key String key to convert
+     * @returns {EnumSymbol}
+     */
+    fromString(key) {
+      if (this[key]) return this[key];
+      Log.warn(`{Enum} Unknown key requested: ${key}`);
+      return this[key] || this.unknown;
+    }
+  }
+
+  window.Enum = Enum;
 
   /**
    * DOM nodes creation and manipulation
    * @type {DomNode}
    */
-  window.DomNode = class DomNode {
+  class DomNode {
     /**
      * Creates a Node
      * @param {(string|Node)} element Element to create or reference
@@ -111,9 +166,8 @@ function main() {
     constructor(element) {
       this._node = null;
       if (typeof element === 'string') {
-        this._node = ((element.charAt(0) === '#') ?
-          document.getElementById(element.slice(1)) :
-          document.createElement(element)) || null;
+        this._node = ((element.charAt(0) === '#') ? document.getElementById(element.slice(1))
+                                                  : document.createElement(element)) || null;
       } else if (element instanceof Node) {
         this._node = element;
       }
@@ -158,7 +212,7 @@ function main() {
      * Appends text node to this instance
      * @param {string} [text=''] - Text content to append
      * @param {boolean} [overwrite=false] - If true, clears container content before appending
-     * @returns {Window.DomNode}
+     * @returns {DomNode}
      */
     txt(text = '', overwrite = false) {
       if (typeof text === 'string') {
@@ -172,9 +226,9 @@ function main() {
 
     /**
      * Appends any HTML element to this instance
-     * @param {(string|Node|Window.DomNode)} [element=''] - HTML element(s) to append
+     * @param {(string|Node|DomNode)} [element=''] - HTML element(s) to append
      * @param {boolean} [overwrite=false] - If true, clears container content before appending
-     * @returns {Window.DomNode}
+     * @returns {DomNode}
      */
     html(element = '', overwrite = false) {
       if (overwrite) this.clear();
@@ -189,9 +243,9 @@ function main() {
 
     /**
      * Appends any valid data to this instance
-     * @param {(string|Node|Window.DomNode)} data - Any valid data to append
+     * @param {(string|Node|DomNode)} data - Any valid data to append
      * @param {boolean} [overwrite=false] - If true, clears container content before appending
-     * @returns {Window.DomNode}
+     * @returns {DomNode}
      */
     data(data, overwrite = false) {
       if (data) {
@@ -250,13 +304,15 @@ function main() {
       }
       return this;
     }
-  };
+  }
+
+  window.DomNode = DomNode;
 
   /**
    * Utility class
-   * @type {Window.Util}
+   * @type {Util}
    */
-  window.Util = class Util {
+  class Util {
     /**
      * Creates, updates or removes CSS stylesheet with given ID
      * @param {string} id - Stylesheet id
@@ -302,8 +358,8 @@ function main() {
       if (paramBegin > -1) {
         const paramEnd = query.indexOf('&', paramBegin);
         value = paramEnd < 0 ?
-          query.slice(paramBegin + parameter.length + 1) :
-          query.slice(paramBegin + parameter.length + 1, paramEnd);
+                query.slice(paramBegin + parameter.length + 1) :
+                query.slice(paramBegin + parameter.length + 1, paramEnd);
       }
       return value;
     }
@@ -332,7 +388,7 @@ function main() {
      * @returns {?raidObject}
      */
     static getRaidFromUrl(url, poster = '') {
-      const r = { createtime: new Date().getTime(), poster: poster };
+      const raid = { id: '', diff: -1, boss: '', hash: '', sid: -1, pid: -1, createtime: -1, poster: poster };
       const reg = /[?&]([^=]+)=([^?&]+)/gui;
       const p = url.replace(/&amp;/gui, '&').replace(/kv_&/gui, '&kv_');
       let cnt = 0, i;
@@ -340,33 +396,37 @@ function main() {
         switch (i[1]) {
           case 'kv_raid_id':
           case 'raid_id':
-            r.id = i[2];
-            cnt++;
+            raid.id = i[2];
+            ++cnt;
             break;
           case 'kv_difficulty':
           case 'difficulty':
-            r.diff = parseInt(i[2]);
-            cnt++;
+            raid.diff = parseInt(i[2]);
+            ++cnt;
             break;
           case 'kv_raid_boss':
           case 'raid_boss':
-            r.boss = i[2];
-            cnt++;
+            raid.boss = i[2];
+            ++cnt;
             break;
           case 'kv_hash':
           case 'hash':
-            r.hash = i[2];
-            cnt++;
+            raid.hash = i[2];
+            ++cnt;
             break;
           case 'kv_serverid':
           case 'serverid':
-            r.sid = parseInt(i[2]);
+            raid.sid = parseInt(i[2]);
+            ++cnt;
             break;
         }
       }
-      if (cnt < 4) return null;
-      r.pid = r.sid === 2 ? 0 : 1;
-      return r;
+      if (cnt === 5) {
+        raid.pid = (raid.sid === 2) ? 0 : 1;
+        raid.createtime = new Date().getTime();
+        return raid;
+      }
+      return null;
     }
 
     /**
@@ -446,9 +506,8 @@ function main() {
     static capitalize(text) {
       if (typeof text === 'string' && text.length > 1) {
         return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-      } else {
-        return text;
       }
+      return text;
     }
 
     /**
@@ -460,7 +519,9 @@ function main() {
     static hasProperty(object, property) {
       return Object.prototype.hasOwnProperty.call(object, property);
     }
-  };
+  }
+
+  window.Util = Util;
 
   /**
    * Gestures classes group
@@ -704,9 +765,9 @@ function main() {
 
   /**
    * Handles dynamic CSS rules
-   * @type {Window.CSS}
+   * @type {CSS}
    */
-  window.CSS = class CSS {
+  class CSS {
     /**
      * Adds new CSS rule
      * @param {string} alias - alias for the rule
@@ -762,12 +823,15 @@ function main() {
     static remove() {
       this.node.detach();
     }
-  };
+  }
+
+  window.CSS = CSS;
 
   /**
    * XHR calls proxy
+   * @type {Proxy}
    */
-  window.Proxy = class Proxy {
+  class Proxy {
     /**
      * Calls lightshot service to get real image url
      * @param {string} link - Link with obfuscated lightshot image url
@@ -814,20 +878,22 @@ function main() {
         if (img && c)
           i.on('load',
             () => {
-              setTimeout(() => DRMng.PrivateChat.getChat(c).scrollToBottom(), 250);
+              setTimeout(() => PrivateChat.getChat(c).scrollToBottom(), 250);
             })
            .attr({ src: img })
            .remove('id');
         else i.detach();
       }
     }
-  };
+  }
+
+  window.Proxy = Proxy;
 
   /**
    * Script configuration management
-   * @type {Window.Config}
+   * @type {Config}
    */
-  window.Config = class Config {
+  class Config {
     /**
      * Configuration data object
      * @type {Object}
@@ -889,6 +955,25 @@ function main() {
     }
 
     /**
+     * Contains raid info from server
+     * @typedef {Object} RaidData
+     * @property {string} fName Full raid name
+     * @property {string} sName Short raid name
+     * @property {number[]} hp Health of raid for each difficulty
+     * @property {number} maxPlayers Maximum number of available slots in raid
+     * @property {boolean} isEvent Indicates event raid
+     * @property {boolean} isGuild Indicates guild raid
+     * @property {string} banner Banner image name
+     */
+
+    /**
+     * @type {Object.<string, RaidData>}
+     */
+    static get raidData() {
+      return this.local.raidData;
+    }
+
+    /**
      * Loads localstorage config into data object
      */
     static load() {
@@ -945,16 +1030,85 @@ function main() {
     static save() {
       localStorage['DRMng'] = JSON.stringify(this.local);
     }
-  };
+  }
+
+  window.Config = Config;
+
+  /**
+   * User Manager module
+   * @type {UserManager}
+   */
+  class UserManager {
+    static basicData() {
+      if (active_user && active_user.username().toLowerCase() !== 'guest') {
+        this.user.ID = active_user.id();
+        this.user.name = active_user.username();
+        this.user.authToken = active_user.gameAuthToken();
+        setTimeout(() => this.extendedData(), 0);
+      } else {
+        Log.debug('{UserManager} User data not ready, trying again in .1 sec');
+        setTimeout(() => this.basicData(), 100);
+      }
+    }
+
+    static userNode() {
+      const guild = holodeck._chat_window._rooms_by_type.guild;
+      const users = guild.users();
+      if (users.length > 0) {
+        for (let i = 0, l = users.length; i < l; ++i) {
+          if (users[i].username === this.user.name) {
+            this.user.IGN = users[i]._game_character_name;
+            break;
+          }
+        }
+        this.user.guild = guild._room.name;
+        this.user.qualified = true;
+        Log.info('{UserManager} Module loaded');
+      } else {
+        setTimeout(() => this.userNode(), 100);
+      }
+    }
+
+    static extendedData() {
+      if (holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
+        if (holodeck._chat_window._rooms_by_type.guild) {
+          return setTimeout(() => this.userNode(), 0);
+        } else if (++this.numTries < 20) {
+          Log.debug(`{UserManager} Guild data missing, trying again in 2 sec (${this.numTries}/20)`);
+          return setTimeout(() => this.extendedData(), 2000);
+        } else {
+          Log.warn('{UserManager} Guild info missing.');
+          this.user.guild = '';
+          this.user.IGN = '';
+          this.user.qualified = true;
+          Log.info('{UserManager} Module loaded');
+        }
+      } else {
+        Log.debug('{UserManager} Holodeck not ready, trying again in .1 sec');
+        return setTimeout(() => this.extendedData(), 100);
+      }
+    }
+
+    static load() {
+      this.numTries = 0;
+      this.user = { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null };
+      this.knownUsers = {};
+      Log.debug('{UserManager} Loading user data');
+      setTimeout(() => this.basicData(), 0);
+    }
+  }
+
+  window.UserManager = UserManager;
 
   /**
    * Chat message class
+   * @type {ChatMessage}
    */
-  window.ChatMessage = class ChatMessage {
+  class ChatMessage {
     /**
      * Private message flags
      * @typedef PrivateFlags
-     * @type {object}
+     * @type {Object}
      * @property {boolean} any - Indicates any private message activity
      * @property {boolean} sent - Indicates outgoing private message
      * @property {boolean} recv - Indicates incoming private message
@@ -965,7 +1119,7 @@ function main() {
      * @param {string|Node|Window.DomNode} message Message content
      * @param {?string} [user] User name and optional ign
      * @param {Object} [props={}] Message properties
-     * @param {string} [props.type] Message type
+     * @param {EnumSymbol} [props.type] Message type
      * @param {string} [props.room] Target chat room for message
      * @param {PrivateFlags} [props.pm] Private message flags
      * @param {(number|Date)} [props.timestamp] Message timestamp
@@ -988,16 +1142,21 @@ function main() {
       this.message = message;
     }
 
+    /**
+     * @type {EnumSymbol}
+     */
     get type() {
       return this._type;
     }
+
     set type(value) {
-      this._type = value.type || 'game';
+      this._type = value.type && (value.type !== ChatMessage.Type.unknown) ? value.type : ChatMessage.Type.game;
     }
 
     get room() {
       return this._room;
     }
+
     set room(value) {
       this._room = value.room || 'none';
     }
@@ -1008,6 +1167,7 @@ function main() {
     get whisper() {
       return this._whisper;
     }
+
     set whisper(value) {
       this._whisper = value.pm || { any: false, sent: false, recv: false };
       if (this._whisper.any) {
@@ -1028,8 +1188,9 @@ function main() {
     get user() {
       return this._user;
     }
+
     set user(value) {
-      this._user = value.user || 'Unknown';
+      this._user = value || 'Unknown';
       if ((this._user === this.self) || this.whisper.sent) {
         this.classes.msg.push('is_self');
       }
@@ -1038,13 +1199,15 @@ function main() {
     get self() {
       return this._self;
     }
+
     set self(value) {
-      this._self = value.self || DRMng.UM.user.name;
+      this._self = value.self || UserManager.user.name;
     }
 
     get gameName() {
       return this._gameName;
     }
+
     set gameName(value) {
       this._gameName = value.characterName || null;
     }
@@ -1069,7 +1232,7 @@ function main() {
     }
 
     /**
-     * @type {string|Node|null}
+     * @type {?(string|Node)}
      */
     get message() {
       return this._message;
@@ -1077,7 +1240,8 @@ function main() {
 
     set message(value) {
       if (typeof value === 'string') {
-        if (this.getRaid(value)) {
+        this.raid = value;
+        if (this.raid) {
           this._message = this.raid.text;
         } else {
           this._message = ChatMessage.formatLinks(value);
@@ -1092,7 +1256,7 @@ function main() {
     }
 
     get html() {
-      if (this.type !== 'service') {
+      if (this.type !== ChatMessage.Type.service) {
         const p = new DomNode('p').attr({ timestamp: this.timestamp });
         if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
         // Time field + raid link
@@ -1124,51 +1288,59 @@ function main() {
       return this.body.node;
     }
 
-    getRaid(link) {
-      let retVal = false;
+    /**
+     * @type {?{text: string, link: DomNode, extra: DomNode}}
+     */
+    get raid() {
+      return this._raid;
+    }
+
+    set raid(link) {
+      this._raid = null;
+
       const match = /(^.*?)(http.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(link);
-      if (match) {
-        const r = Util.getRaidFromUrl(match[2], this._user);
-        if (r) {
-          const vis = Config.visited.indexOf(parseInt(r.id)) > -1;
-          const ded = Util.hasProperty(Config.dead, r.id);
-          const flt = Config.filterRaids[r.boss];
-          const ifo = Config.data.raidData[r.boss];
-          const rnm = [
-            ['n', 'h', 'l', 'nm'][r.diff - 1],
-            ifo ? ifo.sName : r.boss.replace(/_/g, ' ')
-          ];
-          this.classes.main.push('raid', r.id, rnm[0]);
-          if (ded) this.classes.main.push('dead');
-          if (vis) this.classes.main.push('visited');
+      if (!match) {
+        return;
+      }
 
-          this.raid = {
-            link: new DomNode('a')
-              .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(r) })
-              .on('click', DRMng.Raids.joinClick)
-              .txt(rnm.join(' ').toUpperCase()),
-            text: (match[1] + match[3]).trim(),
-            extra: new DomNode('span')
-              .attr({ class: 'extraid' })
-              .txt(ifo ? (ifo.isEvent ? (ifo.isGuild ? 'Guild ER' : 'WR/ER') :
-                `FS ${Util.getShortNumK(ifo.hp[r.diff - 1] * 1000 / ifo.maxPlayers)}`) : '')
-          };
+      const raid = Util.getRaidFromUrl(match[2], this.user);
+      if (!raid) {
+        return;
+      }
 
-          if (this.room === 'none' || this.type !== 'game') {
-            const filter = flt ? !flt[r.diff - 1] : true;
-            if (!ded && !vis && filter && DRMng.Raids.filter.indexOf(`@${r.boss}_${r.diff}`) > -1) {
-              if (DRMng.Raids.isJoining) {
-                setTimeout(DRMng.Raids.pushToQueue.bind(DRMng.Raids, r), 1);
-              } else {
-                setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
-              }
-            }
+      const visited = Config.visited.indexOf(parseInt(raid.id)) > -1;
+      const dead = Util.hasProperty(Config.dead, raid.id);
+      const info = Config.raidData[raid.boss];
+      const diff = ['n', 'h', 'l', 'nm'][raid.diff - 1];
+      const name = info ? info.sName : raid.boss.replace(/_/g, ' ');
+
+      this.classes.main.push('raid', raid.id, diff);
+      if (dead) this.classes.main.push('dead');
+      if (visited) this.classes.main.push('visited');
+
+      this._raid = {
+        text: (match[1] + match[3]).trim(),
+        link: new DomNode('a')
+          .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(raid) })
+          .on('click', DRMng.Raids.joinClick)
+          .txt(`${diff} ${name}`.toUpperCase()),
+        extra: new DomNode('span')
+          .attr({ class: 'extraid' })
+          .txt(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') :
+                       `AP ${Util.getShortNumK(info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
+      };
+
+      if (this.room === 'none' || this.type !== ChatMessage.Type.game) {
+        const filterData = Config.filterRaids[raid.boss];
+        const filter = filterData ? !filterData[raid.diff - 1] : true;
+        if (!dead && !visited && filter && DRMng.Raids.filter.indexOf(`@${raid.boss}_${raid.diff}`) > -1) {
+          if (DRMng.Raids.isJoining) {
+            setTimeout(DRMng.Raids.pushToQueue.bind(DRMng.Raids, raid), 1);
+          } else {
+            setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 1);
           }
-
-          retVal = true;
         }
       }
-      return retVal;
     }
 
     static formatLinks(message) {
@@ -1188,7 +1360,1656 @@ function main() {
       }
       return message.trim();
     }
-  };
+  }
+
+  /**
+   * @type {Enum}
+   * @property {EnumSymbol} game
+   * @property {EnumSymbol} guild
+   * @property {EnumSymbol} service
+   */
+  ChatMessage.Type = new Enum('game', 'guild', 'service');
+
+  window.ChatMessage = ChatMessage;
+
+  class PrivateChat {
+
+    constructor(config, forceActive = false) {
+
+      if (PrivateChat.Rooms === undefined) {
+        PrivateChat.Rooms = new Map();
+        PrivateChat.initSbsContainer();
+      }
+
+      this.users = {
+        html: null,
+        count: 0,
+        keys: [],
+        fields: {},
+        add: function(user) {
+          if (user.usr) {
+            const el = {
+              html: null,
+              name: user.usr || null,
+              ign: user.ign || '',
+              guild: user.gld || '',
+              sock: user.sid || null
+            };
+
+            el.html = document.createElement('div');
+            el.html.setAttribute('class', 'userlist');
+
+
+            let span = document.createElement('span');
+            span.setAttribute('class', 'guildtag');
+            span.textContent = PrivateChat.getGuildTag(el.guild) || '\u2014';
+            el.html.appendChild(span);
+
+            span = document.createElement('span');
+            span.setAttribute('class', 'username');
+            span.textContent = el.name;
+            el.html.appendChild(span);
+
+            span = document.createElement('span');
+            span.setAttribute('class', 'userign');
+            if (el.ign) span.textContent = '(' + el.ign + ')';
+            el.html.appendChild(span);
+
+            this.fields[el.name] = el;
+          }
+        },
+      };
+      this.active = forceActive;
+      this.count = null;
+      this.conf = config;
+      this.unr = null;
+      this.tabs = null;
+      this.tabActions = null;
+      this.tab = null;
+      this.body = null;
+      this.input = null;
+      this.inputCnt = null;
+      this.client = null;
+      this.userLock = false;
+      this.messageLock = false;
+      this.messageBuffer = [];
+
+      PrivateChat.Rooms.set(this.conf.channel, this);
+
+      setTimeout(() => this.initTab(), 10);
+    }
+
+    get name() {
+      return this.conf.name;
+    }
+
+    set name(val) {
+      if (this.conf.name === val) return;
+      this.conf.name = val;
+      this.tab.firstChild.textContent = val;
+      this.nameUpdate();
+    }
+
+    set pass(val) {
+      if (this.conf.pass === val) return;
+      this.conf.pass = val;
+      this.client.query.token = Util.crc32(val);
+      setTimeout(() => this.reconnect(), 1000);
+    }
+
+    configUpdate(conf) {
+      this.name = conf.name;
+      this.pass = conf.pass;
+    }
+
+    connect() {
+      Log.debug(`{PrivateChat} io:${typeof io === 'function'} user:${UserManager.user.qualified} bootstrap:${!DRMng.Raids.bootstrap}`);
+      if (typeof io === 'function' && this.tab && this.chat &&
+        UserManager.user.qualified && !DRMng.Raids.bootstrap) {
+
+        if (Config.data.alliance.sbs) {
+          document.getElementById('private_chat_sbs').style.removeProperty('display');
+        } else {
+          this.tab.style.removeProperty('display');
+        }
+
+        const usr = UserManager.user;
+        const user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
+
+        this.client =
+          io.connect(`${DRMng.serverAddress}/${this.conf.channel}`, {
+            query: {
+              user: UserManager.user.name,
+              token: Util.crc32(this.conf.pass)
+            },
+            secure: true,
+            transports: ['websocket']
+          });
+
+        this.client.on('error', err => {
+          Log.warn('{PrivateChat} Client error:', err);
+          document.getElementById('private_chat_sbs').style.setProperty('display', 'none');
+          this.tab.style.setProperty('display', 'none');
+          //destroyChat();
+        });
+
+        this.client.on('disconnect', () => {
+          Log.warn('{PrivateChat} Client disconnected!');
+        });
+
+        this.client.on('connect', () => {
+          this.clearUsers();              // clear user list
+          this.clear();                   // clear chat
+          this.client.emit('join', user); // login to server
+          Log.info('{PrivateChat} User login data [%s|%s|%s]', user.usr, user.ign, user.gld);
+        });
+
+        this.client.on('msg', data => this.messageEvent(data));
+        this.client.on('service', data => this.serviceEvent(data));
+      } else {
+        Log.debug('{PrivateChat} Resources not ready, trying again in 1 sec...');
+        setTimeout(() => this.connect(), 1000);
+      }
+    }
+
+    reconnect() {
+      if (!this.client) {
+        setTimeout(() => this.connect(), 0);
+      } else if (this.client.connected) {
+        this.client.disconnect();
+        setTimeout(() => this.reconnect(), 3000);
+      } else {
+        this.client.connect();
+      }
+    }
+
+    updateUsers() {
+      // update keys
+      this.users.keys = Object.keys(this.users.fields);
+      // sort userlist
+      this.users.keys.sort();
+      // clear list
+      while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
+      // fill it up again
+      this.users.count = this.users.keys.length;
+
+      for (let i = 0; i < this.users.count; ++i)
+        this.users.html.appendChild(this.users.fields[this.users.keys[i]].html);
+
+      this.countUpdate();
+    }
+
+    addUser(user, noUpdate = false) {
+      if (!this.userLock) {
+        this.userLock = true;
+        // TODO: Stop using update and inject field into sorted array
+        this.users.add(user);
+        if (!noUpdate) this.updateUsers();
+        this.userLock = false;
+      } else {
+        setTimeout(() => this.addUser(user, noUpdate), 10);
+      }
+    }
+
+    delUser(name) {
+      if (!this.userLock) {
+        this.userLock = true;
+        if (Util.hasProperty(this.users.fields, name)) {
+          this.users.html.removeChild(this.users.fields[name].html);
+          delete this.users.fields[name];
+          const idx = this.users.keys.indexOf(name);
+          if (idx !== -1) this.users.keys.splice(idx, 1);
+          this.users.count--;
+          this.countUpdate();
+        }
+        this.userLock = false;
+      } else {
+        setTimeout(() => this.delUser(name), 10);
+      }
+    }
+
+    clearUsers() {
+      this.users.keys = [];
+      this.users.count = 0;
+      this.users.fields = {};
+      if (this.users.html)
+        while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
+    }
+
+    countUpdate() {
+      if (this.active && !PrivateChat.sbsActive) {
+        this.count.textContent = this.users.count;
+      }
+    }
+
+    nameUpdate() {
+      if (Config.data.alliance.sbs || !this.active) return;
+      document.querySelector('.room_name.h6').textContent = this.name;
+    }
+
+    static getGuildTag(guild) {
+      const roman = /^(.+\s)([IXV]+)$/.exec(guild);
+      if (roman) guild = roman[1] + Util.romanToArabic(roman[2]);
+      const reg = /([A-Z]+|[\w'`´])[\w'`´]*/g;
+      let tag = '', part;
+      while ((part = reg.exec(guild))) tag += part[1];
+      return tag;
+    }
+
+    setUnread(unset = false) {
+      if (this.unr) this.unr.setAttribute('style', unset ? 'display: none' : '');
+    }
+
+    activate() {
+      if (!Config.data.alliance.sbs) holodeck._chat_window._active_room.hide();
+      if (PrivateChat.getActive()) PrivateChat.getActive().deactivate();
+      this.tab.classList.add('active');
+      //this.tab.style.setProperty(`border-right`, `0`);
+      this.body.style.removeProperty('display');
+      this.setUnread(true);
+      this.active = true;
+      this.nameUpdate();
+      this.countUpdate();
+      setTimeout(() => this.scrollToBottom(true), 100);
+    }
+
+    deactivate() {
+      if (!this.active) return;
+      this.active = false;
+      this.tab.classList.remove('active');
+      this.body.style.display = 'none';
+    }
+
+    tabClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.activate();
+      return false;
+    }
+
+    clear() {
+      while (this.chat.firstChild) this.chat.removeChild(this.chat.firstChild);
+    }
+
+    send(msg) {
+      msg = msg || this.input.value;
+      if (msg && msg !== 'Enter text for chat here') {
+        let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
+        if (pm && pm[1] && pm[2]) {
+          this.client.emit('msg', { type: 1, user: pm[1], text: pm[2] });
+        } else if (holodeck.processChatCommand(msg, this.conf.channel)) {
+          this.client.emit('msg', { type: 0, text: msg });
+        }
+        this.input.value = '';
+      }
+    }
+
+    scrollToBottom(force = false) {
+      if (!this.chat) return;
+      const elHeight = this.chat.lastChild ? this.chat.lastChild.offsetHeight : 0;
+      const chatHeight = this.chat.scrollHeight - this.chat.offsetHeight - this.chat.scrollTop;
+      if (chatHeight <= elHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
+    }
+
+    static initSbsContainer() {
+      if (!this.sbsCreated) {
+        if (document.getElementById('chat_window')) {
+          this.sbsContainer = new DomNode('div')
+            .attr({ id: 'private_chat_sbs' })
+            .style({ display: 'none' })
+            .on('click', e => this.sbsEvent(e))
+            .attach('to', 'chat_tab_pane')
+            .node;
+
+          this.sbsTabs = new DomNode('div')
+            .attr({ id: 'private_chat_sbs_tabs' })
+            .attach('to', this.sbsContainer)
+            .node;
+
+          this.sbsCreated = true;
+          this.sbsActive = Config.data.alliance.sbs || false;
+
+          DRMng.UI.setChatWidth();
+
+          Log.debug('SBS Container initialized');
+        } else {
+          Log.debug('SBS Container failed to init, retry in 10ms');
+          return setTimeout(() => this.initSbsContainer(), 10);
+        }
+      }
+    }
+
+    initTab() {
+      this.tabs = document.getElementById('chat_room_tabs');
+      this.tabActions = document.getElementById('chat_actions_container');
+      const gr = document.getElementById('guild_room_tab');
+      if (PrivateChat.sbsCreated &&
+        this.tabs && this.tabActions && gr &&
+        this.tabActions.parentNode === this.tabs) {
+        this.tab = document.createElement('div');
+        this.tab.setAttribute('id', `drmng_${this.conf.channel}_room_tab`);
+        this.tab.setAttribute('class', 'chat_room_tab drmng_room_tab');
+        //this.tab.style.setProperty('display', 'none');
+
+        this.unr = document.createElement('span');
+        this.unr.setAttribute('class', 'unread_chat_messages spriteall spritegame');
+        this.unr.setAttribute('style', 'display: none');
+        this.unr.innerHTML = 'Unread';
+
+        const a = document.createElement('a');
+        a.setAttribute('href', '#');
+        a.textContent = this.conf.name;
+        a.addEventListener('click', e => this.tabClick(e));
+        a.appendChild(this.unr);
+
+        this.tab.appendChild(a);
+
+        if (PrivateChat.sbsActive) {
+          if (this.active) this.tab.classList.add('active');
+          PrivateChat.sbsTabs.appendChild(this.tab);
+        } else {
+          this.tabs.insertBefore(this.tab, this.tabActions);
+        }
+
+        this.count = document.querySelector('.number_in_room');
+
+        Log.info(`{PrivateChat::${this.name}} Chat tab created.`);
+        setTimeout(() => this.initBody(), 0);
+      } else {
+        Log.debug('{PrivateChat} Tab failed to init, retry in 50ms');
+        setTimeout(() => this.initTab(), 50);
+      }
+    }
+
+    initBody() {
+      if (!PrivateChat.container) {
+        PrivateChat.container = document.getElementById('chat_rooms_container');
+        if (!PrivateChat.container) return setTimeout(() => this.initBody(), 100);
+      }
+
+      if (this.body === null) {
+        this.body = document.createElement('div');
+        this.body.style.setProperty('width', '100%');
+        this.body.style.setProperty('display', 'none');
+
+        this.users.html = document.createElement('div');
+        this.users.html.classList.add('chat_tabpane', 'users_in_room clear');
+
+        this.chat = document.createElement('div');
+        this.chat.classList.add('chat_message_window');
+
+        const inputDiv = document.createElement('div');
+        inputDiv.setAttribute('class', 'chat_controls');
+
+        this.input = document.createElement('textarea');
+        this.input.setAttribute('class', 'chat_input');
+        this.input.value = 'Enter text for chat here';
+
+        this.input.addEventListener('focus', () => {
+          if (this.input.value === 'Enter text for chat here') {
+            this.input.value = '';
+            this.input.style.removeProperty('font-style');
+          }
+        });
+        this.input.addEventListener('blur', () => {
+          if (this.input.value === '') {
+            this.input.value = 'Enter text for chat here';
+            this.input.style.setProperty('font-style', 'italic');
+          }
+        });
+        this.input.addEventListener('keydown', e => {
+          //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
+          if (e.key === 'Enter' && !e.shiftKey) {
+            this.send();
+            e.preventDefault();
+          }
+        });
+        this.input.addEventListener('keyup', () => {
+          if (this.input.value !== 'Enter text for chat here') {
+            let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
+            txt = txt[2] || '';
+            if (this.inputCnt) this.inputCnt.textContent = txt.length;
+          }
+        });
+
+        const cnt = document.createElement('span');
+        cnt.setAttribute('class', 'chat_chars_remaining');
+        cnt.textContent = '0';
+        this.inputCnt = cnt;
+
+        const cntCont = document.createElement('span');
+        cntCont.setAttribute('class', 'chat_char_countdown');
+        cntCont.appendChild(this.inputCnt);
+        cntCont.appendChild(document.createTextNode('/2000'));
+
+        inputDiv.appendChild(this.input);
+        inputDiv.appendChild(cntCont);
+        this.body.appendChild(this.users.html);
+        this.body.appendChild(this.chat);
+        this.body.appendChild(inputDiv);
+
+        Log.info(`{PrivateChat::${this.name}} Chat body created`);
+      }
+
+      if (PrivateChat.sbsActive) {
+        if (this.active) this.body.style.removeProperty('display');
+        PrivateChat.sbsContainer.style.removeProperty('display');
+        PrivateChat.sbsContainer.appendChild(this.body);
+      } else {
+        PrivateChat.sbsContainer.style.setProperty('display', 'none');
+        PrivateChat.container.appendChild(this.body);
+      }
+
+      Log.info(`{PrivateChat::${this.name}} Chat body attached to DOM`);
+
+      DRMng.UI.setChatWidth();
+
+      setTimeout(() => this.connect(), 0);
+    }
+
+    remove() {
+      if (!PrivateChat.sbsActive && this.active) {
+        if (holodeck._chat_window._rooms_by_type.guild) {
+          holodeck._chat_window._rooms_by_type.guild.show();
+        } else {
+          holodeck._chat_window._rooms_by_type.game.show();
+        }
+      }
+
+      this.client.disconnect();
+
+      if (PrivateChat.sbsActive) {
+        PrivateChat.sbsTabs.removeChild(this.tab);
+        PrivateChat.sbsContainer.removeChild(this.body);
+      } else {
+        this.tabs.removeChild(this.tab);
+        PrivateChat.container.removeChild(this.body);
+      }
+
+
+      for (let i = 0, len = Config.data.alliance.rooms.length; i < len; ++i) {
+        if (Config.data.alliance.rooms[i].channel === this.conf.channel) {
+          Config.data.alliance.rooms.splice(i, 1);
+          Config.save();
+          break;
+        }
+      }
+    }
+
+    static sbsEvent(e) {
+      DRMng.UI.handleChatClick(e, true);
+    }
+
+    /**
+     * Service event handler
+     * @param {object} data
+     * @param {string} data.act
+     * @param {string} data.action
+     * @param {object} data.users
+     * @param {Array} data.raids
+     * @param {object} data.data
+     */
+    serviceEvent(data) {
+      // TODO: remove act when users move to new version
+      if (data.act) data.action = data.act;
+      switch (data.action) {
+        case 'loadData':
+          // load users
+          this.userLock = true;
+          this.clearUsers();
+          this.userLock = false;
+
+          Object.keys(data.users).forEach(u => this.addUser(data.users[u], true));
+
+          this.userLock = true;
+          this.updateUsers();
+          this.userLock = false;
+
+          // load history
+          if (data.log.length > 0 && this.chat.childElementCount < 2) {
+            this.messageLock = true;
+            data.log.forEach(log => this.messageEvent(log, true));
+            while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);
+            this.messageLock = false;
+            setTimeout(() => this.scrollToBottom(true), 1000);
+          }
+
+          break;
+
+        case 'userJoin':
+          setTimeout(() => this.addUser(data.user), 0);
+          break;
+
+        case 'userLeave':
+          setTimeout(() => this.delUser(data.user.usr), 0);
+          break;
+
+        case 'allianceRaids':
+          data.raids.forEach(raid => {
+            raid.createtime = new Date(raid.createtime).getTime();
+            DRMng.Raids.insert(raid);
+          });
+          break;
+
+        case 'newRaid':
+          setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, data.data), 0);
+          break;
+
+        case 'fullUpdate':
+          setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, true), 0);
+          break;
+
+        case 'partialUpdate':
+          setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, false), 0);
+          break;
+
+        case 'nukedRaid':
+          setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, data.data), 0);
+          break;
+
+        default:
+          Log.warn('{PrivateChat} Unhandled service data:', data);
+      }
+    }
+
+    messageEvent(data, history = false) {
+      if (data.type === 4) {
+        this.serviceMessage(data.txt);
+      } else if (!this.messageLock || history) {
+        let u = UserManager.user,
+          t = data.type,
+          e = ['username', 'truncate'],
+          f = data.usr.usr === u.name,
+          h = ['', 'From ', 'To ', ''][t],
+          g = [];
+
+        e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
+        h && g.push('whisper');
+        (t === 1) && g.push('received_whisper');
+        (t === 2) && g.push('sent_whisper');
+        f && e.push('is_self');
+
+        let content = PrivateChat.raidMessage(data, g, e, h);
+        if (!content) {
+          let reg = /(https?\S+[^,\s])/g, l, link, start, end, msg = data.txt;
+
+          while ((l = reg.exec(msg))) {
+            if (/\.(jpe?g|a?png|gif)$/.test(l[1])) {
+              link = `<img src="${l[1]}" alt="${l[1]}" onclick="window.open(this.src)">`;
+            } else if (/(prntscr.com|prnt.sc)/.test(l[1])) {
+              let id = `prntsc_${new Date().getTime()}`;
+              link = `<img id="${id}" onclick="window.open(this.src)">`;
+              Proxy.lightShot(l[1], id, this.conf.channel);
+            } else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1]))) {
+              link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
+            } else {
+              link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
+            }
+            start = msg.substr(0, reg.lastIndex - l[1].length);
+            end = msg.slice(reg.lastIndex);
+            msg = start + link + end;
+            reg.lastIndex += link.length - l[1].length;
+          }
+          content = PrivateChat.getMessageHTML({
+            mainCls: g.join(' '),
+            ts: new Date(data.ts).format('mmm d, HH:MM'),
+            pfx: h,
+            user: data.usr.usr,
+            userCls: e.join(' '),
+            ign: data.usr.ign || '',
+            ignCls: data.usr.ign ? 'guildname truncate' : '',
+            tag: PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
+            msg: msg
+          });
+        }
+        const msg = document.createElement('div');
+        msg.setAttribute('class', 'chat-message');
+        if (content instanceof HTMLElement) {
+          msg.appendChild(content);
+        } else {
+          msg.innerHTML = content;
+        }
+        this.chat.appendChild(msg);
+
+        if (this.active) {
+          this.scrollToBottom(f);
+        } else {
+          this.setUnread();
+        }
+      } else {
+        this.messageBuffer.push(data);
+      }
+    }
+
+    serviceMessage(msg, ri) {
+      if (msg) {
+        const p = new DomNode('div').attr({ class: 'chat-message' });
+        new DomNode('div')
+          .attr({ class: `service${ri ? ' raidinfo' : ''}` })
+          .style(ri ?
+            { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
+            {})
+          .data(msg).attach('to', p);
+        if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
+      }
+    }
+
+    static getMessageHTML(d) {
+      let p = new DomNode('p');
+      if (d) {
+        if (d.mainCls) p.attr({ class: d.mainCls });
+
+        // 1st row (header)
+        let hdr = new DomNode('span').attr({ class: 'header' });
+
+        // Time field
+        new DomNode('span')
+          .attr({ class: 'timestamp' })
+          .style({ 'flex-grow': '1' })
+          .txt(d.ts).attach('to', hdr);
+        // Guild tag
+        if (d.tag) {
+          new DomNode('span')
+            .attr({ class: 'sticker' })
+            .txt(d.tag).attach('to', hdr);
+        }
+
+        hdr.attach('to', p);
+
+        // 2nd row
+        hdr = new DomNode('span').style({ display: 'block' });
+
+        // Username
+        new DomNode('span')
+          .attr({ class: d.userCls, username: d.user, ign: d.ign })
+          .txt((d.pfx || '') + d.user).attach('to', hdr);
+        // IGN
+        new DomNode('span')
+          .attr({ class: d.ignCls })
+          .txt(d.ign).attach('to', hdr);
+        // Separator
+        new DomNode('span')
+          .attr({ class: 'separator' })
+          .txt(': ').attach('to', hdr);
+        // Message
+        new DomNode('span')
+          .attr({ class: 'message hyphenate' })
+          .html(d.msg).attach('to', hdr);
+
+        hdr.attach('to', p);
+      }
+      return p.node;
+    }
+
+    static raidMessage(data, pc, uc, pfx) {
+      const msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
+      if (msg) {
+        const r = Util.getRaidFromUrl(msg[2], data.usr.usr);
+        if (r) {
+          const g = this.getGuildTag(data.usr.gld);
+          const v = Config.visited.indexOf(r.id) > -1;
+          const d = Util.hasProperty(Config.dead, r.id);
+          const m = msg[1] + msg[3];
+          const i = Config.data.raidData[r.boss];
+          const n = [];
+          const s = m ? ':' : '';
+          const t = new Date(data.ts).format('mmm d, HH:MM');
+          const u = data.usr.usr;
+          const ign = data.usr.ign;
+
+          pc.push('raid');
+          pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
+          pc.push(r.id);
+          d ? pc.push('dead') : v && pc.push('visited');
+
+          n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
+          n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
+
+          let l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
+          l = `return DRMng.Raids.joinOne(${l});`;
+
+          let f = i ? Util.getShortNumK(i.hp[r.diff - 1] * 1000 / i.maxPlayers) : '';
+          f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : `FS ${f}`}`;
+
+          return `<p class="${pc.join(' ')}">
+                                    <span class="header">
+                                        ${g
+                                          ? `<span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>`
+                                          : ''}
+                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
+                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
+                                    </span>
+                                    <span style="display: flex">
+                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
+                                        ${ign ? `<span class="guildname truncate">${ign}</span>` : ''}
+                                        <span class="separator">${s}</span>
+                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
+                                    </span>
+                                    <span class="message hyphenate">${m}</span>
+                                </p>`;
+        }
+      }
+      return null;
+    }
+
+    static getChat(name) {
+      if (this.Rooms === undefined) {
+        return null;
+      } else {
+        return this.Rooms.get(name) || null;
+      }
+    }
+
+    static getActive(nameOnly = false) {
+      if (this.Rooms === undefined) {
+        return null;
+      }
+      for (let [name, room] of this.Rooms) {
+        if (room.active) return nameOnly ? name : room;
+      }
+      return null;
+    }
+
+    static anyActive() {
+      if (this.Rooms === undefined) {
+        return false;
+      }
+      for (let room of this.Rooms.values()) {
+        if (room.active) return true;
+      }
+      return false;
+    }
+
+    static createAll() {
+      const rooms = Config.data.alliance.rooms;
+      rooms.forEach((room, index) => {
+        if (room.enabled && this.getChat(room.channel) === null) {
+          if (index === 0 && Config.data.alliance.sbs) {
+            Log.debug('Setting up default sbs room');
+            new this(room, true);
+          } else {
+            new this(room);
+          }
+        }
+      });
+    }
+
+    static add() {
+      const elChannel = document.getElementById('DRMng_allianceChnl');
+      const elPasswd = document.getElementById('DRMng_alliancePass');
+
+      if (elChannel.classList.contains('default') ||
+        elPasswd.classList.contains('default')) {
+        return;
+      }
+
+      const rooms = Config.data.alliance.rooms;
+      let replace = -1;
+      rooms.forEach((room, i) => {
+        if (room.channel === elChannel.value) replace = i;
+      });
+
+      const elName = document.getElementById('DRMng_allianceName');
+      const elColor = document.getElementById('DRMng_allianceColor');
+      const isDefaultName = elName.classList.contains('default');
+      const isDefaultColor = elColor.classList.contains('default');
+      const room = {
+        channel: elChannel.value,
+        pass: elPasswd.value,
+        name: isDefaultName ? Util.capitalize(elChannel.value) : elName.value,
+        color: isDefaultColor ? '#336699' : elColor.value,
+        enabled: true
+      };
+
+      this.addOption(room);
+
+      if (replace > -1) {
+        Config.data.alliance.rooms[replace] = room;
+        const r = this.getChat(room.channel);
+        if (r) {
+          r.configUpdate(room);
+        } else {
+          this.createAll();
+        }
+      } else {
+        Config.data.alliance.rooms.push(room);
+        this.createAll();
+      }
+      Config.save();
+    }
+
+    static addOption(room) {
+      const id = `DRMng_privateChat_room_${room.channel}`;
+      const el = new DomNode(`#${id}`);
+      if (!el.empty) {
+        el.node.firstChild.textContent = room.name;
+      } else {
+        new DomNode('div')
+          .attr({ class: 'buttonStripe', id: id })
+          .data(new DomNode('span').txt(room.name))
+          .data(new DomNode('button')
+            .attr({ class: 'l' }).txt('Del')
+            .on('click', () => this.removeChat(id)))
+          .attach('to', 'DRMng_privateChat');
+      }
+    }
+
+    static moveChats() {
+      PrivateChat.sbsActive = Config.data.alliance.sbs;
+
+      for (let room of PrivateChat.Rooms.values()) {
+        if (PrivateChat.sbsActive) {
+          PrivateChat.sbsTabs.appendChild(room.tab);
+          PrivateChat.sbsContainer.appendChild(room.body);
+        } else {
+          room.deactivate();
+          room.tabs.insertBefore(room.tab, room.tabActions);
+          PrivateChat.container.appendChild(room.body);
+        }
+      }
+
+      if (PrivateChat.sbsActive) {
+        holodeck._chat_window._active_room.show();
+        if (!PrivateChat.anyActive()) {
+          PrivateChat.Rooms.values().next().value.activate();
+        }
+      }
+
+      DRMng.UI.setChatWidth();
+    }
+
+    static removeChat(chatID) {
+      const id = chatID.split('_')[3];
+      new DomNode(`#${chatID}`).detach();
+      const chat = this.getChat(id);
+      if (chat) {
+        chat.remove();
+        this.Rooms.delete(id);
+      }
+    }
+  }
+
+  window.PrivateChat = PrivateChat;
+
+  /**
+   * Kongregate module
+   * @type {Kong}
+   */
+  class Kong {
+    /**
+     * Removes google spying scripts
+     */
+    static killScripts() {
+      const scripts = document.querySelectorAll('script');
+      let counter = 0;
+      scripts.forEach(script => {
+        if (script.src && script.src.indexOf('google') > 0) {
+          script.parentNode.removeChild(script);
+          ++counter;
+        }
+      });
+      Log.debug(`{Kong} Removed intrusive script tags (${counter})`);
+    }
+
+    /**
+     * @typedef {object} kong_ads
+     * @property {object} kong_ads._slots
+     * @property {boolean} kong_ads._refreshAds
+     */
+
+    /**
+     * Adjusts kong_ads object
+     */
+    static killAds() {
+      if (typeof kong_ads === 'object') {
+        kong_ads._slots = {};
+        kong_ads._refreshAds = false;
+        Log.debug('{Kong::kong_ads} Adjusted');
+      } else {
+        setTimeout(() => this.killAds(), 10);
+      }
+    }
+
+    /**
+     * Removes FB Like button placed just above kong chat
+     */
+    static killFbLike() {
+      const like = document.getElementById('quicklinks_facebook');
+      if (like) {
+        like.parentNode.removeChild(like);
+        Log.debug(`{Kong} Removed 'FB like'`);
+      } else {
+        setTimeout(() => this.killFbLike(), 50);
+      }
+    }
+
+    /**
+     * Removes dealspot object
+     */
+    static killDealSpot() {
+      const dealSpot = document.getElementById('dealspot_banner_holder');
+      if (dealSpot) {
+        dealSpot.parentNode.removeChild(dealSpot);
+        Log.debug(`{Kong} Removed 'Dealspot banner'`);
+      } else {
+        setTimeout(() => this.killDealSpot(), 50);
+      }
+    }
+
+    /**
+     * Adds reload game and reload chat buttons at the top of the game window
+     */
+    static addReloadButton() {
+      new DomNode('li')
+        .attr({ class: 'spritegame' })
+        .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+        .html(`<a onclick="DRMng.postGameMessage('gameReload');">Reload Game</a>`, true)
+        .attach('to', 'quicklinks');
+
+      new DomNode('li')
+        .attr({ class: 'spritegame' })
+        .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+        .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
+        .attach('to', 'quicklinks');
+    }
+
+    /**
+     * Add Slim button to kong user bar
+     */
+    static addSlimButton() {
+      if (Config.data.kong.kongSlimHeader) {
+        document.body.classList.add('slim');
+      }
+      if (document.getElementById('DRMng_header')) {
+        new DomNode('li')
+          .data(new DomNode('a')
+            .attr({ id: 'DRMng_KongSlimHeader', href: '' })
+            .txt(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
+            .on('click', this.handleSlimButtonClick))
+          .attach('to', 'nav_welcome_box');
+      } else {
+        setTimeout(() => this.addSlimButton(), 1000);
+      }
+    }
+
+    static handleSlimButtonClick(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const isSlim = !Config.data.kong.kongSlimHeader;
+      if (isSlim) {
+        document.body.classList.add('slim');
+        new DomNode('#DRMng_KongSlimHeader').txt('Full', true);
+      } else {
+        document.body.classList.remove('slim');
+        new DomNode('#DRMng_KongSlimHeader').txt('Slim', true);
+      }
+      Config.data.kong.kongSlimHeader = isSlim;
+      return false;
+    }
+
+    static searchFieldIcon() {
+      const element = document.getElementById('nav_search_submit_button');
+      if (element) {
+        element.value = '\uf1c3';
+      } else {
+        setTimeout(() => this.searchFieldIcon(), 100);
+      }
+    }
+
+    /**
+     * Add container for Side-by-Side private chat window
+     */
+    static addSbsChatContainer() {
+      if (document.getElementById('chat_window')) {
+        new DomNode('div')
+          .attr({ id: 'private_chat_sbs' })
+          .style({ display: 'none' })
+          .on('click', PrivateChat.sbsEvent)
+          .attach('to', 'chat_tab_pane');
+      } else {
+        setTimeout(() => this.addSbsChatContainer(), 10);
+      }
+    }
+
+    /**
+     * @typedef {function(*):Node} $
+     */
+
+    /**
+     * @typedef {object} Element
+     * @property {object} Element._insertionTranslations
+     * @property {function(Node, Node)} Element._insertionTranslations.after
+     * @property {object} Element.Methods
+     * @property {function(Node)} Element.Methods.remove
+     * @property {function(Element.Methods)} Element.addMethods
+     */
+
+    /**
+     * Modifies Element object
+     */
+    static modifyElement() {
+      if (Element && Element.Methods) {
+        Element._insertionTranslations.after = (a, b) => {
+          const c = a.parentNode;
+          c && c.insertBefore(b, a.nextSibling);
+        };
+        Element.Methods.remove = a => {
+          a = $(a);
+          const b = a.parentNode;
+          b && b.removeChild(a);
+          return a;
+        };
+        Element.addMethods(Element.Methods);
+        Log.debug('{Kong::Element} Patched');
+      } else {
+        setTimeout(() => this.modifyElement(), 10);
+      }
+    }
+
+    /**
+     * @typedef {object} ChatDialogue
+     * @property {number} ChatDialogue.SCROLL_FUDGE
+     * @property {number} ChatDialogue._messages_count
+     * @property {holodeck} ChatDialogue._holodeck
+     * @property {object} ChatDialogue._message_window_node
+     * @property {function():number} ChatDialogue._message_window_node.getHeight
+     * @property {object} ChatDialogue._user_manager
+     * @property {function(string):boolean} ChatDialogue._user_manager.isMuted
+     */
+
+    /**
+     * Modifies ChatDialogue prototype
+     */
+    static modifyChatDialogue() {
+      if (ChatDialogue) {
+        ChatDialogue.prototype.displayUnsanitizedMessage = function(a, b, c, d) {
+          // ActiveRoom
+          const ar = this._holodeck.chatWindow().activeRoom();
+          // AllowMutes
+          const am = ar && !ar.canUserModerate(ar.self()) || d.whisper;
+
+          if (!am || !this._user_manager.isMuted(a)) {
+            d.self = this._user_manager.username();
+            d.pm = { sent: d.private || false, recv: d.whisper || false };
+            d.pm.any = d.pm.sent || d.pm.recv;
+
+            const msg = new ChatMessage(b, a, d); // b.a.d message :)
+
+            this.insert(msg.html, null, d.history ? { timestamp: msg.timestamp } : null);
+            this._messages_count++;
+          }
+        };
+        ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
+        ChatDialogue.prototype.serviceMessage = function(cont, raidInfo = null) {
+          const msg = new ChatMessage(cont, null, { type: ChatMessage.Type.service });
+          if (raidInfo) {
+            const FPG_CDN_BASE = 'https://content.5thplanetgames.com/dotd_live/images';
+            msg.addClass = ' raidinfo';
+            msg.addStyle = `background-image: url(${FPG_CDN_BASE}/bosses/${raidInfo}.jpg);`;
+          }
+          this.insert(msg.html, null, null);
+          this._messages_count++;
+        };
+        ChatDialogue.prototype.receivedPrivateMessage = function(a) {
+          if (a.data.success) {
+            this.displayUnsanitizedMessage(
+              a.data.from,
+              `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.` +
+              `insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
+              { class: 'whisper received_whisper' },
+              { whisper: true }
+            );
+          } else {
+            this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
+          }
+        };
+        ChatDialogue.prototype.sendPrivateMessage = function(a, b) {
+          this._user_manager.sendPrivateMessage(a, b);
+          this.displayUnsanitizedMessage(a, b,
+            { class: 'whisper sent_whisper' },
+            { private: true }
+          );
+        };
+        ChatDialogue.prototype.sameTimestamps = (a, b) => Math.trunc(a / 60000) === Math.trunc(b / 60000);
+        ChatDialogue.prototype.insert = function(msg, b, opts) {
+          const dialogue = this, chat = this._message_window_node;
+          const height = chat.getHeight();
+          let doScroll = (height > 0) &&
+            (height + chat.scrollTop + ChatDialogue.SCROLL_FUDGE >= chat.scrollHeight);
+
+          holodeck.scheduleRender(() => {
+            if (opts && opts.timestamp) {
+              const newer = Array.from(chat.querySelectorAll('div > p'))
+                                 .filter(node => node.getAttribute('timestamp') > opts.timestamp);
+
+              if (newer.length > 0) {
+                chat.insertBefore(msg, newer[0].parentNode);
+                doScroll = false;
+              } else {
+                chat.appendChild(msg);
+              }
+            } else {
+              chat.appendChild(msg);
+            }
+            doScroll && dialogue.scrollToBottom();
+          });
+        };
+        ChatDialogue.prototype.earliestTimestamp = function() {
+          const node = this._message_window_node.querySelectorAll('div > p');
+          if (node && node.length > 0) {
+            return parseInt(node[0].getAttribute('timestamp')) / 1000;
+          } else {
+            return Math.trunc(new Date().getTime() / 1000);
+          }
+        };
+        ChatDialogue.prototype.clear = function() {
+          const c = this._message_window_node;
+          while (c.lastChild && c.lastChild.nodeName === 'DIV') c.removeChild(c.lastChild);
+          this._messages_count = 0;
+        };
+        Log.debug('{Kong::ChatDialogue} Patched');
+      } else {
+        setTimeout(() => this.modifyChatDialogue(), 10);
+      }
+    }
+
+    /**
+     * @typedef {object} ChatRoom
+     * @property {function():boolean} ChatRoom.isActive
+     * @property {function()} ChatRoom.updateRoomHeader
+     * @property {function(string)} ChatRoom.prototype.checkUserForModeration
+     * @property {ChatDialogue} ChatRoom._chat_dialogue
+     * @property {object} ChatRoom._unread_message_node
+     * @property {function()} ChatRoom._unread_message_node.show
+     */
+
+    /**
+     * Modifies ChatRoom prototype
+     */
+    static modifyChatRoom() {
+      if (ChatRoom) {
+        ChatRoom.prototype.receivedMessage = function(a) {
+          this.isActive() || this._unread_message_node.show();
+          this.checkUserForModeration(a.data.user.username);
+          this._chat_dialogue.displayUnsanitizedMessage(
+            a.data.user.username, a.data.message, {},
+            {
+              characterName: a.data.user.variables.game_character_name,
+              timestamp: a.data.timestamp,
+              history: a.data.history,
+              room: this._room.name,
+              type: ChatMessage.Type.fromString(this._room.type)
+            }
+          );
+        };
+        ChatRoom.prototype.show = function() {
+          if (!PrivateChat.sbsActive &&
+            PrivateChat.anyActive()) {
+            PrivateChat.getActive().deactivate();
+          }
+          this._node.show();
+          this.updateRoomHeader();
+          this._chat_actions_node.show();
+          this._tab_for_room.addClassName('active');
+          this._unread_message_node.hide();
+          this.scrollToBottom();
+        };
+        ChatRoom.prototype.isActive = function() {
+          return !(!PrivateChat.sbsActive &&
+            PrivateChat.anyActive()) &&
+            (this === this._chat_window.activeRoom());
+        };
+        Log.debug('{Kong::ChatRoom} Patched');
+      } else {
+        setTimeout(() => this.modifyChatRoom(), 10);
+      }
+    }
+
+    /**
+     * @typedef {object} KonduitEvent
+     * @property {string} ROOM_MESSAGE
+     */
+
+    /**
+     * @typedef {object} FayeEventDispatcher
+     * @property {function(*):boolean} FayeEventDispatcher.checkDuplicateMessage
+     * @property {object} FayeEventDispatcher._holodeckEventDispatcher
+     * @property {function(object)} FayeEventDispatcher._holodeckEventDispatcher.fire
+     */
+
+    /**
+     * Modifies FayeEvent (part of guild chat API)
+     */
+    static modifyFayeEvent() {
+      if (FayeEventDispatcher) {
+        FayeEventDispatcher.prototype.message = function(a, b) {
+          if (this.checkDuplicateMessage(b)) {
+            return;
+          }
+          if (b.kuid === '0') {
+            this._holodeckEventDispatcher.fire({
+              type: KonduitEvent.SYSTEM_MESSAGE,
+              data: {
+                data: b.data,
+                timestamp: b.timestamp * 1000,
+                room: a
+              }
+            })
+          } else {
+            this._holodeckEventDispatcher.fire({
+              type: KonduitEvent.ROOM_MESSAGE,
+              data: {
+                history: b.history,
+                message: b.text,
+                timestamp: b.timestamp * 1000,
+                room: a,
+                user: FayeUserTransformer.transformUser(b)
+              }
+            });
+          }
+        };
+        Log.debug('{Kong::FayeEventDispatcher} Patched');
+      } else {
+        setTimeout(() => this.modifyFayeEvent(), 10);
+      }
+    }
+
+    /**
+     * Modifies FayeHistory (part of guild chat API)
+     */
+    static modifyFayeHistory() {
+      if (FayeHistoryService) {
+        FayeHistoryService.prototype.fetchHistory = function(a, b, c) {
+          const self = this;
+          this._makeAjaxRequest(a, b, c).then(b => {
+            $j.each(b.history, (b, c) => {
+              c.push(true);
+              self.trigger('message', a, FayeMessageTransformer.transform(c));
+            });
+            self.trigger('history', a, b.history.length);
+          });
+        };
+        Log.debug('{Kong::FayeHistory} Patched');
+      } else {
+        setTimeout(() => this.modifyFayeHistory(), 10);
+      }
+    }
+
+    /**
+     * Modifies FayeTransformer function (part of guild chat API)
+     */
+    static modifyFayeTransformer() {
+      if (FayeMessageTransformer) {
+        FayeMessageTransformer.transform = a => {
+          a = {
+            version: a[0],
+            kuid: a[1],
+            uuid: a[2],
+            text: a[3],
+            timestamp: a[4],
+            user_id: a[5],
+            username: a[6],
+            character_name: a[7],
+            level: a[8],
+            admin: 0 <= a[10].indexOf('a'),
+            developer: 0 <= a[10].indexOf('d'),
+            mobile: 0 <= a[10].indexOf('m'),
+            premium: 0 <= a[10].indexOf('p'),
+            guid: a[9],
+            history: a[12] || false,
+            type: 'chat'
+          };
+          if (a.kuid === '0') {
+            a.data = JSON.parse(a.text);
+            a.type = a.data.type;
+          }
+          return a;
+        };
+        Log.debug('{Kong::FayeTransformer} Patched');
+      } else {
+        setTimeout(() => this.modifyFayeTransformer(), 10);
+      }
+    }
+
+    /**
+     * Modifies chat commands processing inside Holodeck
+     */
+    static modifyHolodeck() {
+      if (Holodeck) {
+        Holodeck.prototype.processChatCommand = function(command, ally) {
+          const cmd = ((command.match(/^\/([^\s]+)/) || [])[1] || '').toLowerCase();
+          if (this._chat_commands[cmd]) {
+            const chat = ally ? PrivateChat.getChat(ally) : this;
+            return this._chat_commands[cmd].detect(b => !b(chat, command)) === undefined;
+          } else {
+            return true;
+          }
+        };
+        Log.debug('{Kong::Holodeck} Patched');
+      } else {
+        setTimeout(() => this.modifyHolodeck(), 10);
+      }
+    }
+
+    /**
+     * Custom chat commands injector
+     */
+    static addChatCommand(cmd, call) {
+      cmd = cmd instanceof Array ? cmd : [cmd];
+      cmd.forEach(c => holodeck.addChatCommand(c, call));
+    }
+
+    /**
+     * Definition of all supported chat commands
+     */
+    static addChatCommands() {
+      if (holodeck && holodeck.ready) {
+        this.addChatCommand(['kiss', 'hit', 'poke', 'slap'], (chat, cmd) => {
+          const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
+          if (part) {
+            const command = Util.capitalize(part[1]);
+            const gesture = Gestures[command].generate()
+                                             .replace('@from', UserManager.user.name)
+                                             .replace('@who', part[2]);
+            const gestureText = `** ${gesture} **`;
+
+            if (chat instanceof Holodeck) {
+              chat.filterOutgoingMessage(gestureText, chat._active_dialogue._onInputFunction);
+            } else {
+              chat.send(gestureText);
+            }
+          }
+          return false;
+        });
+        this.addChatCommand('perc', (a, b) => {
+          let pval = /.+\s(\d+)(\w?)/.exec(b);
+          if (pval) {
+            let mul = 1;
+            switch (pval[2]) {
+              case 'k':
+                mul *= 1000;
+                break;
+              case 'm':
+                mul *= 1000000;
+                break;
+            }
+            pval = parseInt(pval[1]) || 0;
+            pval *= mul;
+          } else {
+            pval = 0;
+          }
+
+          const D = [
+            { val: 1, bok: ['Brown', 'Grey'], bokp: [50, 50] },
+            { val: 4000, bok: ['Brown', 'Grey', 'Green'], bokp: [33, 34, 33] },
+            { val: 6000, bok: ['Grey', 'Green'], bokp: [50, 50] },
+            { val: 10000, bok: ['Grey', 'Green', 'Blue'], bokp: [33, 34, 33] },
+            { val: 14000, bok: ['Green', 'Blue'], bokp: [50, 50] },
+            { val: 16000, bok: ['Green', 'Blue', 'Purple'], bokp: [33, 34, 33] },
+            { val: 18000, bok: ['Blue', 'Purple'], bokp: [50, 50] },
+            { val: 22000, bok: ['Blue', 'Purple', 'Orange'], bokp: [33, 34, 33] },
+            { val: 24000, bok: ['Purple', 'Orange'], bokp: [50, 50] },
+            { val: 30000, bok: ['Orange'], bokp: [100] },
+            { val: 33000, bok: ['Orange', 'Red'], bokp: [75, 25] },
+            { val: 36000, bok: ['Orange', 'Red'], bokp: [50, 50] },
+            { val: 50000, bok: ['Orange', 'Red'], bokp: [25, 75] },
+            { val: 70000, bok: ['Red'], bokp: [100] },
+            { val: 80000, bok: ['Red', 'Bronze'], bokp: [75, 25] },
+            { val: 90000, bok: ['Red', 'Bronze'], bokp: [50, 50] },
+            { val: 100000, bok: ['Red', 'Bronze'], bokp: [25, 75] },
+            { val: 110000, bok: ['Bronze', 'Silver'], bokp: [75, 25] },
+            { val: 120000, bok: ['Bronze', 'Silver'], bokp: [50, 50] },
+            { val: 130000, bok: ['Bronze', 'Silver'], bokp: [25, 75] },
+            { val: 140000, bok: ['Silver'], bokp: [100] },
+            { val: 150000, bok: ['Silver', 'Gold'], bokp: [75, 25] },
+            { val: 160000, bok: ['Silver', 'Gold'], bokp: [50, 50] },
+            { val: 170000, bok: ['Silver', 'Gold'], bokp: [25, 75] },
+          ];
+
+          let t = document.createElement('table'), row, cell, s;
+          t.setAttribute('cellspacing', '0');
+          t.style.setProperty('width', '100%');
+          t.style.setProperty('font-weight', '300');
+          t.style.setProperty('font-size', '10px');
+
+          for (let i = 0, l = D.length; i < l; ++i) {
+            if (D[i].val >= pval || i === l - 1) {
+              row = document.createElement('tr');
+              cell = document.createElement('td');
+              cell.style.setProperty('background', '#303030');
+              cell.style.setProperty('border-right', '1px solid #000000');
+              cell.style.setProperty('border-bottom', '1px solid #000000');
+              cell.style.setProperty('padding-right', '5px');
+              cell.style.setProperty('text-align', 'right');
+              cell.style.setProperty('width', '30px');
+              cell.textContent = D[i].val > 1000 ? `${D[i].val / 1000}k` : D[i].val;
+              row.appendChild(cell);
+              cell = document.createElement('td');
+              cell.style.setProperty('border-bottom', '1px solid #000000');
+              cell.style.setProperty('border-right', '1px solid #000000');
+              cell.style.setProperty('width', '80%');
+              for (let j = 0; j < D[i].bok.length; j++) {
+                s = document.createElement('span');
+                s.style.setProperty('width', D[i].bokp[j] + '%');
+                s.style.setProperty('background-color', D[i].bok[j]);
+                s.style.setProperty('display', 'inline-block');
+                s.textContent = D[i].bok[j];
+                cell.appendChild(s);
+              }
+              row.appendChild(cell);
+              t.appendChild(row);
+            }
+          }
+
+          let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
+          if (chat) chat.serviceMessage(t);
+
+          return false;
+        });
+        this.addChatCommand(['reload', 'reloaf', 'relaod', 'rl'], (_, cmd) => {
+          const type = /^\/\w+\s?(.*)$/.exec(cmd)[1];
+          switch (type) {
+            case 'game':
+              DRMng.postGameMessage('gameReload');
+              break;
+            case 'chat':
+              DRMng.postGameMessage('chatReload');
+              break;
+            default:
+              window.gameLoader.loadGame('');
+          }
+          return false;
+        });
+        this.addChatCommand('clear', chat => {
+          chat = chat instanceof Holodeck ? chat._active_dialogue : chat;
+          chat.clear();
+          return false;
+        });
+        this.addChatCommand('kill', (_, cmd) => {
+          const mode = /^\/kill\s?(.*)$/.exec(cmd)[1];
+          switch (mode) {
+            case 'game':
+              DRMng.postGameMessage('killGame');
+              break;
+            case 'chat':
+              DRMng.postGameMessage('killChat');
+              break;
+            default:
+              new DomNode('#gameiframe').attr({ src: '' });
+          }
+          return false;
+        });
+        this.addChatCommand('wiki', (_, cmd) => {
+          const val = /^\/wiki (.+)$/.exec(cmd);
+          if (val) {
+            window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${encodeURI(val[1])}`, '_blank');
+          }
+          return false;
+        });
+        this.addChatCommand('enc', (_, cmd) => {
+          const val = /^\/enc (.+)$/.exec(cmd);
+          if (val) {
+            window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(val[1])}`, '_blank');
+          }
+          return false;
+        });
+        this.addChatCommand(['ver', 'version', 'update'], chat => {
+          if (chat instanceof Holodeck) {
+            chat = chat._active_dialogue;
+          }
+          Kong.serviceMsg(DRMng.About.versionHtml, chat);
+          return false;
+        });
+        this.addChatCommand(['raid', 'rd'], (chat, cmd) => {
+          const comm = /^\/(raid|rd) (.+)$/.exec(cmd);
+          if (chat instanceof Holodeck) {
+            chat = chat._active_dialogue;
+          }
+          if (comm) {
+            const raid = comm[2].toLowerCase();
+            const rarr = raid.split(' ');
+            const data = Config.data.raidData;
+            const fnd = [];
+
+            Object.keys(data).forEach(rd => {
+              const rn = data[rd].fName.toLowerCase();
+              if (rarr.reduce((a, v) => a && rd.indexOf(v) > -1, true) ||
+                rarr.reduce((a, v) => a && rn.indexOf(v) > -1, true)) {
+                fnd.push([rd, data[rd].fName]);
+              }
+            });
+
+            if (fnd.length > 1) {
+              const raidPicker = fnd.reduce((a, f) =>
+                `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`, '');
+              chat && chat.serviceMessage('Multiple results found, pick one:' + raidPicker);
+            } else if (fnd.length === 1) {
+              chat && chat.serviceMessage(DRMng.UI.raidInfo(fnd[0][0]), data[fnd[0][0]].banner);
+            } else {
+              chat && chat.serviceMessage('No info found matching ' + raid);
+            }
+          } else {
+            chat && chat.serviceMessage('Wrong /raid or /rd syntax');
+          }
+          return false;
+        });
+        Log.debug('{Kong} Chat commands added');
+      } else {
+        setTimeout(() => this.addChatCommands(), 100);
+      }
+    }
+
+    /**
+     * Relocates Chat options button
+     */
+    static moveChatOptions() {
+      const src = document.getElementById('chat_actions_container');
+      const dst = document.getElementById('chat_room_tabs');
+      if (src && dst) {
+        dst.appendChild(src);
+      } else {
+        setTimeout(() => this.moveChatOptions(), 10);
+      }
+    }
+
+    /**
+     * Call all modifications
+     */
+    static modifyKongEngine() {
+      this.modifyHolodeck();
+      this.modifyChatRoom();
+      this.modifyChatDialogue();
+      this.modifyFayeEvent();
+      this.modifyFayeTransformer();
+      this.modifyFayeHistory();
+      this.modifyElement();
+    }
+
+    /**
+     * Sets kongregate header width to match game frame
+     */
+    static setHeaderWidth() {
+      document.getElementById('header').style.width =
+        `${document.getElementById('maingame').offsetWidth}px`;
+    }
+
+    /**
+     * Resize game frame to account for inactive/hidden world chat
+     */
+    static hideWorldChat() {
+      const opts = Config.data.gameFrame;
+      new DomNode('#game')
+        .style({ width: (opts.hideWChat || opts.removeWChat) ? '760px' : '1025px' });
+    }
+
+    static setWrapperWidth(w) {
+      const width = w ? `calc(100% - ${w}px)` : '100%';
+      new DomNode('#primarywrap').style({ width: width });
+      new DomNode('#headerwrap').style({ width: width });
+    }
+
+    /**
+     * Removes iFrames leaving only one with game
+     */
+    static killIFrames() {
+      document.querySelectorAll('iframe').forEach(ifr => {
+        if (ifr.id !== 'gameiframe') ifr.parentNode.removeChild(ifr);
+      });
+      Log.debug('{Kong} Removed all redundant iFrames');
+    }
+
+    static serviceMsg(msg, chat) {
+      if (!chat) {
+        chat = PrivateChat.anyActive() ? PrivateChat.getActive() : holodeck._active_dialogue;
+      }
+      if (chat) {
+        chat.serviceMessage(msg);
+      } else if (!holodeck) {
+        setTimeout(() => this.serviceMsg(msg, chat), 50);
+      }
+    }
+
+    static load() {
+      document.body.classList.add('premium_user');
+      document.body.classList.remove('spotlight_ad_creative-control');
+      this.killAds();
+      this.killScripts();
+      this.killFbLike();
+      this.killDealSpot();
+      this.addSlimButton();
+      this.addReloadButton();
+      //this.addSbsChatContainer();
+      this.searchFieldIcon();
+      this.modifyKongEngine();
+      this.addChatCommands();
+      this.setWrapperWidth();
+      setTimeout(() => this.moveChatOptions(), 500);
+      //setTimeout(this.killIframes, 5000);
+
+      // Open Sans font used by scripts theme
+      new DomNode('link')
+        .attr({
+          href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
+          rel: 'stylesheet'
+        })
+        .attach('to', document.head);
+
+      // Kong theme
+      new DomNode('link')
+        .attr({
+          id: 'DRMng_kongCSS',
+          href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css',
+          //href: 'https://mutikt.ml/kong_dark.css',
+          rel: 'stylesheet'
+        })
+        .on('load', () => this.setHeaderWidth())
+        .attach('to', document.head);
+
+      Log.info('{Kong} Module loaded');
+    }
+  }
+
+  window.Kong = Kong;
 
   window.DRMng = {
     serverAddress: 'wss://mutikt.ml:3000',
@@ -1230,7 +3051,7 @@ function main() {
       right: false,
       redraw: false,
       clicked: null,
-      calc: function (e) {
+      calc: function(e) {
         if (this.pane === null) return false;
         this.rect = this.pane.getBoundingClientRect();
         this.x = e.clientX - this.rect.left;
@@ -1238,7 +3059,7 @@ function main() {
         this.right = this.regRight && this.x > this.rect.width - 7 && this.x < this.rect.width + 7;
         return true;
       },
-      findPane: function (e) {
+      findPane: function(e) {
         let p = e.target, idx;
         while (p && p.nodeName !== 'BODY') {
           idx = this.regPanes.indexOf(p.id);
@@ -1256,11 +3077,11 @@ function main() {
           p = p.parentNode;
         }
       },
-      onMouseDown: function (e) {
+      onMouseDown: function(e) {
         this.findPane(e);
         if (this.calc(e)) this.onDown(e);
       },
-      onDown: function (e) {
+      onDown: function(e) {
         let isResizing = this.left || this.right;
         if (isResizing) e.preventDefault();
         this.clicked = {
@@ -1279,12 +3100,12 @@ function main() {
         this.animate();
       },
       hold: false,
-      resetHold: function () {
+      resetHold: function() {
         this.hold = false;
         //console.log(this);
         if (!(this.right || this.left)) document.body.style.removeProperty('cursor');
       },
-      onMove: function (e) {
+      onMove: function(e) {
         if (this.hold) return;
         if (this.clicked === null) {
           this.findPane(e);
@@ -1293,7 +3114,7 @@ function main() {
         }
         this.onMoveProgress(e);
       },
-      onMoveProgress: function (e) {
+      onMoveProgress: function(e) {
         if (!this.calc(e)) return;
         if (this.right || this.left) document.body.style.cursor = 'ew-resize';
         //if (this.right || this.left) this.pane.style.cursor = `ew-resize`;
@@ -1303,7 +3124,7 @@ function main() {
         this.ev = e;
         this.redraw = true;
       },
-      onUp: function () {
+      onUp: function() {
         document.body.style.removeProperty('cursor');
         if (this.pane) {
           const p = this.pane;
@@ -1314,7 +3135,7 @@ function main() {
               Config.data.kong.chatWidth =
                 Config.data.alliance.sbs ? Math.trunc((w - 7) / 2) : w;
               Config.save();
-              DRMng.Kong.setHeaderWidth();
+              Kong.setHeaderWidth();
               break;
             case 'DRMng_main':
               Config.data.scriptWidth = parseInt(p.style.width.replace('px', ''));
@@ -1328,7 +3149,7 @@ function main() {
         this.clicked = null;
         this.pane = null;
       },
-      animate: function () {
+      animate: function() {
         if (this.clicked) requestAnimationFrame(this.animate.bind(this));
         if (!this.redraw) return;
         this.redraw = false;
@@ -1339,10 +3160,10 @@ function main() {
           if (this.clicked.left) {
             this.pane.style.width = w + 'px';
           }
-          if (this.pane.id === 'DRMng_main') DRMng.Kong.setWrapperWidth(w);
+          if (this.pane.id === 'DRMng_main') Kong.setWrapperWidth(w);
         }
       },
-      init: function () {
+      init: function() {
         document.addEventListener('mousemove', this.onMove.bind(this));
         document.addEventListener('mouseup', this.onUp.bind(this));
         //this.animate();
@@ -1375,688 +3196,6 @@ function main() {
       }
     },
     /**
-     * Kongregate module
-     */
-    Kong: {
-      /**
-       * Removes google spying scripts
-       */
-      killScripts: () => {
-        const scr = document.querySelectorAll('script');
-        let counter = 0;
-        scr.forEach(s => {
-          if (s.src && s.src.indexOf('google') > 0) {
-            s.parentNode.removeChild(s);
-            counter++;
-          }
-        });
-        Log.debug(`{Kong} Removed intrusive script tags (${counter})`);
-      },
-      /**
-       * Adjusts kong_ads object
-       */
-      killAds: () => {
-        if (typeof window.kong_ads === 'object') {
-          window.kong_ads._slots = {};
-          window.kong_ads._refreshAds = false;
-          Log.debug('{Kong::kong_ads} Adjusted');
-        } else {
-          setTimeout(DRMng.Kong.killAds, 10);
-        }
-      },
-      /**
-       * Removes FB Like button placed just above kong chat
-       */
-      killFBlike: () => {
-        const like = document.getElementById('quicklinks_facebook');
-        if (like) {
-          like.parentNode.removeChild(like);
-          Log.debug('{Kong} Removed \'FB like\'');
-        } else {
-          setTimeout(DRMng.Kong.killFBlike, 50);
-        }
-      },
-      /**
-       * Removes dealspot object
-       */
-      killDealSpot: () => {
-        const ds = document.getElementById('dealspot_banner_holder');
-        if (ds) {
-          ds.parentNode.removeChild(ds);
-          Log.debug('{Kong} Removed \'Dealspot banner\'');
-        } else {
-          setTimeout(DRMng.Kong.killDealSpot, 50);
-        }
-      },
-      /**
-       * Adds reload game and reload chat buttons at the top of the game window
-       */
-      addReloadButton: () => {
-        new DomNode('li')
-          .attr({ class: 'spritegame' })
-          .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
-          .html('<a onclick="DRMng.postGameMessage(\'gameReload\');">Reload Game</a>', true)
-          .attach('to', 'quicklinks');
-
-        new DomNode('li')
-          .attr({ class: 'spritegame' })
-          .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
-          .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
-          .attach('to', 'quicklinks');
-      },
-      /**
-       * Add Slim button to kong user bar
-       */
-      addSlimButton: () => {
-        if (Config.data.kong.kongSlimHeader &&
-          document.body.className.indexOf('slim') === -1) {
-          document.body.className += ' slim';
-        }
-
-        if (document.getElementById('DRMng_header')) {
-          new DomNode('li')
-            .data(new DomNode('a')
-              .attr({ id: 'DRMng_KongSlimHeader', href: '' })
-              .txt(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
-              .on('click', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                const isSlim = !Config.data.kong.kongSlimHeader;
-                if (isSlim) {
-                  document.body.classList.add('slim');
-                  new DomNode('#DRMng_KongSlimHeader').txt('Full', true);
-                } else {
-                  document.body.classList.remove('slim');
-                  new DomNode('#DRMng_KongSlimHeader').txt('Slim', true);
-                }
-                Config.data.kong.kongSlimHeader = isSlim;
-                return false;
-              }))
-            .attach('to', 'nav_welcome_box');
-        } else {
-          setTimeout(DRMng.Kong.addSlimButton, 1000);
-        }
-      },
-      searchFieldIcon: () => {
-        const el = document.getElementById('nav_search_submit_button');
-        if (el) {
-          el.value = '\uf1c3';
-        } else {
-          setTimeout(DRMng.Kong.searchFieldIcon, 100);
-        }
-      },
-      /**
-       * Add container for Side-by-Side private chat window
-       */
-      addSbsChatContainer: () => {
-        if (document.getElementById('chat_window')) {
-          new DomNode('div')
-            .attr({ id: 'private_chat_sbs' })
-            .style({ display: 'none' })
-            .on('click', DRMng.PrivateChat.sbsEvent)
-            .attach('to', 'chat_tab_pane');
-        } else {
-          setTimeout(DRMng.Kong.addSbsChatContainer, 10);
-        }
-      },
-      /**
-       * Modifies Element object
-       */
-      modifyElement: () => {
-        if (Element && Element.Methods) {
-          Element._insertionTranslations.after = (a, b) => {
-            const c = a.parentNode;
-            c && c.insertBefore(b, a.nextSibling);
-          };
-          Element.Methods.remove = a => {
-            a = $(a);
-            const b = a.parentNode;
-            b && b.removeChild(a);
-            return a;
-          };
-          Element.addMethods(Element.Methods);
-          Log.debug('{Kong::Element} Patched');
-        } else setTimeout(DRMng.Kong.modifyElement, 10);
-      },
-      /**
-       * Modifies ChatDialogue prototype
-       */
-      modifyChatDialogue: () => {
-        if (ChatDialogue) {
-          ChatDialogue.prototype.displayUnsanitizedMessage = function (a, b, c, d) {
-            // ActiveRoom
-            const ar = this._holodeck.chatWindow().activeRoom();
-            // AllowMutes
-            const am = ar && !ar.canUserModerate(ar.self()) || d.whisper;
-
-            if (!am || !this._user_manager.isMuted(a)) {
-              d.self = this._user_manager.username();
-              d.pm = { sent: d.private || false, recv: d.whisper || false };
-              d.pm.any = d.pm.sent || d.pm.recv;
-
-              const msg = new ChatMessage(b, a, d); // b.a.d message :)
-
-              this.insert(msg.html, null, d.history ? { timestamp: msg.timestamp } : null);
-              this._messages_count++;
-            }
-          };
-          ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
-          ChatDialogue.prototype.serviceMessage = function (cont, raidInfo = null) {
-            const msg = new ChatMessage(cont, null, { type: 'service' });
-            if (raidInfo) {
-              const FPG_CDN_BASE = 'https://content.5thplanetgames.com/dotd_live/images';
-              msg.addClass = ' raidinfo';
-              msg.addStyle = `background-image: url(${FPG_CDN_BASE}/bosses/${raidInfo}.jpg);`;
-            }
-            this.insert(msg.html, null, null);
-            this._messages_count++;
-          };
-          ChatDialogue.prototype.receivedPrivateMessage = function (a) {
-            if (a.data.success) {
-              this.displayUnsanitizedMessage(
-                a.data.from,
-                `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.` +
-                `insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
-                { class: 'whisper received_whisper' },
-                { whisper: true }
-              );
-            } else {
-              this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
-            }
-          };
-          ChatDialogue.prototype.sendPrivateMessage = function (a, b) {
-            this._user_manager.sendPrivateMessage(a, b);
-            this.displayUnsanitizedMessage(a, b,
-              { class: 'whisper sent_whisper' },
-              { private: true }
-            );
-          };
-          ChatDialogue.prototype.sameTimestamps = (a, b) => parseInt(a / 60000) === parseInt(b / 60000);
-          ChatDialogue.prototype.insert = function (msg, b, opts) {
-            const dialogue = this, chat = this._message_window_node;
-            const height = chat.getHeight();
-            let doScroll = (height > 0) &&
-              (height + chat.scrollTop + ChatDialogue.SCROLL_FUDGE >= chat.scrollHeight);
-
-            holodeck.scheduleRender(() => {
-              if (opts && opts.timestamp) {
-                const newer = Array.from(chat.querySelectorAll('div > p'))
-                                   .filter(node => node.getAttribute('timestamp') > opts.timestamp);
-
-                if (newer.length > 0) {
-                  chat.insertBefore(msg, newer[0].parentNode);
-                  doScroll = false;
-                } else {
-                  chat.appendChild(msg);
-                }
-              } else {
-                chat.appendChild(msg);
-              }
-              doScroll && dialogue.scrollToBottom();
-            });
-          };
-          ChatDialogue.prototype.earliestTimestamp = function () {
-            const node = this._message_window_node.querySelectorAll('div > p');
-            if (node && node.length > 0) {
-              return parseInt(node[0].getAttribute('timestamp')) / 1000;
-            } else {
-              return parseInt(new Date().getTime() / 1000);
-            }
-          };
-          ChatDialogue.prototype.clear = function () {
-            const c = this._message_window_node;
-            while (c.lastChild && c.lastChild.nodeName === 'DIV') c.removeChild(c.lastChild);
-            this._messages_count = 0;
-          };
-          Log.debug('{Kong::ChatDialogue} Patched');
-        } else {
-          setTimeout(DRMng.Kong.modifyChatDialogue, 10);
-        }
-      },
-      /**
-       * Modifies ChatRoom prototype
-       */
-      modifyChatRoom: () => {
-        if (ChatRoom) {
-          ChatRoom.prototype.receivedMessage = function (a) {
-            this.isActive() || this._unread_message_node.show();
-            this.checkUserForModeration(a.data.user.username);
-            this._chat_dialogue.displayUnsanitizedMessage(
-              a.data.user.username, a.data.message, {},
-              {
-                characterName: a.data.user.variables.game_character_name,
-                timestamp: a.data.timestamp,
-                history: a.data.history,
-                room: this._room.name,
-                type: this._room.type
-              }
-            );
-          };
-          ChatRoom.prototype.show = function () {
-            if (DRMng && !DRMng.PrivateChat.sbsActive &&
-              DRMng.PrivateChat.anyActive()) {
-              DRMng.PrivateChat.getActive().deactivate();
-            }
-            this._node.show();
-            this.updateRoomHeader();
-            this._chat_actions_node.show();
-            this._tab_for_room.addClassName('active');
-            this._unread_message_node.hide();
-            this.scrollToBottom();
-          };
-          ChatRoom.prototype.isActive = function () {
-            return !(DRMng && !DRMng.PrivateChat.sbsActive &&
-              DRMng.PrivateChat.anyActive()) &&
-              (this === this._chat_window.activeRoom());
-          };
-          Log.debug('{Kong::ChatRoom} Patched');
-        } else setTimeout(DRMng.Kong.modifyChatRoom, 10);
-      },
-      /**
-       * Modifies FayeEvent (part of guild chat API)
-       */
-      modifyFayeEvent: () => {
-        if (FayeEventDispatcher) {
-          FayeEventDispatcher.prototype.message = function (a, b) {
-            this.checkDuplicateMessage(b) || this._holodeckEventDispatcher.fire({
-              type: KonduitEvent.ROOM_MESSAGE,
-              data: {
-                history: b.history,
-                message: b.text,
-                timestamp: b.timestamp * 1000,
-                room: a,
-                user: FayeUserTransformer.transformUser(b)
-              }
-            });
-          };
-          Log.debug('{Kong::FayeEventDispatcher} Patched');
-        } else {
-          setTimeout(DRMng.Kong.modifyFayeEvent, 10);
-        }
-      },
-      /**
-       * Modifies FayeHistory (part of guild chat API)
-       */
-      modifyFayeHistory: () => {
-        if (FayeHistoryService) {
-          FayeHistoryService.prototype.fetchHistory = function (a, b, c) {
-            const self = this;
-            this._makeAjaxRequest(a, b, c).then(b => {
-              $j.each(b.history, (b, c) => {
-                c.push(true);
-                self.trigger('message', a, FayeMessageTransformer.transform(c));
-              });
-              self.trigger('history', a, b.history.length);
-            });
-          };
-          Log.debug('{Kong::FayeHistory} Patched');
-        } else {
-          setTimeout(DRMng.Kong.modifyFayeHistory, 10);
-        }
-      },
-      /**
-       * Modifiees FayeTransformer function (part of guild chat API)
-       */
-      modifyFayeTransformer: () => {
-        if (FayeMessageTransformer) {// && typeof FayeMessageTransformer.transform === `function`) {
-          FayeMessageTransformer.transform = a => {
-            return {
-              version: a[0],
-              kuid: a[1],
-              uuid: a[2],
-              text: a[3],
-              timestamp: a[4],
-              user_id: a[5],
-              username: a[6],
-              character_name: a[7],
-              level: a[8],
-              admin: 0 <= a[10].indexOf('a'),
-              developer: 0 <= a[10].indexOf('d'),
-              mobile: 0 <= a[10].indexOf('m'),
-              premium: 0 <= a[10].indexOf('p'),
-              guid: a[9],
-              history: a[12] || false
-            };
-          };
-          Log.debug('{Kong::FayeTransformer} Patched');
-        } else {
-          setTimeout(DRMng.Kong.modifyFayeTransformer, 10);
-        }
-      },
-      /**
-       * Modifies chat commands processing inside Holodeck
-       */
-      modifyHolodeck: function () {
-        if (Holodeck) {
-          Holodeck.prototype.processChatCommand = function (command, ally) {
-            const cmd = ((command.match(/^\/([^\s]+)/) || [])[1] || '').toLowerCase();
-            if (this._chat_commands[cmd]) {
-              const chat = ally ? DRMng.PrivateChat.getChat(ally) : this;
-              return this._chat_commands[cmd].detect(b => !b(chat, command)) === undefined;
-            } else {
-              return true;
-            }
-          };
-          Log.debug('{Kong::Holodeck} Patched');
-        } else {
-          setTimeout(this.modifyHolodeck, 10);
-        }
-      },
-      /**
-       * Custom chat commands injector
-       */
-      addChatCommand: (cmd, call) => {
-        cmd = cmd instanceof Array ? cmd : [cmd];
-        cmd.forEach(c => holodeck.addChatCommand(c, call));
-      },
-      /**
-       * Definition of all supported chat commands
-       */
-      addChatCommands: () => {
-        const self = DRMng.Kong;
-        if (holodeck && holodeck.ready) {
-          /* Gestures Commands */
-          self.addChatCommand(['kiss', 'hit', 'poke', 'slap'], (chat, cmd) => {
-            const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
-            if (part) {
-              const command = Util.capitalize(part[1]);
-              const gesture = Gestures[command].generate()
-                                               .replace('@from', DRMng.UM.user.name)
-                                               .replace('@who', part[2]);
-              const gestureText = `** ${gesture} **`;
-
-              if (chat instanceof Holodeck) {
-                chat.filterOutgoingMessage(gestureText, chat._active_dialogue._onInputFunction);
-              } else {
-                chat.send(gestureText);
-              }
-            }
-            return false;
-          });
-          // TODO: /perc WIP HALP!
-          self.addChatCommand('perc', (a, b) => {
-            let pval = /.+\s(\d+)(\w?)/.exec(b);
-            if (pval) {
-              let mul = 1;
-              switch (pval[2]) {
-                case 'k':
-                  mul *= 1000;
-                  break;
-                case 'm':
-                  mul *= 1000000;
-                  break;
-              }
-              pval = parseInt(pval[1]) || 0;
-              pval *= mul;
-            } else {
-              pval = 0;
-            }
-
-            const D = [
-              { val: 1, bok: ['Brown', 'Grey'], bokp: [50, 50] },
-              { val: 4000, bok: ['Brown', 'Grey', 'Green'], bokp: [33, 34, 33] },
-              { val: 6000, bok: ['Grey', 'Green'], bokp: [50, 50] },
-              { val: 10000, bok: ['Grey', 'Green', 'Blue'], bokp: [33, 34, 33] },
-              { val: 14000, bok: ['Green', 'Blue'], bokp: [50, 50] },
-              { val: 16000, bok: ['Green', 'Blue', 'Purple'], bokp: [33, 34, 33] },
-              { val: 18000, bok: ['Blue', 'Purple'], bokp: [50, 50] },
-              { val: 22000, bok: ['Blue', 'Purple', 'Orange'], bokp: [33, 34, 33] },
-              { val: 24000, bok: ['Purple', 'Orange'], bokp: [50, 50] },
-              { val: 30000, bok: ['Orange'], bokp: [100] },
-              { val: 33000, bok: ['Orange', 'Red'], bokp: [75, 25] },
-              { val: 36000, bok: ['Orange', 'Red'], bokp: [50, 50] },
-              { val: 50000, bok: ['Orange', 'Red'], bokp: [25, 75] },
-              { val: 70000, bok: ['Red'], bokp: [100] },
-              { val: 80000, bok: ['Red', 'Bronze'], bokp: [75, 25] },
-              { val: 90000, bok: ['Red', 'Bronze'], bokp: [50, 50] },
-              { val: 100000, bok: ['Red', 'Bronze'], bokp: [25, 75] },
-              { val: 110000, bok: ['Bronze', 'Silver'], bokp: [75, 25] },
-              { val: 120000, bok: ['Bronze', 'Silver'], bokp: [50, 50] },
-              { val: 130000, bok: ['Bronze', 'Silver'], bokp: [25, 75] },
-              { val: 140000, bok: ['Silver'], bokp: [100] },
-              { val: 150000, bok: ['Silver', 'Gold'], bokp: [75, 25] },
-              { val: 160000, bok: ['Silver', 'Gold'], bokp: [50, 50] },
-              { val: 170000, bok: ['Silver', 'Gold'], bokp: [25, 75] },
-            ];
-
-            let t = document.createElement('table'), row, cell, s;
-            t.setAttribute('cellspacing', '0');
-            t.style.setProperty('width', '100%');
-            t.style.setProperty('font-weight', '300');
-            t.style.setProperty('font-size', '10px');
-
-            for (let i = 0, l = D.length; i < l; ++i) {
-              if (D[i].val >= pval || i === l - 1) {
-                row = document.createElement('tr');
-                cell = document.createElement('td');
-                cell.style.setProperty('background', '#303030');
-                cell.style.setProperty('border-right', '1px solid #000000');
-                cell.style.setProperty('border-bottom', '1px solid #000000');
-                cell.style.setProperty('padding-right', '5px');
-                cell.style.setProperty('text-align', 'right');
-                cell.style.setProperty('width', '30px');
-                cell.textContent = D[i].val > 1000 ? `${D[i].val / 1000}k` : D[i].val;
-                row.appendChild(cell);
-                cell = document.createElement('td');
-                cell.style.setProperty('border-bottom', '1px solid #000000');
-                cell.style.setProperty('border-right', '1px solid #000000');
-                cell.style.setProperty('width', '80%');
-                for (let j = 0; j < D[i].bok.length; j++) {
-                  s = document.createElement('span');
-                  s.style.setProperty('width', D[i].bokp[j] + '%');
-                  s.style.setProperty('background-color', D[i].bok[j]);
-                  s.style.setProperty('display', 'inline-block');
-                  s.textContent = D[i].bok[j];
-                  cell.appendChild(s);
-                }
-                row.appendChild(cell);
-                t.appendChild(row);
-              }
-            }
-
-            let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
-            if (chat) chat.serviceMessage(t);
-
-            return false;
-          });
-          self.addChatCommand(['reload', 'reloaf', 'relaod', 'rl'], (_, cmd) => {
-            const type = /^\/\w+\s?(.*)$/.exec(cmd)[1];
-            switch (type) {
-              case 'game':
-                DRMng.postGameMessage('gameReload');
-                break;
-              case 'chat':
-                DRMng.postGameMessage('chatReload');
-                break;
-              default:
-                window.gameLoader.loadGame('');
-            }
-            return false;
-          });
-          self.addChatCommand('clear', chat => {
-            chat = chat instanceof Holodeck ? chat._active_dialogue : chat;
-            chat.clear();
-            return false;
-          });
-          self.addChatCommand('kill', (_, cmd) => {
-            const mode = /^\/kill\s?(.*)$/.exec(cmd)[1];
-            switch (mode) {
-              case 'game':
-                DRMng.postGameMessage('killGame');
-                break;
-              case 'chat':
-                DRMng.postGameMessage('killChat');
-                break;
-              default:
-                new DomNode('#gameiframe').attr({ src: '' });
-            }
-            return false;
-          });
-          self.addChatCommand('wiki', (_, cmd) => {
-            const val = /^\/wiki (.+)$/.exec(cmd);
-            if (val) {
-              window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${encodeURI(val[1])}`, '_blank');
-            }
-            return false;
-          });
-          self.addChatCommand('enc', (_, cmd) => {
-            const val = /^\/enc (.+)$/.exec(cmd);
-            if (val) {
-              window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(val[1])}`, '_blank');
-            }
-            return false;
-          });
-          self.addChatCommand(['ver', 'version', 'update'], chat => {
-            if (chat instanceof Holodeck) {
-              chat = chat._active_dialogue;
-            }
-            DRMng.Kong.serviceMsg(DRMng.About.versionHtml, chat);
-            return false;
-          });
-          self.addChatCommand(['raid', 'rd'], (chat, cmd) => {
-            const comm = /^\/(raid|rd) (.+)$/.exec(cmd);
-            if (chat instanceof Holodeck) {
-              chat = chat._active_dialogue;
-            }
-            if (comm) {
-              const raid = comm[2].toLowerCase();
-              const rarr = raid.split(' ');
-              const data = Config.data.raidData;
-              const fnd = [];
-
-              Object.keys(data).forEach(rd => {
-                const rn = data[rd].fName.toLowerCase();
-                if (rarr.reduce((a, v) => a && rd.indexOf(v) > -1, true) ||
-                  rarr.reduce((a, v) => a && rn.indexOf(v) > -1, true)) {
-                  fnd.push([rd, data[rd].fName]);
-                }
-              });
-
-              if (fnd.length > 1) {
-                const raidPicker = fnd.reduce((a, f) =>
-                  `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`, '');
-                chat && chat.serviceMessage('Multiple results found, pick one:' + raidPicker);
-              } else if (fnd.length === 1) {
-                chat && chat.serviceMessage(DRMng.UI.raidInfo(fnd[0][0]), data[fnd[0][0]].banner);
-              } else {
-                chat && chat.serviceMessage('No info found matching ' + raid);
-              }
-            } else {
-              chat && chat.serviceMessage('Wrong /raid or /rd syntax');
-            }
-            return false;
-          });
-          Log.debug('{Kong} Chat commands added');
-        } else {
-          setTimeout(self.addChatCommands, 100);
-        }
-      },
-      /**
-       * Relocates Chat options button
-       */
-      moveChatOptions: () => {
-        const src = document.getElementById('chat_actions_container');
-        const dst = document.getElementById('chat_room_tabs');
-        if (src && dst) {
-          dst.appendChild(src);
-        } else {
-          setTimeout(DRMng.Kong.moveChatOptions, 10);
-        }
-      },
-      /**
-       * Meta function to fire all modifications
-       */
-      modifyKongEngine: function () {
-        this.modifyHolodeck();
-        this.modifyChatRoom();
-        this.modifyChatDialogue();
-        this.modifyFayeEvent();
-        this.modifyFayeTransformer();
-        this.modifyFayeHistory();
-        this.modifyElement();
-      },
-      /**
-       * Sets kongregate header width to match game frame
-       */
-      setHeaderWidth: () => {
-        document.getElementById('header').style.width =
-          `${document.getElementById('maingame').offsetWidth}px`;
-      },
-      /**
-       * Resize game frame to account for inactive/hidden world chat
-       */
-      hideWorldChat: () => {
-        const opts = Config.data.gameFrame;
-        new DomNode('#game')
-          .style({ width: (opts.hideWChat || opts.removeWChat) ? '760px' : '1025px' });
-      },
-      setWrapperWidth: w => {
-        const width = w ? `calc(100% - ${w}px)` : '100%';
-        new DomNode('#primarywrap').style({ width: width });
-        new DomNode('#headerwrap').style({ width: width });
-      },
-      /**
-       * Removes iFrames leaving only one with game
-       */
-      killIframes: () => {
-        document.querySelectorAll('iframe').forEach(ifr => {
-          if (ifr.id !== 'gameiframe') ifr.parentNode.removeChild(ifr);
-        });
-        Log.debug('{Kong} Removed all redundant iFrames');
-      },
-      serviceMsg: (msg, chat) => {
-        if (!chat) {
-          chat = DRMng.PrivateChat.anyActive() ?
-            DRMng.PrivateChat.getActive() :
-            holodeck._active_dialogue;
-        }
-
-        if (chat) {
-          chat.serviceMessage(msg);
-        } else if (!holodeck) {
-          setTimeout(DRMng.Kong.serviceMsg, 50, msg);
-        }
-      },
-      init: function () {
-        document.body.classList.add('premium_user');
-        document.body.classList.remove('spotlight_ad_creative-control');
-        this.killAds();
-        this.killScripts();
-        this.killFBlike();
-        this.killDealSpot();
-        this.addSlimButton();
-        this.addReloadButton();
-        //this.addSbsChatContainer();
-        this.searchFieldIcon();
-        this.modifyKongEngine();
-        this.addChatCommands();
-        this.setWrapperWidth();
-        setTimeout(this.moveChatOptions, 500);
-        //setTimeout(this.killIframes, 5000);
-
-        // Open Sans font used by scripts theme
-        new DomNode('link')
-          .attr({
-            href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
-            rel: 'stylesheet'
-          })
-          .attach('to', document.head);
-
-        // Kong theme
-        new DomNode('link')
-          .attr({
-            id: 'DRMng_kongCSS',
-            href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css',
-            //href: 'https://mutikt.ml/kong_dark.css',
-            rel: 'stylesheet'
-          })
-          .on('load', DRMng.Kong.setHeaderWidth)
-          .attach('to', document.head);
-
-        Log.info('{Kong} Module loaded');
-      }
-    },
-    /**
      * Raids module
      * All raids management related methods
      */
@@ -2080,7 +3219,7 @@ function main() {
        */
       checkAndSend: () => {
         const link = document.getElementById('DRMng_submitRaidLink');
-        const r = Util.getRaidFromUrl(link.textContent, DRMng.UM.user.name);
+        const r = Util.getRaidFromUrl(link.textContent, UserManager.user.name);
         if (r && !isNaN(+r.id) && r.hash.length === 10 &&
           ['kasan', 'elyssa'][r.pid] === DRMng.Raids.srv) {
           const delayBase = document.querySelector('[group=DRMng_submitDelay].crimson').textContent;
@@ -2103,7 +3242,7 @@ function main() {
       /**
        * Removes old raids from dead cache
        */
-      cleanDeadCache: function () {
+      cleanDeadCache: function() {
         const dead = Config.dead;
         const deadThr = Date.now() - 129600000; // 3 days old
 
@@ -2121,7 +3260,7 @@ function main() {
        * Format message while joining raids
        * @param {string} [m] Message to show
        */
-      joinMsg: function (m) {
+      joinMsg: function(m) {
         DRMng.UI.displayStatus(m ? m : `Joined ${this.joined} out of ${this.joinLen}`);
       },
       /**
@@ -2132,10 +3271,11 @@ function main() {
       join: (r, multi = false) => {
         r = r && r.id ? r : DRMng.Raids.get(r);
         if (r) {
-          const u = DRMng.UM.user;
+          const u = UserManager.user;
           if (u.qualified) {
             const authData = `kongregate_user_id=${u.ID}&kongregate_game_auth_token=${u.authToken}`;
-            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server === 'Elyssa' ? '1' : '2')}`;
+            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server === 'Elyssa'
+                                                                                         ? '1' : '2')}`;
             const data = {
               eventName: `DRMng.joinRaid${multi ? 's' : ''}`,
               url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
@@ -2153,7 +3293,7 @@ function main() {
           DRMng.Raids.joinMsg();
         }
       },
-      prepareJoining: function () {
+      prepareJoining: function() {
         if (this.isJoining) return;
         this.isPreparing = true;
         this.ids = [];
@@ -2191,14 +3331,14 @@ function main() {
         if (this.joinLen > 0 && this.isAuto) this.joinAll();
         else DRMng.UI.displayStatus();
       },
-      pushToQueue: function (r, useFilter = false) {
+      pushToQueue: function(r, useFilter = false) {
         if (this.ids.indexOf(r.id) === -1 && (!useFilter || !r.isFull)) {
           this.joinQueue.push(r);
           this.joinLen++;
           DRMng.UI.displayStatus();
         }
       },
-      switchAutoJoin: function () {
+      switchAutoJoin: function() {
         const button = document.getElementById('DRMng_autoJoin');
         if (this.isAuto) {
           this.isAuto = false;
@@ -2209,7 +3349,7 @@ function main() {
           setTimeout(() => this.joinAll(), 0);
         }
       },
-      joinAll: function () {
+      joinAll: function() {
         if (this.isJoining || !this.joinLen) {
           return;
         } else if (this.isPreparing) {
@@ -2230,7 +3370,7 @@ function main() {
         }
         return false;
       },
-      joinOne: function (r) {
+      joinOne: function(r) {
         if (this.isJoining) {
           setTimeout(() => this.pushToQueue(r), 0);
         } else if (this.isPreparing) {
@@ -2240,7 +3380,7 @@ function main() {
         }
         return false;
       },
-      processJoin: function (id, text) {
+      processJoin: function(id, text) {
         let status = 0;
         if (/successfully (re-)?joined/i.test(text)) {
           setTimeout(() => this.setVisited(id), 0);
@@ -2297,7 +3437,7 @@ function main() {
         diff = diff ? diff.slice(1) : 0;
         return isNaN(+diff) ? ({ 'n': 1, 'h': 2, 'l': 3, 'nm': 4, 'nnm': 5 })[diff.toLowerCase()] || 0 : +diff;
       },
-      processFilter: function (filterTxt, loading) {
+      processFilter: function(filterTxt, loading) {
         DRMng.Raids.isAuto && DRMng.Raids.switchAutoJoin();
         if (loading) {
           filterTxt = Config.filterString || '';
@@ -2327,7 +3467,7 @@ function main() {
                 if (d) raids = raids.concat(d);
               }
               else raids = p[2] === 'all' ?
-                Object.keys(Config.data.raidData) : Config.data.filterData[`${p[2]}`];
+                           Object.keys(Config.data.raidData) : Config.data.filterData[`${p[2]}`];
 
               if (raids) {
                 diff = this.getDiff(p[3]);
@@ -2391,7 +3531,7 @@ function main() {
         const list = document.getElementsByClassName(id);
         for (let i = 0, len = list.length; i < len; ++i) list[i].classList.add(cls);
       },
-      setVisited: function (id, drop) {
+      setVisited: function(id, drop) {
         let idx = Config.visited.indexOf(id);
         if (drop && (idx > -1)) {
           Config.visited.splice(idx, 1);
@@ -2408,7 +3548,7 @@ function main() {
         Config.save();
       },
       comp: (a, b) => a.hp - b.hp,
-      _setComp: function (field) {
+      _setComp: function(field) {
         switch (field) {
           case 'id':
             this.comp = (a, b) => parseInt(a.id) - parseInt(b.id);
@@ -2434,7 +3574,7 @@ function main() {
             Config.data.sortBy = field;
         }
       },
-      setComp: function (field) {
+      setComp: function(field) {
         if (this.locked || this.bootstrap) {
           setTimeout(DRMng.Raids.setComp.bind(this, field), 10);
           return;
@@ -2450,17 +3590,17 @@ function main() {
 
         this.locked = false;
       },
-      get: function (id) {
+      get: function(id) {
         return this.all[this.getIdx(id)] || null;
       },
-      getIdx: function (id) {
+      getIdx: function(id) {
         for (let i = 0, len = this.all.length; i < len; ++i) if (this.all[i].id == id) return i;
         return -1;
       },
-      sort: function () {
+      sort: function() {
         this.all.sort(this.comp);
       },
-      insertAll: function (raids) {
+      insertAll: function(raids) {
         if (this.locked) {
           setTimeout(this.insertAll.bind(this, raids), 10);
           return;
@@ -2498,7 +3638,7 @@ function main() {
         setTimeout(this.prepareJoining.bind(this), 0);
         this.bootstrap = false;
       },
-      insert: function (raid) {
+      insert: function(raid) {
         if (this.locked || this.bootstrap) {
           setTimeout(this.insert.bind(this, raid), 10);
           return;
@@ -2525,16 +3665,16 @@ function main() {
 
         this.locked = false;
       },
-      setDead: function (id, save) {
+      setDead: function(id, save) {
         if (!this.getDead(id)) {
           Config.dead[id] = new Date().getTime();
           if (save) Config.save();
         }
       },
-      getDead: function (id) {
+      getDead: function(id) {
         return Util.hasProperty(Config.dead, id);
       },
-      remove: function (id, serverNuke) {
+      remove: function(id, serverNuke) {
         if (this.locked || this.bootstrap) {
           setTimeout(this.remove.bind(this, id, serverNuke), 10);
           return;
@@ -2560,7 +3700,7 @@ function main() {
 
         this.locked = false;
       },
-      update: function (raid, full) {
+      update: function(raid, full) {
         if (this.locked || this.bootstrap) {
           setTimeout(DRMng.Raids.update.bind(this, raid, full), 10);
           return;
@@ -2595,7 +3735,7 @@ function main() {
 
         this.locked = false;
       },
-      location: function (val, start = 0, end) {
+      location: function(val, start = 0, end) {
         const len = this.all.length;
 
         if (len === 0) return -1;
@@ -2609,70 +3749,9 @@ function main() {
         if (c > 0) return this.location(val, pos, end);
         return pos;
       },
-      init: function () {
+      init: function() {
         setTimeout(() => this.cleanDeadCache(), 60000);
         Log.info('{Raids} Module loaded');
-      }
-    },
-    /**
-     * User Manager module
-     * Keeps user and friends data
-     */
-    UM: {
-      numTries: 0,
-      knownUsers: {},
-      user: { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null },
-      getBasicUserData: function () {
-        if (active_user && active_user.username().toLowerCase() !== 'guest') {
-          this.user.ID = active_user.id();
-          this.user.name = active_user.username();
-          this.user.authToken = active_user.gameAuthToken();
-          setTimeout(() => this.getExtendedUserData(), 0);
-        } else {
-          Log.debug('{UserManager} User data not ready, trying again in .1 sec');
-          setTimeout(() => this.getBasicUserData(), 100);
-        }
-      },
-      getUserNode: function () {
-        const guild = holodeck._chat_window._rooms_by_type.guild;
-        const users = guild.users();
-        if (users.length > 0) {
-          // set IGN
-          for (let i = 0, l = users.length; i < l; ++i)
-            if (users[i].username === this.user.name) {
-              this.user.IGN = users[i]._game_character_name;
-              break;
-            }
-          // set guild
-          this.user.guild = guild._room.name;
-          // qualify user data
-          this.user.qualified = true;
-        } else {
-          setTimeout(() => this.getUserNode(), 100);
-        }
-      },
-      getExtendedUserData: function () {
-        if (holodeck && holodeck.ready && holodeck._chat_window._rooms_by_type) {
-          if (holodeck._chat_window._rooms_by_type.guild) {
-            return setTimeout(() => this.getUserNode(), 0);
-          } else if (this.numTries++ <= 20) {
-            Log.debug('{UserManager} Guild data missing, trying again in 2 sec (%d/20)', this.numTries);
-            return setTimeout(() => this.getExtendedUserData(), 2000);
-          } else {
-            Log.warn('{UserManager} Guild info missing. Protip: Join private guild.');
-            this.user.guild = '';
-            this.user.IGN = '';
-            this.user.qualified = true;
-
-          }
-        } else {
-          return setTimeout(() => this.getExtendedUserData(), 100);
-        }
-      },
-      getUserData: function () {
-        this.numTries = 0;
-        this.user.qualified = false;
-        setTimeout(() => this.getBasicUserData(), 0);
       }
     },
     /**
@@ -2701,13 +3780,13 @@ function main() {
         setTimeout(DRMng.Engine.client.connect.bind(DRMng.Engine.client), 1000);
       },
       init: () => {
-        if (typeof io === 'function' && DRMng.UM.user.qualified) {
+        if (typeof io === 'function' && UserManager.user.qualified) {
           DRMng.Engine.client = io
             .connect(`${DRMng.serverAddress}/${Config.data.server}`,
               {
                 secure: true,
                 transports: ['websocket'],
-                query: { user: DRMng.UM.user.name }
+                query: { user: UserManager.user.name }
               })
             .on('error', data => Log.warn('{Engine} Error ::', data))
             .on('msg', DRMng.Engine.handleMessage)
@@ -2716,9 +3795,9 @@ function main() {
             .on('connect', () => {
               Log.info('{Engine} Socket connection established, joining...');
               DRMng.Engine.client.emit('join', {
-                usr: DRMng.UM.user.name,
-                ign: DRMng.UM.user.IGN,
-                gld: DRMng.UM.user.guild,
+                usr: UserManager.user.name,
+                ign: UserManager.user.IGN,
+                gld: UserManager.user.guild,
                 chk: Config.data.checkSums
               });
             });
@@ -2727,7 +3806,6 @@ function main() {
           setTimeout(DRMng.Engine.init, 1000);
         }
       },
-      //handleMessage: msg => DRMng.Kong.serviceMsg(msg.txt),
       handleMessage: msg => Log.info(`{Engine::Message} ${msg.txt}`),
       handleService: d => {
         if (!d) return;
@@ -2787,869 +3865,13 @@ function main() {
         }
       }
     },
-    PrivateChat: class {
-
-      constructor(config, forceActive = false) {
-
-        if (DRMng.PrivateChat.Rooms === undefined) {
-          DRMng.PrivateChat.Rooms = new Map();
-          DRMng.PrivateChat.initSbsContainer();
-        }
-
-        this.users = {
-          html: null,
-          count: 0,
-          keys: [],
-          fields: {},
-          add: function (user) {
-            if (user.usr) {
-              const el = {
-                html: null,
-                name: user.usr || null,
-                ign: user.ign || '',
-                guild: user.gld || '',
-                sock: user.sid || null
-              };
-
-              el.html = document.createElement('div');
-              el.html.setAttribute('class', 'userlist');
-
-
-              let span = document.createElement('span');
-              span.setAttribute('class', 'guildtag');
-              span.textContent = DRMng.PrivateChat.getGuildTag(el.guild) || '\u2014';
-              el.html.appendChild(span);
-
-              span = document.createElement('span');
-              span.setAttribute('class', 'username');
-              span.textContent = el.name;
-              el.html.appendChild(span);
-
-              span = document.createElement('span');
-              span.setAttribute('class', 'userign');
-              if (el.ign) span.textContent = '(' + el.ign + ')';
-              el.html.appendChild(span);
-
-              this.fields[el.name] = el;
-            }
-          },
-        };
-        this.active = forceActive;
-        this.count = null;
-        this.conf = config;
-        this.unr = null;
-        this.tabs = null;
-        this.tabActions = null;
-        this.tab = null;
-        this.body = null;
-        this.input = null;
-        this.inputCnt = null;
-        this.client = null;
-        this.userLock = false;
-        this.messageLock = false;
-        this.messageBuffer = [];
-
-        DRMng.PrivateChat.Rooms.set(this.conf.channel, this);
-
-        setTimeout(() => this.initTab(), 10);
-      }
-
-      get name() {
-        return this.conf.name;
-      }
-
-      set name(val) {
-        if (this.conf.name === val) return;
-        this.conf.name = val;
-        this.tab.firstChild.textContent = val;
-        this.nameUpdate();
-      }
-
-      set pass(val) {
-        if (this.conf.pass === val) return;
-        this.conf.pass = val;
-        this.client.query.token = Util.crc32(val);
-        setTimeout(() => this.reconnect(), 1000);
-      }
-
-      configUpdate(conf) {
-        this.name = conf.name;
-        this.pass = conf.pass;
-      }
-
-      connect() {
-        if (typeof io === 'function' && this.tab && this.chat &&
-          DRMng.UM.user.qualified && !DRMng.Raids.bootstrap) {
-
-          if (Config.data.alliance.sbs) {
-            document.getElementById('private_chat_sbs').style.removeProperty('display');
-          } else {
-            this.tab.style.removeProperty('display');
-          }
-
-          const usr = DRMng.UM.user;
-          const user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
-
-          this.client =
-            io.connect(`${DRMng.serverAddress}/${this.conf.channel}`, {
-              query: {
-                user: DRMng.UM.user.name,
-                token: Util.crc32(this.conf.pass)
-              },
-              secure: true,
-              transports: ['websocket']
-            });
-
-          this.client.on('error', err => {
-            Log.warn('{PrivateChat} Client error:', err);
-            document.getElementById('private_chat_sbs').style.setProperty('display', 'none');
-            this.tab.style.setProperty('display', 'none');
-            //destroyChat();
-          });
-
-          this.client.on('disconnect', () => {
-            Log.warn('{PrivateChat} Client disconnected!');
-          });
-
-          this.client.on('connect', () => {
-            this.clearUsers();              // clear user list
-            this.clear();                   // clear chat
-            this.client.emit('join', user); // login to server
-            Log.info('{PrivateChat} User login data [%s|%s|%s]', user.usr, user.ign, user.gld);
-          });
-
-          this.client.on('msg', data => this.messageEvent(data));
-          this.client.on('service', data => this.serviceEvent(data));
-        } else {
-          Log.debug('{PrivateChat} Resources not ready, trying again in 1 sec...');
-          setTimeout(() => this.connect(), 1000);
-        }
-      }
-
-      reconnect() {
-        if (!this.client) {
-          setTimeout(() => this.connect(), 0);
-        } else if (this.client.connected) {
-          this.client.disconnect();
-          setTimeout(() => this.reconnect(), 3000);
-        } else {
-          this.client.connect();
-        }
-      }
-
-      updateUsers() {
-        // update keys
-        this.users.keys = Object.keys(this.users.fields);
-        // sort userlist
-        this.users.keys.sort();
-        // clear list
-        while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
-        // fill it up again
-        this.users.count = this.users.keys.length;
-
-        for (let i = 0; i < this.users.count; ++i)
-          this.users.html.appendChild(this.users.fields[this.users.keys[i]].html);
-
-        this.countUpdate();
-      }
-
-      addUser(user, noUpdate = false) {
-        if (!this.userLock) {
-          this.userLock = true;
-          // TODO: Stop using update and inject field into sorted array
-          this.users.add(user);
-          if (!noUpdate) this.updateUsers();
-          this.userLock = false;
-        } else {
-          setTimeout(() => this.addUser(user, noUpdate), 10);
-        }
-      }
-
-      delUser(name) {
-        if (!this.userLock) {
-          this.userLock = true;
-          if (Util.hasProperty(this.users.fields, name)) {
-            this.users.html.removeChild(this.users.fields[name].html);
-            delete this.users.fields[name];
-            const idx = this.users.keys.indexOf(name);
-            if (idx !== -1) this.users.keys.splice(idx, 1);
-            this.users.count--;
-            this.countUpdate();
-          }
-          this.userLock = false;
-        } else {
-          setTimeout(() => this.delUser(name), 10);
-        }
-      }
-
-      clearUsers() {
-        this.users.keys = [];
-        this.users.count = 0;
-        this.users.fields = {};
-        if (this.users.html)
-          while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
-      }
-
-      countUpdate() {
-        if (this.active && !DRMng.PrivateChat.sbsActive) {
-          this.count.textContent = this.users.count;
-        }
-      }
-
-      nameUpdate() {
-        if (Config.data.alliance.sbs || !this.active) return;
-        document.querySelector('.room_name.h6').textContent = this.name;
-      }
-
-      static getGuildTag(guild) {
-        const roman = /^(.+\s)([IXV]+)$/.exec(guild);
-        if (roman) guild = roman[1] + Util.romanToArabic(roman[2]);
-        const reg = /([A-Z]+|[\w'`´])[\w'`´]*/g;
-        let tag = '', part;
-        while ((part = reg.exec(guild))) tag += part[1];
-        return tag;
-      }
-
-      setUnread(unset = false) {
-        if (this.unr) this.unr.setAttribute('style', unset ? 'display: none' : '');
-      }
-
-      activate() {
-        if (!Config.data.alliance.sbs) holodeck._chat_window._active_room.hide();
-        if (DRMng.PrivateChat.getActive()) DRMng.PrivateChat.getActive().deactivate();
-        this.tab.classList.add('active');
-        //this.tab.style.setProperty(`border-right`, `0`);
-        this.body.style.removeProperty('display');
-        this.setUnread(true);
-        this.active = true;
-        this.nameUpdate();
-        this.countUpdate();
-        setTimeout(() => this.scrollToBottom(true), 100);
-      }
-
-      deactivate() {
-        if (!this.active) return;
-        this.active = false;
-        this.tab.classList.remove('active');
-        this.body.style.display = 'none';
-      }
-
-      tabClick(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.activate();
-        return false;
-      }
-
-      clear() {
-        while (this.chat.firstChild) this.chat.removeChild(this.chat.firstChild);
-      }
-
-      send(msg) {
-        msg = msg || this.input.value;
-        if (msg && msg !== 'Enter text for chat here') {
-          let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
-          if (pm && pm[1] && pm[2]) {
-            this.client.emit('msg', { type: 1, user: pm[1], text: pm[2] });
-          } else if (holodeck.processChatCommand(msg, this.conf.channel)) {
-            this.client.emit('msg', { type: 0, text: msg });
-          }
-          this.input.value = '';
-        }
-      }
-
-      scrollToBottom(force = false) {
-        if (!this.chat) return;
-        const elHeight = this.chat.lastChild ? this.chat.lastChild.offsetHeight : 0;
-        const chatHeight = this.chat.scrollHeight - this.chat.offsetHeight - this.chat.scrollTop;
-        if (chatHeight <= elHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
-      }
-
-      static initSbsContainer() {
-        if (!this.sbsCreated) {
-          if (document.getElementById('chat_window')) {
-            this.sbsContainer = new DomNode('div')
-              .attr({ id: 'private_chat_sbs' })
-              .style({ display: 'none' })
-              .on('click', e => this.sbsEvent(e))
-              .attach('to', 'chat_tab_pane')
-              .node;
-
-            this.sbsTabs = new DomNode('div')
-              .attr({ id: 'private_chat_sbs_tabs' })
-              .attach('to', this.sbsContainer)
-              .node;
-
-            this.sbsCreated = true;
-            this.sbsActive = Config.data.alliance.sbs || false;
-
-            DRMng.UI.setChatWidth();
-
-            Log.debug('SBS Container initialized');
-          } else {
-            Log.debug('SBS Container failed to init, retry in 10ms');
-            return setTimeout(() => this.initSbsContainer(), 10);
-          }
-        }
-      }
-
-      initTab() {
-        this.tabs = document.getElementById('chat_room_tabs');
-        this.tabActions = document.getElementById('chat_actions_container');
-        const gr = document.getElementById('guild_room_tab');
-        if (DRMng.PrivateChat.sbsCreated &&
-          this.tabs && this.tabActions && gr &&
-          this.tabActions.parentNode === this.tabs) {
-          this.tab = document.createElement('div');
-          this.tab.setAttribute('id', `drmng_${this.conf.channel}_room_tab`);
-          this.tab.setAttribute('class', 'chat_room_tab drmng_room_tab');
-          //this.tab.style.setProperty('display', 'none');
-
-          this.unr = document.createElement('span');
-          this.unr.setAttribute('class', 'unread_chat_messages spriteall spritegame');
-          this.unr.setAttribute('style', 'display: none');
-          this.unr.innerHTML = 'Unread';
-
-          const a = document.createElement('a');
-          a.setAttribute('href', '#');
-          a.textContent = this.conf.name;
-          a.addEventListener('click', e => this.tabClick(e));
-          a.appendChild(this.unr);
-
-          this.tab.appendChild(a);
-
-          if (DRMng.PrivateChat.sbsActive) {
-            if (this.active) this.tab.classList.add('active');
-            DRMng.PrivateChat.sbsTabs.appendChild(this.tab);
-          } else {
-            this.tabs.insertBefore(this.tab, this.tabActions);
-          }
-
-          this.count = document.querySelector('.number_in_room');
-
-          Log.info(`{PrivateChat::${this.name}} Chat tab created.`);
-          setTimeout(() => this.initBody(), 0);
-        } else {
-          Log.debug('{PrivateChat} Tab failed to init, retry in 50ms');
-          setTimeout(() => this.initTab(), 50);
-        }
-      }
-
-      initBody() {
-        if (!DRMng.PrivateChat.container) {
-          DRMng.PrivateChat.container = document.getElementById('chat_rooms_container');
-          if (!DRMng.PrivateChat.container) return setTimeout(() => this.initBody(), 100);
-        }
-
-        if (this.body === null) {
-          this.body = document.createElement('div');
-          this.body.style.setProperty('width', '100%');
-          this.body.style.setProperty('display', 'none');
-
-          const usr = document.createElement('div');
-          usr.setAttribute('class', 'chat_tabpane users_in_room clear');
-          this.users.html = usr;
-
-          const chat = document.createElement('div');
-          chat.setAttribute('class', 'chat_message_window');
-          this.chat = chat;
-
-          const inputDiv = document.createElement('div');
-          inputDiv.setAttribute('class', 'chat_controls');
-
-          this.input = document.createElement('textarea');
-          this.input.setAttribute('class', 'chat_input');
-          this.input.value = 'Enter text for chat here';
-
-          this.input.addEventListener('focus', () => {
-            if (this.input.value === 'Enter text for chat here') {
-              this.input.value = '';
-              this.input.style.removeProperty('font-style');
-            }
-          });
-          this.input.addEventListener('blur', () => {
-            if (this.input.value === '') {
-              this.input.value = 'Enter text for chat here';
-              this.input.style.setProperty('font-style', 'italic');
-            }
-          });
-          this.input.addEventListener('keydown', e => {
-            //console.log(e.which, e.keyCode, e.charCode, e.key, e.shiftKey);
-            if (e.key === 'Enter' && !e.shiftKey) {
-              this.send();
-              e.preventDefault();
-            }
-          });
-          this.input.addEventListener('keyup', () => {
-            if (this.input.value !== 'Enter text for chat here') {
-              let txt = /^(\/\w*\s?)?([\S\s]*)$/.exec(this.input.value);
-              txt = txt[2] || '';
-              if (this.inputCnt) this.inputCnt.textContent = txt.length;
-            }
-          });
-
-          const cnt = document.createElement('span');
-          cnt.setAttribute('class', 'chat_chars_remaining');
-          cnt.textContent = '0';
-          this.inputCnt = cnt;
-
-          const cntCont = document.createElement('span');
-          cntCont.setAttribute('class', 'chat_char_countdown');
-          cntCont.appendChild(this.inputCnt);
-          cntCont.appendChild(document.createTextNode('/2000'));
-
-          inputDiv.appendChild(this.input);
-          inputDiv.appendChild(cntCont);
-          this.body.appendChild(this.users.html);
-          this.body.appendChild(this.chat);
-          this.body.appendChild(inputDiv);
-
-          Log.info(`{PrivateChat::${this.name}} Chat body created`);
-        }
-
-        if (DRMng.PrivateChat.sbsActive) {
-          if (this.active) this.body.style.removeProperty('display');
-          DRMng.PrivateChat.sbsContainer.style.removeProperty('display');
-          DRMng.PrivateChat.sbsContainer.appendChild(this.body);
-        } else {
-          DRMng.PrivateChat.sbsContainer.style.setProperty('display', 'none');
-          DRMng.PrivateChat.container.appendChild(this.body);
-        }
-
-        Log.info(`{PrivateChat::${this.name}} Chat body attached to DOM`);
-
-        DRMng.UI.setChatWidth();
-
-        setTimeout(() => this.connect(), 0);
-      }
-
-      remove() {
-        if (!DRMng.PrivateChat.sbsActive && this.active) {
-          if (holodeck._chat_window._rooms_by_type.guild) {
-            holodeck._chat_window._rooms_by_type.guild.show();
-          } else {
-            holodeck._chat_window._rooms_by_type.game.show();
-          }
-        }
-
-        this.client.disconnect();
-
-        if (DRMng.PrivateChat.sbsActive) {
-          DRMng.PrivateChat.sbsTabs.removeChild(this.tab);
-          DRMng.PrivateChat.sbsContainer.removeChild(this.body);
-        } else {
-          this.tabs.removeChild(this.tab);
-          DRMng.PrivateChat.container.removeChild(this.body);
-        }
-
-
-        for (let i = 0, len = Config.data.alliance.rooms.length; i < len; ++i) {
-          if (Config.data.alliance.rooms[i].channel === this.conf.channel) {
-            Config.data.alliance.rooms.splice(i, 1);
-            Config.save();
-            break;
-          }
-        }
-      }
-
-      static sbsEvent(e) {
-        DRMng.UI.handleChatClick(e, true);
-      }
-
-      /**
-       * Service event handler
-       * @param {object} data
-       * @param {string} data.act
-       * @param {string} data.action
-       * @param {object} data.users
-       * @param {Array} data.raids
-       * @param {object} data.data
-       */
-      serviceEvent(data) {
-        // TODO: remove act when users move to new version
-        if (data.act) data.action = data.act;
-        switch (data.action) {
-          case 'loadData':
-            // load users
-            this.userLock = true;
-            this.clearUsers();
-            this.userLock = false;
-
-            Object.keys(data.users).forEach(u => this.addUser(data.users[u], true));
-
-            this.userLock = true;
-            this.updateUsers();
-            this.userLock = false;
-
-            // load history
-            if (data.log.length > 0 && this.chat.childElementCount < 2) {
-              this.messageLock = true;
-              data.log.forEach(log => this.messageEvent(log, true));
-              while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);
-              this.messageLock = false;
-              setTimeout(() => this.scrollToBottom(true), 1000);
-            }
-
-            break;
-
-          case 'userJoin':
-            setTimeout(() => this.addUser(data.user), 0);
-            break;
-
-          case 'userLeave':
-            setTimeout(() => this.delUser(data.user.usr), 0);
-            break;
-
-          case 'allianceRaids':
-            data.raids.forEach(raid => {
-              raid.createtime = new Date(raid.createtime).getTime();
-              DRMng.Raids.insert(raid);
-            });
-            break;
-
-          case 'newRaid':
-            setTimeout(DRMng.Raids.insert.bind(DRMng.Raids, data.data), 0);
-            break;
-
-          case 'fullUpdate':
-            setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, true), 0);
-            break;
-
-          case 'partialUpdate':
-            setTimeout(DRMng.Raids.update.bind(DRMng.Raids, data.data, false), 0);
-            break;
-
-          case 'nukedRaid':
-            setTimeout(DRMng.Raids.remove.bind(DRMng.Raids, data.data), 0);
-            break;
-
-          default:
-            Log.warn('{PrivateChat} Unhandled service data:', data);
-        }
-      }
-
-      messageEvent(data, history = false) {
-        if (data.type === 4) {
-          this.serviceMessage(data.txt);
-        } else if (!this.messageLock || history) {
-          let u = DRMng.UM.user,
-            t = data.type,
-            e = ['username', 'truncate'],
-            f = data.usr.usr === u.name,
-            h = ['', 'From ', 'To ', ''][t],
-            g = [];
-
-          e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
-          h && g.push('whisper');
-          (t === 1) && g.push('received_whisper');
-          (t === 2) && g.push('sent_whisper');
-          f && e.push('is_self');
-
-          let content = DRMng.PrivateChat.raidMessage(data, g, e, h);
-          if (!content) {
-            let reg = /(https?\S+[^,\s])/g, l, link, start, end, msg = data.txt;
-
-            while ((l = reg.exec(msg))) {
-              if (/\.(jpe?g|a?png|gif)$/.test(l[1])) {
-                link = `<img src="${l[1]}" alt="${l[1]}" onclick="window.open(this.src)">`;
-              } else if (/(prntscr.com|prnt.sc)/.test(l[1])) {
-                let id = `prntsc_${new Date().getTime()}`;
-                link = `<img id="${id}" onclick="window.open(this.src)">`;
-                Proxy.lightShot(l[1], id, this.conf.channel);
-              } else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1]))) {
-                link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
-              } else {
-                link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
-              }
-              start = msg.substr(0, reg.lastIndex - l[1].length);
-              end = msg.slice(reg.lastIndex);
-              msg = start + link + end;
-              reg.lastIndex += link.length - l[1].length;
-            }
-            content = DRMng.PrivateChat.getMessageHTML({
-              mainCls: g.join(' '),
-              ts: new Date(data.ts).format('mmm d, HH:MM'),
-              pfx: h,
-              user: data.usr.usr,
-              userCls: e.join(' '),
-              ign: data.usr.ign || '',
-              ignCls: data.usr.ign ? 'guildname truncate' : '',
-              tag: DRMng.PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
-              msg: msg
-            });
-          }
-          const msg = document.createElement('div');
-          msg.setAttribute('class', 'chat-message');
-          if (content instanceof HTMLElement) {
-            msg.appendChild(content);
-          } else {
-            msg.innerHTML = content;
-          }
-          this.chat.appendChild(msg);
-
-          if (this.active) {
-            this.scrollToBottom(f);
-          } else {
-            this.setUnread();
-          }
-        } else {
-          this.messageBuffer.push(data);
-        }
-      }
-
-      serviceMessage(msg, ri) {
-        if (msg) {
-          const p = new DomNode('div').attr({ class: 'chat-message' });
-          new DomNode('div')
-            .attr({ class: `service${ri ? ' raidinfo' : ''}` })
-            .style(ri ?
-              { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
-              {})
-            .data(msg).attach('to', p);
-          if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
-        }
-      }
-
-      static getMessageHTML(d) {
-        let p = new DomNode('p');
-        if (d) {
-          if (d.mainCls) p.attr({ class: d.mainCls });
-
-          // 1st row (header)
-          let hdr = new DomNode('span').attr({ class: 'header' });
-
-          // Time field
-          new DomNode('span')
-            .attr({ class: 'timestamp' })
-            .style({ 'flex-grow': '1' })
-            .txt(d.ts).attach('to', hdr);
-          // Guild tag
-          if (d.tag) {
-            new DomNode('span')
-              .attr({ class: 'sticker' })
-              .txt(d.tag).attach('to', hdr);
-          }
-
-          hdr.attach('to', p);
-
-          // 2nd row
-          hdr = new DomNode('span').style({ display: 'block' });
-
-          // Username
-          new DomNode('span')
-            .attr({ class: d.userCls, username: d.user, ign: d.ign })
-            .txt((d.pfx || '') + d.user).attach('to', hdr);
-          // IGN
-          new DomNode('span')
-            .attr({ class: d.ignCls })
-            .txt(d.ign).attach('to', hdr);
-          // Separator
-          new DomNode('span')
-            .attr({ class: 'separator' })
-            .txt(': ').attach('to', hdr);
-          // Message
-          new DomNode('span')
-            .attr({ class: 'message hyphenate' })
-            .html(d.msg).attach('to', hdr);
-
-          hdr.attach('to', p);
-        }
-        return p.node;
-      }
-
-      static raidMessage(data, pc, uc, pfx) {
-        const msg = /(^.*?)(https?...www.kongregate.com.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(data.txt);
-        if (msg) {
-          const r = Util.getRaidFromUrl(msg[2], data.usr.usr);
-          if (r) {
-            const g = this.getGuildTag(data.usr.gld);
-            const v = Config.visited.indexOf(r.id) > -1;
-            const d = Util.hasProperty(Config.dead, r.id);
-            const m = msg[1] + msg[3];
-            const i = Config.data.raidData[r.boss];
-            const n = [];
-            const s = m ? ':' : '';
-            const t = new Date(data.ts).format('mmm d, HH:MM');
-            const u = data.usr.usr;
-            const ign = data.usr.ign;
-
-            pc.push('raid');
-            pc.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
-            pc.push(r.id);
-            d ? pc.push('dead') : v && pc.push('visited');
-
-            n.push(['N', 'H', 'L', 'NM'][r.diff - 1]);
-            n.push(i ? i.sName : r.boss.replace(/_/g, ' ').toUpperCase());
-
-            let l = `{id:'${r.id}',hash:'${r.hash}',boss:'${r.boss}',sid:'${r.sid}'}`;
-            l = `return DRMng.Raids.joinOne(${l});`;
-
-            let f = i ? Util.getShortNumK(i.hp[r.diff - 1] * 1000 / i.maxPlayers) : '';
-            f = `${i && i.maxPlayers === 90000 ? 'ER/WR' : `FS ${f}`}`;
-
-            return `<p class="${pc.join(' ')}">
-                                    <span class="header">
-                                        ${g ? `<span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>` : ''}
-                                        <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
-                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
-                                    </span>
-                                    <span style="display: flex">
-                                        <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
-                                        ${ign ? `<span class="guildname truncate">${ign}</span>` : ''}
-                                        <span class="separator">${s}</span>
-                                        <span class="extraid" style="flex-grow: 1; text-align: right; white-space: nowrap;">${f}</span>
-                                    </span>
-                                    <span class="message hyphenate">${m}</span>
-                                </p>`;
-          }
-        }
-        return null;
-      }
-
-      static getChat(name) {
-        if (this.Rooms === undefined) {
-          return null;
-        } else {
-          return this.Rooms.get(name) || null;
-        }
-      }
-
-      static getActive(nameOnly = false) {
-        if (this.Rooms === undefined) {
-          return null;
-        }
-        for (let [name, room] of this.Rooms) {
-          if (room.active) return nameOnly ? name : room;
-        }
-        return null;
-      }
-
-      static anyActive() {
-        if (this.Rooms === undefined) {
-          return false;
-        }
-        for (let room of this.Rooms.values()) {
-          if (room.active) return true;
-        }
-        return false;
-      }
-
-      static createAll() {
-        const rooms = Config.data.alliance.rooms;
-        rooms.forEach((room, index) => {
-          if (room.enabled && this.getChat(room.channel) === null) {
-            if (index === 0 && Config.data.alliance.sbs) {
-              Log.debug('Setting up default sbs room');
-              new this(room, true);
-            } else {
-              new this(room);
-            }
-          }
-        });
-      }
-
-      static add() {
-        const elChannel = document.getElementById('DRMng_allianceChnl');
-        const elPasswd = document.getElementById('DRMng_alliancePass');
-
-        if (elChannel.classList.contains('default') ||
-          elPasswd.classList.contains('default')) {
-          return;
-        }
-
-        const rooms = Config.data.alliance.rooms;
-        let replace = -1;
-        rooms.forEach((room, i) => {
-          if (room.channel === elChannel.value) replace = i;
-        });
-
-        const elName = document.getElementById('DRMng_allianceName');
-        const elColor = document.getElementById('DRMng_allianceColor');
-        const isDefaultName = elName.classList.contains('default');
-        const isDefaultColor = elColor.classList.contains('default');
-        const room = {
-          channel: elChannel.value,
-          pass: elPasswd.value,
-          name: isDefaultName ? Util.capitalize(elChannel.value) : elName.value,
-          color: isDefaultColor ? '#336699' : elColor.value,
-          enabled: true
-        };
-
-        this.addOption(room);
-
-        if (replace > -1) {
-          Config.data.alliance.rooms[replace] = room;
-          const r = this.getChat(room.channel);
-          if (r) {
-            r.configUpdate(room);
-          } else {
-            this.createAll();
-          }
-        } else {
-          Config.data.alliance.rooms.push(room);
-          this.createAll();
-        }
-        Config.save();
-      }
-
-      static addOption(room) {
-        const id = `DRMng_privateChat_room_${room.channel}`;
-        const el = new DomNode(`#${id}`);
-        if (el.notNull) {
-          el.node.firstChild.textContent = room.name;
-        } else {
-          new DomNode('div')
-            .attr({ class: 'buttonStripe', id: id })
-            .data(new DomNode('span').txt(room.name))
-            .data(new DomNode('button')
-              .attr({ class: 'l' }).txt('Del')
-              .on('click', () => this.removeChat(id)))
-            .attach('to', 'DRMng_privateChat');
-        }
-      }
-
-      static moveChats() {
-        DRMng.PrivateChat.sbsActive = Config.data.alliance.sbs;
-
-        for (let room of DRMng.PrivateChat.Rooms.values()) {
-          if (DRMng.PrivateChat.sbsActive) {
-            DRMng.PrivateChat.sbsTabs.appendChild(room.tab);
-            DRMng.PrivateChat.sbsContainer.appendChild(room.body);
-          } else {
-            room.deactivate();
-            room.tabs.insertBefore(room.tab, room.tabActions);
-            DRMng.PrivateChat.container.appendChild(room.body);
-          }
-        }
-
-        if (DRMng.PrivateChat.sbsActive) {
-          holodeck._chat_window._active_room.show();
-          if (!DRMng.PrivateChat.anyActive()) {
-            DRMng.PrivateChat.Rooms.values().next().value.activate();
-          }
-        }
-
-        DRMng.UI.setChatWidth();
-      }
-
-      static removeChat(chatID) {
-        const id = chatID.split('_')[3];
-        new DomNode(`#${chatID}`).detach();
-        const chat = this.getChat(id);
-        if (chat) {
-          chat.remove();
-          this.Rooms.delete(id);
-        }
-      }
-
-    },
     UI: {
       Groups: {},
-      Group: function (alias, title, visible) {
+      Group: function(alias, title, visible) {
         this.fields = [];
         this.html = null;
         this.cont = null;
-        this.setup = function (alias, title, visible) {
+        this.setup = function(alias, title, visible) {
           if (alias && title) {
             visible = visible || false;
             let groupDiv = document.createElement('div');
@@ -3669,7 +3891,7 @@ function main() {
           }
           return this;
         };
-        this.add = function (option) {
+        this.add = function(option) {
           if (option && (option instanceof DRMng.UI.Option || option instanceof DRMng.UI.SidebarConfig)) {
             this.fields.push(option);
             if (this.cont) this.cont.appendChild(option.html);
@@ -3678,7 +3900,7 @@ function main() {
         };
         return this.setup(alias, title, visible);
       },
-      Option: function () {
+      Option: function() {
         this.html = null;
         this.conf = null;
         this.cbFn = null;
@@ -3686,7 +3908,7 @@ function main() {
         this.field = '';
         this.type = '';
         let _title = '', _desc = '';
-        this.setup = function (alias, title, type = 'bool', value) {
+        this.setup = function(alias, title, type = 'bool', value) {
           if (alias !== null) {
             const defaults = {
               bool: false,
@@ -3706,22 +3928,22 @@ function main() {
           }
           return this;
         };
-        this.getConf = function () {
+        this.getConf = function() {
           return this.conf[this.field];
         };
-        this.flipConf = function () {
+        this.flipConf = function() {
           this.conf[this.field] = !this.conf[this.field];
           Config.save();
         };
-        this.desc = function (desc) {
+        this.desc = function(desc) {
           if (desc) _desc = desc;
           return this;
         };
-        this.event = function (callback) {
+        this.event = function(callback) {
           if (callback && typeof callback === 'function') this.cbFn = callback;
           return this;
         };
-        this.make = function (group, skipCb = false, name = 'Apply') {
+        this.make = function(group, skipCb = false, name = 'Apply') {
 
           let optionDiv = document.createElement('div');
           optionDiv.setAttribute('class', 'buttonStripe');
@@ -3740,7 +3962,7 @@ function main() {
             button.textContent = name;
           }
           button.setAttribute('style', 'border-left-color: #3a3a3a;');
-          button.addEventListener('click', function (e) {
+          button.addEventListener('click', function(e) {
             if (this.type === 'bool') {
               this.flipConf();
               e.target.setAttribute('class', this.getConf() ? 'n' : 'l');
@@ -3819,7 +4041,7 @@ function main() {
           else el.data(this.makeSbButton());
           return el;
         };
-        this.makeSb = function (group, data) {
+        this.makeSb = function(group, data) {
           /*const grp = new DomNode(`div`)
            .attr({class: `drmng_config_sb`})
            .data(new DomNode(`div`)
@@ -3895,7 +4117,7 @@ function main() {
           new DRMng.UI.Option().makeSb(group, { name: 'Buttons', buttons: this.conf.buttons });
         }
       },
-      addRaidField: function (r, idx) {
+      addRaidField: function(r, idx) {
         const ifo = Config.data.raidData[r.boss];
         // classes
         const cls = ['drm_' + r.boss + '_' + r.diff];
@@ -3921,15 +4143,15 @@ function main() {
         }
         if (list.scrollTop < 20) list.scrollTop = 0;
       },
-      removeRaidField: function (id) {
+      removeRaidField: function(id) {
         let r = document.getElementById('DRMng_' + id);
         if (r) r.parentNode.removeChild(r);
       },
-      clearRaidList: function () {
+      clearRaidList: function() {
         document.getElementById('DRMng_RaidList').innerHTML = '';
       },
       statusTimer: null,
-      displayStatus: function (msg) {
+      displayStatus: function(msg) {
         const status = document.getElementById('DRMng_status');
         if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
           if (DRMng.Raids.joinLen > 0)
@@ -3943,7 +4165,7 @@ function main() {
         }
       },
       submitResponseTimeout: 0,
-      submitResponse: function (mode, msg) {
+      submitResponse: function(mode, msg) {
         clearTimeout(this.submitResponseTimeout);
         let respDiv = document.getElementById('DRMng_submitResponse');
         msg = msg || 'Unidentified event occurred';
@@ -3962,11 +4184,11 @@ function main() {
           respDiv.innerHTML = msg;
           respDiv.className += mode;
         }
-        this.submitResponseTimeout = setTimeout(function () {
+        this.submitResponseTimeout = setTimeout(function() {
           document.getElementById('DRMng_submitResponse').className = 'textField';
         }, 60000);
       },
-      createCSS: function () {
+      createCSS: function() {
         let content = `\
                 @font-face {\
                     font-family: 'Material-Design';\
@@ -4706,7 +4928,7 @@ function main() {
           }
         });
       },
-      applyDiffFilter: function (id) {
+      applyDiffFilter: function(id) {
         let mode = id && id.split('_');
         if (mode[0] === 'DRMngFilter') {
           let diff = parseInt(mode[2]);
@@ -4724,7 +4946,7 @@ function main() {
           }
         }
       },
-      applyFilter: function (e) {
+      applyFilter: function(e) {
         let el = e.target;
         if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
         let server = Config.data.server.toLowerCase();
@@ -4769,7 +4991,7 @@ function main() {
               break;
             case 'chat':
               btn.on('click', () =>
-                holodeck.processChatCommand(button.command, DRMng.PrivateChat.getActive(true)));
+                holodeck.processChatCommand(button.command, PrivateChat.getActive(true)));
               break;
             case 'www':
               btn.on('click', () => window.open(button.command));
@@ -4778,7 +5000,7 @@ function main() {
         }
         return btn.node;
       },
-      setupSidebar: function () {
+      setupSidebar: function() {
         let left = true;
         let sb = document.getElementById('DRMng_Sidebar');
         if (sb) new DomNode(sb).clear();
@@ -4820,7 +5042,7 @@ function main() {
       setChatWidth: () => {
         const el = document.getElementById('chat_container');
         if (el) {
-          const sc = DRMng.PrivateChat.sbsContainer;
+          const sc = PrivateChat.sbsContainer;
           const a = Config.data.alliance.sbs && sc && sc.childElementCount > 1;
           const width = Config.data.kong.chatWidth;
           if (a) {
@@ -4832,7 +5054,7 @@ function main() {
           }
         }
       },
-      loadDefaults: function () {
+      loadDefaults: function() {
         let val;
 
         // Chat width
@@ -4857,9 +5079,9 @@ function main() {
         });
 
         // Private Chats
-        Config.data.alliance.rooms.forEach(room => DRMng.PrivateChat.addOption(room));
+        Config.data.alliance.rooms.forEach(room => PrivateChat.addOption(room));
       },
-      loadOptions: function () {
+      loadOptions: function() {
         let group, opt;
 
         group = new this.Group('kongui', 'Kongregate', true);
@@ -4867,7 +5089,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_stickyHeader', 'Sticky header', 'bool', true)
            .desc('Makes top header always visible on screen.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field]) {
                new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
                CSS.del(this.field);
@@ -4883,7 +5105,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_hideToolbar', 'Hide game toolbar', 'bool', false)
            .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
              else CSS.del(this.field);
@@ -4893,7 +5115,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_hideFrame', 'Hide game frame', 'bool', false)
            .desc('Hides 7px wide frame around game window.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, 'div#maingame', 'padding: 0');
              else CSS.del(this.field);
@@ -4903,7 +5125,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_hideGameDetails', 'Hide game details', 'bool', false)
            .desc('Hides game details part located just below game window.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, 'div.game_details_outer', 'display: none');
              else CSS.del(this.field);
@@ -4913,7 +5135,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_hideForum', 'Hide forum area', 'bool', true)
            .desc('Hides forum part located below game window.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
              else CSS.del(this.field);
@@ -4929,7 +5151,7 @@ function main() {
         opt.setup('drmui_disableTransitions', 'Disable transitions', 'bool', false)
            .desc('Disables animated transitions for various UI elements to improve performance on' +
              ' low-end hardware.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
                  ' div#DRMng_info *', 'transition: initial !important');
@@ -4940,7 +5162,7 @@ function main() {
         opt = new this.Option();
         opt.setup('drmui_hideSideBar', 'Hide sidebar', 'bool', false)
            .desc('Hides sidebar which is located between game window and kongregate chat.')
-           .event(function () {
+           .event(function() {
              if (this.conf[this.field])
                CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
              else CSS.del(this.field);
@@ -4956,7 +5178,7 @@ function main() {
         opt.setup('alliance_sbs', 'Side by side', 'bool', false)
            .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
              ' (doubles width taken by chat area).')
-           .event(() => DRMng.PrivateChat.moveChats())
+           .event(() => PrivateChat.moveChats())
            // .event(function () {
            //     // make sure initial variable setting wont fire this
            //     if (DRMng.Alliance.tab) {
@@ -4979,9 +5201,9 @@ function main() {
         opt = new this.Option();
         opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
            .desc('Disables World Chat located next to game window.')
-           .event(function () {
+           .event(function() {
              DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-             DRMng.Kong.hideWorldChat();
+             Kong.hideWorldChat();
            })
            .make(group, true);
 
@@ -4994,9 +5216,9 @@ function main() {
         opt = new this.Option();
         opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
            .desc('Hides World Chat (without disabling it completely).')
-           .event(function () {
+           .event(function() {
              DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-             DRMng.Kong.hideWorldChat();
+             Kong.hideWorldChat();
            })
            .make(group, true);
 
@@ -5005,7 +5227,7 @@ function main() {
         new this.Option()
           .setup('sidebar_apply', 'Apply changes', 'action')
           .desc('Applies sidebar layout changes as defined below.')
-          .event(function () {
+          .event(function() {
             const sb = document.getElementsByClassName('drmng_config_sb');
             const dat = { groups: [], buttons: [] };
             for (let i = 0; i < sb.length; ++i) {
@@ -5079,12 +5301,12 @@ function main() {
           .make(group, true, 'Import');
         new this.SidebarConfig().make(group);
 
-        DRMng.Kong.hideWorldChat();
+        Kong.hideWorldChat();
 
         // Save all changes made to config file due to introducing new options
         Config.save();
       },
-      raidInfo: function (boss) {
+      raidInfo: function(boss) {
         let txt = '';
         if (boss) {
           let r = Config.data.raidData[boss];
@@ -5109,23 +5331,23 @@ function main() {
               rt = t.nonTiered.ratio[r.size][3];
               txt += '<tr><td>OS</td>' +
                 '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td></tr>';
+                          '&mdash;') + '</td></tr>';
               rt = t.nonTiered.ratio[r.size][6];
               txt += '<tr><td>MS</td>' +
                 '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td>' +
+                          '&mdash;') + '</td>' +
                 '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                  '&mdash;') + '</td></tr>';
+                          '&mdash;') + '</td></tr>';
             }
             txt += '</table>';
 
@@ -5140,8 +5362,8 @@ function main() {
                 '<td>' + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
-                  (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
-                  '&mdash;') + '</td>';
+                          (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
+                          '&mdash;') + '</td>';
               // Epics OS
               if (t.eOS >= 0) txt += '<tr><td>Epics OS</td><td>' +
                 Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' +
@@ -5149,8 +5371,8 @@ function main() {
                 '<td>' + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
-                  (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
-                  '&mdash;') + '</td>';
+                          (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
+                          '&mdash;') + '</td>';
               // Max Tier
               let idx = t.tiers.length - 1;
               txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
@@ -5201,7 +5423,7 @@ function main() {
 
         // Status
         data.sta += rd.isFull ? `, Full (${rd.participants})` :
-          `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ''}`;
+                    `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ''}`;
         data.sta += rd.visited ? ', Visited' : '';
 
         // Health text
@@ -5221,7 +5443,7 @@ function main() {
           `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
           `<progress class="time" id="DRMng_progTime" value="${data.ptm}"></progress></div>`;
       },
-      infoEvent: function (e) {
+      infoEvent: function(e) {
         clearTimeout(DRMng.UI.fillInfoTimeout);
         if (DRMng.hResize.clicked) return;
 
@@ -5247,8 +5469,8 @@ function main() {
         if (usr) {
           e.stopPropagation();
           e.preventDefault();
-          if ((DRMng.PrivateChat.anyActive() && !DRMng.PrivateChat.sbsActive) || sbs) {
-            const a = DRMng.PrivateChat.getActive();
+          if ((PrivateChat.anyActive() && !PrivateChat.sbsActive) || sbs) {
+            const a = PrivateChat.getActive();
             Log.info(`{${a ? `Private::${a.conf.channel}` : 'Kong'}::PM} User <${usr}>`);
             a.input.focus();
             a.input.dispatchEvent(new Event('focus'));
@@ -5281,7 +5503,7 @@ function main() {
           setTimeout(DRMng.UI.addListenerToChat, 250);
         }
       },
-      attachListeners: function () {
+      attachListeners: function() {
         // Chat global listener
         setTimeout(DRMng.UI.addListenerToChat, 1000);
 
@@ -5472,7 +5694,7 @@ function main() {
         document.getElementById('DRMng_main')
                 .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
       },
-      roll: function (elem) {
+      roll: function(elem) {
         const gr = elem ? elem.parentNode : null;
         if (gr) {
           const group = gr.getAttribute('group');
@@ -5496,7 +5718,7 @@ function main() {
           }
         }
       },
-      init: function () {
+      init: function() {
         // create stylesheet
         this.createCSS();
 
@@ -5614,7 +5836,7 @@ function main() {
                                             id="DRMng_allianceColor" value="Color">\
                                     </div>\
                                     <div class="buttonStripe">
-                                        <button onclick="DRMng.PrivateChat.add()"
+                                        <button onclick="PrivateChat.add()"
                                             id="DRMng_allianceAdd" class="n">Add</button>
                                     </div>\
                                 </div>\
@@ -5644,11 +5866,11 @@ function main() {
                                                             if (el.className === 'hidden') {
                                                               el.removeAttribute('class');
                                                               new DomNode('#DRMng_onoff').remove('class');
-                                                              DRMng.Kong.setWrapperWidth(Config.data.scriptWidth);
+                                                              Kong.setWrapperWidth(Config.data.scriptWidth);
                                                             } else {
                                                               el.className = 'hidden';
                                                               new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
-                                                              DRMng.Kong.setWrapperWidth();
+                                                              Kong.setWrapperWidth();
                                                             }
                                                           })));
 
@@ -5710,7 +5932,7 @@ function main() {
         return this.running;
       }
     },
-    postMessage: function (data) {
+    postMessage: function(data) {
       document.dispatchEvent(
         new MessageEvent('DRMng.xhrReq', {
           origin: `${document.location.protocol}//${document.location.hostname}`,
@@ -5720,7 +5942,7 @@ function main() {
         })
       );
     },
-    postGameMessage: function (type, data = '') {
+    postGameMessage: function(type, data = '') {
       const game = document.getElementById('gameiframe');
       if (game) {
         type = `DRMng.${type}`;
@@ -5729,16 +5951,16 @@ function main() {
         game.contentWindow.postMessage(type, 'https://dotd-web1.5thplanetgames.com');
       }
     },
-    init: function () {
+    init: function() {
 
       // load localStorage
       Config.load();
 
       // init kong features
-      this.Kong.init();
+      Kong.load();
 
-      // get user data
-      this.UM.getUserData();
+      // load user manager
+      UserManager.load();
 
       // load UI
       this.UI.init();
@@ -5752,10 +5974,8 @@ function main() {
       // connect to Server
       this.Engine.init();
 
-      // silently init alliance chat
-      // and connect if proper credentials are present
-      // this.Alliance.init();
-      this.PrivateChat.createAll();
+      // create and connect private chats
+      PrivateChat.createAll();
     }
   };
 
@@ -5847,7 +6067,7 @@ function load() {
         flashvars: Object.keys(vars).reduce((a, v) => `${a}&${v}=${encodeURIComponent(vars[v])}`, '')
       };
     },
-    createSwf: function (data, id, width, height) {
+    createSwf: function(data, id, width, height) {
       const swf = document.getElementById(id);
       if (swf) swf.setAttribute('data', data);
       else {
@@ -5875,7 +6095,7 @@ function load() {
         obj.style.visibility = 'visible';
       }
     },
-    applyChatSettings: function () {
+    applyChatSettings: function() {
       const swfDiv = document.getElementById('swfdiv');
       const chatDiv = document.getElementById('chatdiv');
       if (this.config.removeWChat) {
@@ -5900,7 +6120,7 @@ function load() {
         if (swfDiv) swfDiv.parentNode.style.left = '0';
       }
     },
-    reloadChat: function () {
+    reloadChat: function() {
       if (this.config.version.chat)
         this.createSwf(
           'https://content.5thplanetgames.com/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf',
@@ -5908,14 +6128,14 @@ function load() {
         );
       setTimeout(this.applyChatSettings.bind(this), 100);
     },
-    reloadGame: function () {
+    reloadGame: function() {
       if (this.config.version.game)
         this.createSwf(
           'https://content.5thplanetgames.com/dotd_live/swf/' + this.config.version.game + '/dotd.swf',
           'swfdiv', '760', '690'
         );
     },
-    init: function () {
+    init: function() {
       const swfDiv = document.getElementById('swfdiv');
       const chatDiv = document.getElementById('chatdiv');
       this.load();
@@ -5982,7 +6202,7 @@ if (window.location.host === 'www.kongregate.com') {
   if (window.top === window.self) {
     document.addEventListener('DRMng.xhrReq', param => {
       const p = JSON.parse(param.data);
-      p.callback = function (e, r) {
+      p.callback = function(e, r) {
         delete this.onload;
         delete this.onerror;
         delete this.ontimeout;

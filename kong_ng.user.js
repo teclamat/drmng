@@ -204,7 +204,9 @@ function main() {
     }
 
     clear() {
-      while (this._node.firstChild) this._node.removeChild(this._node.firstChild);
+      if (!this.empty) {
+        while (this._node.firstChild) this._node.removeChild(this._node.firstChild);
+      }
       return this;
     }
 
@@ -258,13 +260,13 @@ function main() {
       return this;
     }
 
-    on(event, func, bubble) {
-      this._node.addEventListener(event, func, bubble);
+    on(event, callback, bubble) {
+      this._node.addEventListener(event, callback, bubble);
       return this;
     }
 
-    off(event, func, bubble) {
-      this._node.removeEventListener(event, func, bubble);
+    off(event, callback, bubble) {
+      this._node.removeEventListener(event, callback, bubble);
       return this;
     }
 
@@ -436,7 +438,7 @@ function main() {
      * @param {string[]} [order] - Order array
      * @returns {string}
      */
-    static getShortNum(number, precision = 4, order = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
+    static toShortNumber(number, precision = 4, order = ['', 'k', 'm', 'b', 't', 'q', 'Q']) {
       let value = parseInt(number);
       if (isNaN(value) || value < 0) return number;
       let count = 0;
@@ -454,7 +456,7 @@ function main() {
      * @returns {string}
      */
     static getShortNumK(number, precision = 4) {
-      return this.getShortNum(number, precision, ['k', 'm', 'b', 't', 'q', 'Q']);
+      return this.toShortNumber(number, precision, ['k', 'm', 'b', 't', 'q', 'Q']);
     }
 
     /**
@@ -463,18 +465,18 @@ function main() {
      * @param {number} [min=0] - Lowest possible integer
      * @returns {number}
      */
-    static getRand(max = 1, min = 0) {
+    static random(max = 1, min = 0) {
       if (max < 1) return 0;
       return Math.floor(min + Math.random() * (max + 1));
     }
 
     /**
      * Returns random element from given array
-     * @param {Array} arr - Input array
+     * @param {Array} array - Input array
      * @returns {*}
      */
-    static getRandArray(arr) {
-      return arr[this.getRand(arr.length - 1)];
+    static randomFromArray(array) {
+      return array[this.random(array.length - 1)];
     }
 
     /**
@@ -504,7 +506,7 @@ function main() {
      * @return {string}
      */
     static capitalize(text) {
-      if (typeof text === 'string' && text.length > 1) {
+      if ((typeof text === 'string') && (text.length > 1)) {
         return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
       }
       return text;
@@ -524,17 +526,69 @@ function main() {
   window.Util = Util;
 
   /**
+   * Timer class
+   * @type {Timer}
+   */
+  class Timer {
+    /**
+     * Creates a timer
+     * @param {function(*)} callback Function to invoke after timer completes
+     * @param {number} delay Timer duration
+     */
+    constructor(callback, delay) {
+      this.started = null;
+      this.remaining = delay;
+      this.running = false;
+      this.delay = delay;
+      this.start();
+      this.cb = callback;
+    }
+
+    start() {
+      this.running = true;
+      this.started = new Date();
+      this.id = setTimeout(this.cb, this.remaining);
+    }
+
+    restart() {
+      this.pause();
+      this.remaining = this.delay;
+      this.start();
+    }
+
+    pause() {
+      this.running = false;
+      clearTimeout(this.id);
+      this.remaining -= new Date() - this.started;
+    }
+
+    get timeLeft() {
+      if (this.running) {
+        this.pause();
+        this.start();
+      }
+      return this.remaining;
+    }
+
+    get state() {
+      return this.running;
+    }
+  }
+
+  window.Timer = Timer;
+
+  /**
    * Gestures classes group
    */
   window.Gestures = {
     Kiss: class {
       static get SmittenAdjective() {
         const smittenAdjective = ['smitten', 'enamored', 'infatuated', 'taken', 'in love', 'inflamed'];
-        return Util.getRandArray(smittenAdjective);
+        return Util.randomFromArray(smittenAdjective);
       }
 
       static generate() {
-        switch (Util.getRand(6)) {
+        switch (Util.random(6)) {
           case 0:
             return '@from gives @who a puckered kiss on the lips.';
           case 1:
@@ -556,12 +610,12 @@ function main() {
           'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
           'up the butt'
         ];
-        return Util.getRandArray(pokeBodyPlace);
+        return Util.randomFromArray(pokeBodyPlace);
       }
 
       static generate() {
         let txt = '';
-        switch (Util.getRand(6)) {
+        switch (Util.random(6)) {
           case 0:
             txt = '@from with a tickling finger of doom, pokes @who ';
             break;
@@ -593,7 +647,7 @@ function main() {
           'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel',
           'strike', 'beat'
         ];
-        return Util.getRandArray(strikeAction);
+        return Util.randomFromArray(strikeAction);
       }
 
       static get LeapingAction() {
@@ -601,14 +655,14 @@ function main() {
           'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
           'sprints', 'dashes', 'charges', 'lunges'
         ];
-        return Util.getRandArray(leapingAction);
+        return Util.randomFromArray(leapingAction);
       }
 
       static get AimModifier() {
         const aimModifier = [
           'a well placed', 'a pin-point accurate', 'a targeted', 'an aimed', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
         ];
-        return Util.getRandArray(aimModifier);
+        return Util.randomFromArray(aimModifier);
       }
 
       static get WrestlingMove() {
@@ -622,7 +676,7 @@ function main() {
           ' fast lowerbody roundhouse kick', ' fast upperbody roundhouse kick', 'n uppercut palm strike',
           'n uppercut to midsection jab combo', ' downward chop'
         ];
-        return Util.getRandArray(wrestlingMove);
+        return Util.randomFromArray(wrestlingMove);
       }
 
       static get Meal() {
@@ -630,17 +684,17 @@ function main() {
           'midmorning snack', 'midnight snack', 'supper', 'breakfast', 'brunch', '2 o\'clock tea time',
           'midafternoon snack', 'lunch'
         ];
-        return Util.getRandArray(meal);
+        return Util.randomFromArray(meal);
       }
 
       static get ThrowAction() {
         const throwAction = ['tosses', 'propels', 'throws', 'catapults', 'hurls', 'launches'];
-        return Util.getRandArray(throwAction);
+        return Util.randomFromArray(throwAction);
       }
 
       static get Crying() {
         const crying = ['shouting', 'screaming', 'hollering', 'yelling', 'crying out'];
-        return Util.getRandArray(crying);
+        return Util.randomFromArray(crying);
       }
 
       static get SportsWeapon() {
@@ -648,12 +702,12 @@ function main() {
           'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
           'barbell', 'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
         ];
-        return Util.getRandArray(sportsWeapon);
+        return Util.randomFromArray(sportsWeapon);
       }
 
       static get MidsectionStrikePlace() {
         const midsectionStrikePlace = ['midsection', 'solar plexus', 'chest', 'abdomen', 'sternum'];
-        return Util.getRandArray(midsectionStrikePlace);
+        return Util.randomFromArray(midsectionStrikePlace);
       }
 
       static get RandomItemWeapon() {
@@ -664,7 +718,7 @@ function main() {
           'a slinky, a slink [fun for a girl or a boy]', 'a chinese finger puzzle', 'a whip of wet noodles',
           'a humungous spicey italian meatstick', 'a giant garlic dill', 'an ACME hammer of pain'
         ];
-        return Util.getRandArray(randomItemWeapon);
+        return Util.randomFromArray(randomItemWeapon);
       }
 
       static get WithDescriptors() {
@@ -673,7 +727,7 @@ function main() {
           'with half-cocked attitude, ', 'with fervor and oomph, ', 'with vitality and gusto, ',
           'with ambition and enthusiasm, ', '', '', '', ''
         ];
-        return Util.getRandArray(withDescriptors);
+        return Util.randomFromArray(withDescriptors);
       }
 
       static get StrikeActionVerb() {
@@ -681,11 +735,11 @@ function main() {
           'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
           'punishes', 'pummels', 'strikes', 'assaults', 'beats'
         ];
-        return Util.getRandArray(strikeActionVerb);
+        return Util.randomFromArray(strikeActionVerb);
       }
 
       static generate() {
-        switch (Util.getRand(8)) {
+        switch (Util.random(8)) {
           case 0:
           case 3:
             return `@from attempts to ${this.StrikeAction} @who but fails...`;
@@ -712,26 +766,26 @@ function main() {
           'left over chicken drumstick', 'limp and slightly dirty french fry', 'brick of moldy cheese',
           'grilled cheese', 'big dildo'
         ];
-        return Util.getRandArray(slapWeapon);
+        return Util.randomFromArray(slapWeapon);
       }
 
       static get TargetAction() {
         const targetAction = [
           'deals', 'aims', 'inflicts', 'releases', 'dispatches', 'discharges', 'delivers', 'unleashes'
         ];
-        return Util.getRandArray(targetAction);
+        return Util.randomFromArray(targetAction);
       }
 
       static get SassySynonym() {
         const sassySynonym = [
           'an audacious', 'an impudent', 'a bold', 'an overbold', 'an arrant', 'a brassy', 'a sassy'
         ];
-        return Util.getRandArray(sassySynonym);
+        return Util.randomFromArray(sassySynonym);
       }
 
       static get Place() {
         const place = [['side', '\'s head.'], ['face', '.'], ['cheek', '.']];
-        return Util.getRandArray(place);
+        return Util.randomFromArray(place);
       }
 
       static get LeapingAction() {
@@ -739,18 +793,18 @@ function main() {
           'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
           'sprints', 'dashes', 'charges', 'lunges'
         ];
-        return Util.getRandArray(leapingAction);
+        return Util.randomFromArray(leapingAction);
       }
 
       static get LeadSpeed() {
         const leadSpeed = [
           ' sudden', ' spry', 'n abrupt', 'n energetic', ' hasty', 'n agile', 'n accelerated', ' quick'
         ];
-        return Util.getRandArray(leadSpeed);
+        return Util.randomFromArray(leadSpeed);
       }
 
       static generate() {
-        switch (Util.getRand(3)) {
+        switch (Util.random(3)) {
           case 0:
           case 2:
             return `@from slaps @who with a ${this.SlapWeapon}.`;
@@ -765,9 +819,9 @@ function main() {
 
   /**
    * Handles dynamic CSS rules
-   * @type {CSS}
+   * @type {Css}
    */
-  class CSS {
+  class Css {
     /**
      * Adds new CSS rule
      * @param {string} alias - alias for the rule
@@ -825,7 +879,7 @@ function main() {
     }
   }
 
-  window.CSS = CSS;
+  window.Css = Css;
 
   /**
    * XHR calls proxy
@@ -1457,15 +1511,17 @@ function main() {
       setTimeout(() => this.reconnect(), 1000);
     }
 
+    get ready() {
+      return (typeof io === 'function') && this.tab && this.chat && UserManager.user.qualified && !DRMng.Raids.bootstrap;
+    }
+
     configUpdate(conf) {
       this.name = conf.name;
       this.pass = conf.pass;
     }
 
     connect() {
-      Log.debug(`{PrivateChat} io:${typeof io === 'function'} user:${UserManager.user.qualified} bootstrap:${!DRMng.Raids.bootstrap}`);
-      if (typeof io === 'function' && this.tab && this.chat &&
-        UserManager.user.qualified && !DRMng.Raids.bootstrap) {
+      if (this.ready) {
 
         if (Config.data.alliance.sbs) {
           document.getElementById('private_chat_sbs').style.removeProperty('display');
@@ -2454,8 +2510,7 @@ function main() {
           if (a.data.success) {
             this.displayUnsanitizedMessage(
               a.data.from,
-              `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.` +
-              `insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
+              `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
               { class: 'whisper received_whisper' },
               { whisper: true }
             );
@@ -2699,200 +2754,226 @@ function main() {
       cmd.forEach(c => holodeck.addChatCommand(c, call));
     }
 
+    static handleGestureCommand(chat, inputText) {
+      const input = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(inputText);
+      if (chat && input) {
+        const command = Util.capitalize(input[1]);
+        const gesture = Gestures[command].generate()
+          .replace('@from', UserManager.user.name)
+          .replace('@who', input[2]);
+        const gestureText = `** ${gesture} **`;
+
+        if (chat instanceof Holodeck) {
+          chat.filterOutgoingMessage(gestureText, chat._active_dialogue._onInputFunction);
+        } else if (chat instanceof PrivateChat) {
+          chat.send(gestureText);
+        }
+      }
+      return false;
+    }
+
+    static handlePerceptionCommand(chat, inputText) {
+      const input = /.+\s(\d+)(\w?)/.exec(inputText);
+
+      let level = 0;
+      if (input) {
+        let order = 1;
+        if (input[2] === 'k') {
+          order = 1000
+        } else if (input[2] === 'm') {
+          order = 1000000
+        }
+        level = parseInt(input[1]) * order;
+      }
+
+      const PERC_DROPS = [
+        {val: 1, drop: {color: ['Brown', 'Grey'], perc: [50, 50]}},
+        {val: 4000, drop: {color: ['Brown', 'Grey', 'Green'], perc: [33, 34, 33]}},
+        {val: 6000, drop: {color: ['Grey', 'Green'], perc: [50, 50]}},
+        {val: 10000, drop: {color: ['Grey', 'Green', 'Blue'], perc: [33, 34, 33]}},
+        {val: 14000, drop: {color: ['Green', 'Blue'], perc: [50, 50]}},
+        {val: 16000, drop: {color: ['Green', 'Blue', 'Purple'], perc: [33, 34, 33]}},
+        {val: 18000, drop: {color: ['Blue', 'Purple'], perc: [50, 50]}},
+        {val: 22000, drop: {color: ['Blue', 'Purple', 'Orange'], perc: [33, 34, 33]}},
+        {val: 24000, drop: {color: ['Purple', 'Orange'], perc: [50, 50]}},
+        {val: 30000, drop: {color: ['Orange'], perc: [100]}},
+        {val: 33000, drop: {color: ['Orange', 'Red'], perc: [75, 25]}},
+        {val: 36000, drop: {color: ['Orange', 'Red'], perc: [50, 50]}},
+        {val: 50000, drop: {color: ['Orange', 'Red'], perc: [25, 75]}},
+        {val: 70000, drop: {color: ['Red'], perc: [100]}},
+        {val: 80000, drop: {color: ['Red', 'Bronze'], perc: [75, 25]}},
+        {val: 90000, drop: {color: ['Red', 'Bronze'], perc: [50, 50]}},
+        {val: 100000, drop: {color: ['Red', 'Bronze'], perc: [25, 75]}},
+        {val: 110000, drop: {color: ['Bronze', 'Silver'], perc: [75, 25]}},
+        {val: 120000, drop: {color: ['Bronze', 'Silver'], perc: [50, 50]}},
+        {val: 130000, drop: {color: ['Bronze', 'Silver'], perc: [25, 75]}},
+        {val: 140000, drop: {color: ['Silver'], perc: [100]}},
+        {val: 150000, drop: {color: ['Silver', 'Gold'], perc: [75, 25]}},
+        {val: 160000, drop: {color: ['Silver', 'Gold'], perc: [50, 50]}},
+        {val: 170000, drop: {color: ['Silver', 'Gold'], perc: [25, 75]}},
+      ];
+
+      const table = new DomNode('table')
+        .attr({'cellspacing': '0'})
+        .style({'width': '100%', 'font-weight': '300', 'font-size': '10px'});
+
+      const lastElement = PERC_DROPS.length - 1;
+
+      PERC_DROPS.forEach((data, index) => {
+        if ((data.val >= level) || (index === lastElement)) {
+          const row = new DomNode('tr').attach('to', table);
+
+          new DomNode('td')
+            .style({
+              'background': '#303030',
+              'border-right': '1px solid #000000',
+              'border-bottom': '1px solid #000000',
+              'padding-right': '5px',
+              'text-align': 'right',
+              'width': '30px'
+            })
+            .text(data.val > 1000 ? `${data.val / 1000}k` : data.val)
+            .attach('to', row);
+
+          const cell = new DomNode('td')
+            .style({'border-bottom': '1px solid #000000', 'border-right': '1px solid #000000', 'width': '80%'})
+            .attach('to', row);
+
+          const drop = data.drop;
+
+          for (let i = 0; i < drop.color.length; ++i) {
+            new DomNode('span')
+              .style({'width': `${drop.perc[i]}%`, 'background-color': drop.color[i], 'display': 'inline-block'})
+              .text(drop.color[i])
+              .attach('to', cell);
+          }
+        }
+      });
+
+      if (chat instanceof Holodeck) {
+        chat._active_dialogue.serviceMessage(table.node);
+      } else if (chat instanceof PrivateChat) {
+        chat.serviceMessage(table.node);
+      }
+
+      return false;
+    }
+
+    static handleReloadCommand(chat, inputText) {
+      const type = /^\/\w+\s?(.*)$/.exec(inputText)[1];
+      switch (type) {
+        case 'game':
+          DRMng.postGameMessage('gameReload');
+          break;
+        case 'chat':
+          DRMng.postGameMessage('chatReload');
+          break;
+        default:
+          window.gameLoader.loadGame('');
+      }
+      return false;
+    }
+
+    static handleGameKillCommand(chat, inputText) {
+      const mode = /^\/kill\s?(.*)$/.exec(inputText)[1];
+      switch (mode) {
+        case 'game':
+          DRMng.postGameMessage('killGame');
+          break;
+        case 'chat':
+          DRMng.postGameMessage('killChat');
+          break;
+        default:
+          new DomNode('#gameiframe').attr({ src: '' });
+      }
+      return false;
+    }
+
+    static handleClearChatCommand(chat, inputText) {
+      if (chat instanceof  Holodeck) {
+        chat._active_dialogue.clear();
+      } else if (chat instanceof PrivateChat) {
+        chat.clear();
+      }
+      return false;
+    }
+
+    static handleWikiCommand(chat, inputText) {
+      const searchItem = /^\/wiki (.+)$/.exec(inputText);
+      if (searchItem) {
+        window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${encodeURI(searchItem[1])}`, '_blank');
+      }
+      return false;
+    }
+
+    static handleEncyclopediaCommand(chat, inputText) {
+      const searchItem = /^\/enc (.+)$/.exec(inputText);
+      if (searchItem) {
+        window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(searchItem[1])}`, '_blank');
+      }
+      return false;
+    }
+
+    static handleScriptVersionCommand(chat, inputText) {
+      if (chat instanceof Holodeck) {
+        chat._active_dialogue.serviceMessage(DRMng.About.versionHtml);
+      } else if (chat instanceof PrivateChat) {
+        chat.serviceMessage(DRMng.About.versionHtml);
+      }
+      return false;
+    }
+
+    static handleRaidInfoCommand(chat, inputText) {
+      const input = /^\/(raid|rd) (.+)$/.exec(inputText);
+      let message = 'Wrong /raid or /rd syntax';
+      let banner = null;
+      if (input) {
+        const raidText = input[2].toLowerCase();
+        const raidArray = raidText.split(' ');
+        const raidData = Config.data.raidData;
+        const raidsFound = [];
+
+        Object.entries(raidData).forEach(([linkName,raidData]) => {
+          const fullName = raidData.fName.toLowerCase();
+          const nameMatch = raidArray.some(name => fullName.includes(name) || linkName.includes(name));
+          if (nameMatch) raidsFound.push([linkName, raidData.fName]);
+        });
+
+        if (raidsFound.length > 1) {
+          message = raidsFound.reduce((msg, raid) =>
+            `${msg}<br><span class="DRMng_info_picker ${raid[0]}">${raid[1]} (${raid[0]})</span>`,
+            'Multiple results found, pick one:');
+        } else if (raidsFound.length === 1) {
+          message = DRMng.UI.raidInfo(raidsFound[0][0]);
+          banner = data[raidsFound[0][0]].banner;
+        } else {
+          message = `No info found matching ${raidText}`;
+        }
+      }
+
+      if (chat instanceof Holodeck) {
+        chat._active_dialogue.serviceMessage(message, banner);
+      } else if (chat instanceof PrivateChat) {
+        chat.serviceMessage(message, banner);
+      }
+
+      return false;
+    }
+
     /**
      * Definition of all supported chat commands
      */
     static addChatCommands() {
       if (holodeck && holodeck.ready) {
-        this.addChatCommand(['kiss', 'hit', 'poke', 'slap'], (chat, cmd) => {
-          const part = /^\/(kiss|hit|poke|slap) (\w+)$/.exec(cmd);
-          if (part) {
-            const command = Util.capitalize(part[1]);
-            const gesture = Gestures[command].generate()
-                                             .replace('@from', UserManager.user.name)
-                                             .replace('@who', part[2]);
-            const gestureText = `** ${gesture} **`;
-
-            if (chat instanceof Holodeck) {
-              chat.filterOutgoingMessage(gestureText, chat._active_dialogue._onInputFunction);
-            } else {
-              chat.send(gestureText);
-            }
-          }
-          return false;
-        });
-        this.addChatCommand('perc', (a, b) => {
-          let pval = /.+\s(\d+)(\w?)/.exec(b);
-          if (pval) {
-            let mul = 1;
-            switch (pval[2]) {
-              case 'k':
-                mul *= 1000;
-                break;
-              case 'm':
-                mul *= 1000000;
-                break;
-            }
-            pval = parseInt(pval[1]) || 0;
-            pval *= mul;
-          } else {
-            pval = 0;
-          }
-
-          const D = [
-            { val: 1, bok: ['Brown', 'Grey'], bokp: [50, 50] },
-            { val: 4000, bok: ['Brown', 'Grey', 'Green'], bokp: [33, 34, 33] },
-            { val: 6000, bok: ['Grey', 'Green'], bokp: [50, 50] },
-            { val: 10000, bok: ['Grey', 'Green', 'Blue'], bokp: [33, 34, 33] },
-            { val: 14000, bok: ['Green', 'Blue'], bokp: [50, 50] },
-            { val: 16000, bok: ['Green', 'Blue', 'Purple'], bokp: [33, 34, 33] },
-            { val: 18000, bok: ['Blue', 'Purple'], bokp: [50, 50] },
-            { val: 22000, bok: ['Blue', 'Purple', 'Orange'], bokp: [33, 34, 33] },
-            { val: 24000, bok: ['Purple', 'Orange'], bokp: [50, 50] },
-            { val: 30000, bok: ['Orange'], bokp: [100] },
-            { val: 33000, bok: ['Orange', 'Red'], bokp: [75, 25] },
-            { val: 36000, bok: ['Orange', 'Red'], bokp: [50, 50] },
-            { val: 50000, bok: ['Orange', 'Red'], bokp: [25, 75] },
-            { val: 70000, bok: ['Red'], bokp: [100] },
-            { val: 80000, bok: ['Red', 'Bronze'], bokp: [75, 25] },
-            { val: 90000, bok: ['Red', 'Bronze'], bokp: [50, 50] },
-            { val: 100000, bok: ['Red', 'Bronze'], bokp: [25, 75] },
-            { val: 110000, bok: ['Bronze', 'Silver'], bokp: [75, 25] },
-            { val: 120000, bok: ['Bronze', 'Silver'], bokp: [50, 50] },
-            { val: 130000, bok: ['Bronze', 'Silver'], bokp: [25, 75] },
-            { val: 140000, bok: ['Silver'], bokp: [100] },
-            { val: 150000, bok: ['Silver', 'Gold'], bokp: [75, 25] },
-            { val: 160000, bok: ['Silver', 'Gold'], bokp: [50, 50] },
-            { val: 170000, bok: ['Silver', 'Gold'], bokp: [25, 75] },
-          ];
-
-          let t = document.createElement('table'), row, cell, s;
-          t.setAttribute('cellspacing', '0');
-          t.style.setProperty('width', '100%');
-          t.style.setProperty('font-weight', '300');
-          t.style.setProperty('font-size', '10px');
-
-          for (let i = 0, l = D.length; i < l; ++i) {
-            if (D[i].val >= pval || i === l - 1) {
-              row = document.createElement('tr');
-              cell = document.createElement('td');
-              cell.style.setProperty('background', '#303030');
-              cell.style.setProperty('border-right', '1px solid #000000');
-              cell.style.setProperty('border-bottom', '1px solid #000000');
-              cell.style.setProperty('padding-right', '5px');
-              cell.style.setProperty('text-align', 'right');
-              cell.style.setProperty('width', '30px');
-              cell.textContent = D[i].val > 1000 ? `${D[i].val / 1000}k` : D[i].val;
-              row.appendChild(cell);
-              cell = document.createElement('td');
-              cell.style.setProperty('border-bottom', '1px solid #000000');
-              cell.style.setProperty('border-right', '1px solid #000000');
-              cell.style.setProperty('width', '80%');
-              for (let j = 0; j < D[i].bok.length; j++) {
-                s = document.createElement('span');
-                s.style.setProperty('width', D[i].bokp[j] + '%');
-                s.style.setProperty('background-color', D[i].bok[j]);
-                s.style.setProperty('display', 'inline-block');
-                s.textContent = D[i].bok[j];
-                cell.appendChild(s);
-              }
-              row.appendChild(cell);
-              t.appendChild(row);
-            }
-          }
-
-          let chat = (a instanceof Holodeck) ? a.activeDialogue() : a;
-          if (chat) chat.serviceMessage(t);
-
-          return false;
-        });
-        this.addChatCommand(['reload', 'reloaf', 'relaod', 'rl'], (_, cmd) => {
-          const type = /^\/\w+\s?(.*)$/.exec(cmd)[1];
-          switch (type) {
-            case 'game':
-              DRMng.postGameMessage('gameReload');
-              break;
-            case 'chat':
-              DRMng.postGameMessage('chatReload');
-              break;
-            default:
-              window.gameLoader.loadGame('');
-          }
-          return false;
-        });
-        this.addChatCommand('clear', chat => {
-          chat = chat instanceof Holodeck ? chat._active_dialogue : chat;
-          chat.clear();
-          return false;
-        });
-        this.addChatCommand('kill', (_, cmd) => {
-          const mode = /^\/kill\s?(.*)$/.exec(cmd)[1];
-          switch (mode) {
-            case 'game':
-              DRMng.postGameMessage('killGame');
-              break;
-            case 'chat':
-              DRMng.postGameMessage('killChat');
-              break;
-            default:
-              new DomNode('#gameiframe').attr({ src: '' });
-          }
-          return false;
-        });
-        this.addChatCommand('wiki', (_, cmd) => {
-          const val = /^\/wiki (.+)$/.exec(cmd);
-          if (val) {
-            window.open(`http://dotd.wikia.com/wiki/Special:Search?search=${encodeURI(val[1])}`, '_blank');
-          }
-          return false;
-        });
-        this.addChatCommand('enc', (_, cmd) => {
-          const val = /^\/enc (.+)$/.exec(cmd);
-          if (val) {
-            window.open(`https://mutikt.ml/encyclopedia/#src_${encodeURI(val[1])}`, '_blank');
-          }
-          return false;
-        });
-        this.addChatCommand(['ver', 'version', 'update'], chat => {
-          if (chat instanceof Holodeck) {
-            chat = chat._active_dialogue;
-          }
-          Kong.serviceMsg(DRMng.About.versionHtml, chat);
-          return false;
-        });
-        this.addChatCommand(['raid', 'rd'], (chat, cmd) => {
-          const comm = /^\/(raid|rd) (.+)$/.exec(cmd);
-          if (chat instanceof Holodeck) {
-            chat = chat._active_dialogue;
-          }
-          if (comm) {
-            const raid = comm[2].toLowerCase();
-            const rarr = raid.split(' ');
-            const data = Config.data.raidData;
-            const fnd = [];
-
-            Object.keys(data).forEach(rd => {
-              const rn = data[rd].fName.toLowerCase();
-              if (rarr.reduce((a, v) => a && rd.indexOf(v) > -1, true) ||
-                rarr.reduce((a, v) => a && rn.indexOf(v) > -1, true)) {
-                fnd.push([rd, data[rd].fName]);
-              }
-            });
-
-            if (fnd.length > 1) {
-              const raidPicker = fnd.reduce((a, f) =>
-                `${a}<br><span class="DRMng_info_picker ${f[0]}">${f[1]} (${f[0]})</span>`, '');
-              chat && chat.serviceMessage('Multiple results found, pick one:' + raidPicker);
-            } else if (fnd.length === 1) {
-              chat && chat.serviceMessage(DRMng.UI.raidInfo(fnd[0][0]), data[fnd[0][0]].banner);
-            } else {
-              chat && chat.serviceMessage('No info found matching ' + raid);
-            }
-          } else {
-            chat && chat.serviceMessage('Wrong /raid or /rd syntax');
-          }
-          return false;
-        });
+        this.addChatCommand(['kiss', 'hit', 'poke', 'slap'], this.handleGestureCommand);
+        this.addChatCommand('perc', this.handlePerceptionCommand);
+        this.addChatCommand(['reload', 'reloaf', 'relaod', 'rl'], this.handleReloadCommand);
+        this.addChatCommand('kill', this.handleGameKillCommand);
+        this.addChatCommand('clear', this.handleClearChatCommand);
+        this.addChatCommand('wiki', this.handleWikiCommand);
+        this.addChatCommand('enc', this.handleEncyclopediaCommand);
+        this.addChatCommand(['ver', 'version', 'update', 'about'], this.handleScriptVersionCommand);
+        this.addChatCommand(['raid', 'rd'], this.handleRaidInfoCommand);
         Log.debug('{Kong} Chat commands added');
       } else {
         setTimeout(() => this.addChatCommands(), 100);
@@ -2956,17 +3037,6 @@ function main() {
         if (ifr.id !== 'gameiframe') ifr.parentNode.removeChild(ifr);
       });
       Log.debug('{Kong} Removed all redundant iFrames');
-    }
-
-    static serviceMsg(msg, chat) {
-      if (!chat) {
-        chat = PrivateChat.anyActive() ? PrivateChat.getActive() : holodeck._active_dialogue;
-      }
-      if (chat) {
-        chat.serviceMessage(msg);
-      } else if (!holodeck) {
-        setTimeout(() => this.serviceMsg(msg, chat), 50);
-      }
     }
 
     static load() {
@@ -3220,8 +3290,7 @@ function main() {
       checkAndSend: () => {
         const link = document.getElementById('DRMng_submitRaidLink');
         const r = Util.getRaidFromUrl(link.textContent, UserManager.user.name);
-        if (r && !isNaN(+r.id) && r.hash.length === 10 &&
-          ['kasan', 'elyssa'][r.pid] === DRMng.Raids.srv) {
+        if (r && !isNaN(+r.id) && r.hash.length === 10) {
           const delayBase = document.querySelector('[group=DRMng_submitDelay].crimson').textContent;
           let delay = parseInt(document.getElementById('DRMng_submitDelay').value);
           switch (delayBase) {
@@ -4118,37 +4187,41 @@ function main() {
         }
       },
       addRaidField: function(r, idx) {
-        const ifo = Config.data.raidData[r.boss];
+        const raidInfo = Config.data.raidData[r.boss];
         // classes
         const cls = ['drm_' + r.boss + '_' + r.diff];
         cls.push(['n', 'h', 'l', 'nm'][r.diff - 1]);
         r.visited && cls.push('visited');
         r.isFull && cls.push('full');
 
-        const hp = ifo && ifo.isEvent ? '\u221e' : `HP: ${(r.hp * 100).toPrecision(3).slice(0, 4)}%`;
+        const hp = raidInfo && raidInfo.isEvent ? '\u221e' : `HP: ${(r.hp * 100).toPrecision(3).slice(0, 4)}%`;
 
         // main elem
-        const div = new DomNode('div')
+        const raidElement = new DomNode('div')
           .attr({ id: `DRMng_${r.id}`, class: cls.join(' ') })
-          .data(new DomNode('span').txt(ifo ? ifo.sName : r.boss.replace(/_/g, ' ')))
+          .data(new DomNode('span').txt(raidInfo ? raidInfo.sName : r.boss.replace(/_/g, ' ')))
           .data(new DomNode('span').txt(hp))
           .on('mouseenter', DRMng.UI.infoEvent);
 
-        const list = document.getElementById('DRMng_RaidList');
-        if (idx === undefined) list.appendChild(div.node);
-        else {
-          const chLen = list.childNodes.length;
-          if (idx === chLen) list.appendChild(div.node);
-          else list.insertBefore(div.node, list.childNodes[idx]);
+        const list = new DomNode('#DRMng_RaidList');
+        if (list.empty) return;
+
+        const childLength = list.node.childNodes.length;
+        if ((idx === undefined) || (idx === childLength)) {
+          raidElement.attach('to', list);
+        } else {
+          raidElement.attach('before', list.node.childNodes[idx]);
         }
-        if (list.scrollTop < 20) list.scrollTop = 0;
+
+        if (list.node.scrollTop < 20) {
+          list.node.scrollTop = 0;
+        }
       },
-      removeRaidField: function(id) {
-        let r = document.getElementById('DRMng_' + id);
-        if (r) r.parentNode.removeChild(r);
+      removeRaidField: id => {
+        new DomNode(`#DRMng_${id}`).detach();
       },
-      clearRaidList: function() {
-        document.getElementById('DRMng_RaidList').innerHTML = '';
+      clearRaidList: () => {
+        new DomNode('#DRMng_RaidList').clear();
       },
       statusTimer: null,
       displayStatus: function(msg) {
@@ -4161,7 +4234,7 @@ function main() {
         } else if (msg) {
           status.innerText = msg;
           if (this.statusTimer) this.statusTimer.restart();
-          else this.statusTimer = new DRMng.Timer(DRMng.UI.displayStatus.bind(this), 4000);
+          else this.statusTimer = new Timer(DRMng.UI.displayStatus.bind(this), 4000);
         }
       },
       submitResponseTimeout: 0,
@@ -5092,12 +5165,12 @@ function main() {
            .event(function() {
              if (this.conf[this.field]) {
                new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
-               CSS.del(this.field);
-               CSS.del(this.field + 'b');
+               Css.del(this.field);
+               Css.del(this.field + 'b');
              } else {
                new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
-               CSS.add(this.field, 'div#headerwrap', 'width: 100% !important');
-               CSS.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
+               Css.add(this.field, 'div#headerwrap', 'width: 100% !important');
+               Css.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
              }
            })
            .make(group);
@@ -5107,8 +5180,8 @@ function main() {
            .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
-             else CSS.del(this.field);
+               Css.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5117,8 +5190,8 @@ function main() {
            .desc('Hides 7px wide frame around game window.')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, 'div#maingame', 'padding: 0');
-             else CSS.del(this.field);
+               Css.add(this.field, 'div#maingame', 'padding: 0');
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5127,8 +5200,8 @@ function main() {
            .desc('Hides game details part located just below game window.')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, 'div.game_details_outer', 'display: none');
-             else CSS.del(this.field);
+               Css.add(this.field, 'div.game_details_outer', 'display: none');
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5137,8 +5210,8 @@ function main() {
            .desc('Hides forum part located below game window.')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
-             else CSS.del(this.field);
+               Css.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5153,9 +5226,9 @@ function main() {
              ' low-end hardware.')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+               Css.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
                  ' div#DRMng_info *', 'transition: initial !important');
-             else CSS.del(this.field);
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5164,8 +5237,8 @@ function main() {
            .desc('Hides sidebar which is located between game window and kongregate chat.')
            .event(function() {
              if (this.conf[this.field])
-               CSS.add(this.field, 'div#DRMng_Sidebar', 'display: none');
-             else CSS.del(this.field);
+               Css.add(this.field, 'div#DRMng_Sidebar', 'display: none');
+             else Css.del(this.field);
            })
            .make(group);
 
@@ -5179,18 +5252,6 @@ function main() {
            .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
              ' (doubles width taken by chat area).')
            .event(() => PrivateChat.moveChats())
-           // .event(function () {
-           //     // make sure initial variable setting wont fire this
-           //     if (DRMng.Alliance.tab) {
-           //         const a = DRMng.Alliance;
-           //         if (this.conf[this.field]) a.body.style.removeProperty('display');
-           //         else a.tab.className = 'chat_room_tab';
-           //         DRMng.UI.setChatWidth();
-           //         a.active = false;
-           //         holodeck._chat_window.showActiveRoom();
-           //         a.initBody.call(a);
-           //     }
-           // })
            .make(group, true);
 
         /**
@@ -5358,7 +5419,7 @@ function main() {
               // Stats OS
               if (t.spOS >= 0) txt += '<tr><td>Stats OS</td><td>' +
                 Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + '</td>' +
-                '<td>' + Util.getShortNum(t.sp[t.spOS]) + '</td>' +
+                '<td>' + Util.toShortNumber(t.sp[t.spOS]) + '</td>' +
                 '<td>' + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
@@ -5367,7 +5428,7 @@ function main() {
               // Epics OS
               if (t.eOS >= 0) txt += '<tr><td>Epics OS</td><td>' +
                 Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' +
-                '<td>' + Util.getShortNum(t.sp[t.eOS]) + '</td>' +
+                '<td>' + Util.toShortNumber(t.sp[t.eOS]) + '</td>' +
                 '<td>' + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
                 '</td>' +
                 '<td>' + (t.hasCURE && t.e ?
@@ -5377,7 +5438,7 @@ function main() {
               let idx = t.tiers.length - 1;
               txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
                 '</td>' +
-                '<td>' + Util.getShortNum(t.sp[idx]) + '</td>' +
+                '<td>' + Util.toShortNumber(t.sp[idx]) + '</td>' +
                 '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) + '</td>' +
                 '<td>' +
                 (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
@@ -5701,7 +5762,7 @@ function main() {
           if (group) {
             gr.parentNode.childNodes.forEach(d => {
               if (d.tagName === undefined) return;
-              if (d !== 'gr' && d.getAttribute('group') === group) {
+              if (d !== gr && d.getAttribute('group') === group) {
                 if (d.className.indexOf('hide') === -1) d.className += ' hide';
                 d.children[1].style.display = 'none';
               }
@@ -5882,54 +5943,6 @@ function main() {
 
         // load options
         this.loadOptions();
-      }
-    },
-    /**
-     * Timer class
-     */
-    Timer: class {
-      /**
-       * Creates a timer
-       * @param {function(...args)} callback Function to invoke after timer completes
-       * @param {number} delay Timer duration
-       */
-      constructor(callback, delay) {
-        this.started = null;
-        this.remaining = delay;
-        this.running = false;
-        this.delay = delay;
-        this.start();
-        this.cb = callback;
-      }
-
-      start() {
-        this.running = true;
-        this.started = new Date();
-        this.id = setTimeout(this.cb, this.remaining);
-      }
-
-      restart() {
-        this.pause();
-        this.remaining = this.delay;
-        this.start();
-      }
-
-      pause() {
-        this.running = false;
-        clearTimeout(this.id);
-        this.remaining -= new Date() - this.started;
-      }
-
-      get timeLeft() {
-        if (this.running) {
-          this.pause();
-          this.start();
-        }
-        return this.remaining;
-      }
-
-      get state() {
-        return this.running;
       }
     },
     postMessage: function(data) {

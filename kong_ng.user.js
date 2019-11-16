@@ -2810,7 +2810,7 @@ function main() {
         {val: 140000, drop: {color: ['Silver'], perc: [100]}},
         {val: 150000, drop: {color: ['Silver', 'Gold'], perc: [75, 25]}},
         {val: 160000, drop: {color: ['Silver', 'Gold'], perc: [50, 50]}},
-        {val: 170000, drop: {color: ['Silver', 'Gold'], perc: [25, 75]}},
+        {val: 170000, drop: {color: ['Silver', 'Gold'], perc: [25, 75]}}
       ];
 
       const COLORS = {

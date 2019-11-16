@@ -2813,6 +2813,19 @@ function main() {
         {val: 170000, drop: {color: ['Silver', 'Gold'], perc: [25, 75]}},
       ];
 
+      const COLORS = {
+        Brown: '#654737',
+        Grey: '#494c53',
+        Green: '#106b21',
+        Blue: '#31639c',
+        Purple: '#684d77',
+        Orange: '#d9863a',
+        Red: '#be2535',
+        Bronze: '#655138',
+        Silver: '#6c7a86',
+        Gold: '#908059'
+      };
+
       const table = new DomNode('table')
         .attr({'cellspacing': '0'})
         .style({'width': '100%', 'font-weight': '300', 'font-size': '10px'});
@@ -2843,7 +2856,11 @@ function main() {
 
           for (let i = 0; i < drop.color.length; ++i) {
             new DomNode('span')
-              .style({'width': `${drop.perc[i]}%`, 'background-color': drop.color[i], 'display': 'inline-block'})
+              .style({
+                'width': `${drop.perc[i]}%`,
+                'background-color': COLORS[drop.color[i]],
+                'display': 'inline-block'
+              })
               .text(drop.color[i])
               .attach('to', cell);
           }

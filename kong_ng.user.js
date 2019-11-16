@@ -216,7 +216,7 @@ function main() {
      * @param {boolean} [overwrite=false] - If true, clears container content before appending
      * @returns {DomNode}
      */
-    txt(text = '', overwrite = false) {
+    text(text = '', overwrite = false) {
       if (typeof text === 'string') {
         if (overwrite) this.clear();
         this._node.appendChild(document.createTextNode(text));
@@ -252,7 +252,7 @@ function main() {
     data(data, overwrite = false) {
       if (data) {
         if ((typeof data === 'string') && (/<.{3,}?>/.test(data) === false)) {
-          this.txt(data, overwrite);
+          this.text(data, overwrite);
         } else {
           this.html(data, overwrite);
         }
@@ -328,7 +328,7 @@ function main() {
             .attr({ type: 'text/css', id: id })
             .attach('to', document.head);
         }
-        s.txt(content, true);
+        s.text(content, true);
       } else {
         s.detach();
       }
@@ -861,12 +861,12 @@ function main() {
           .attach('to', document.head);
       }
       if (obj) {
-        this.node.txt(`${obj.name} {${obj.value}}\n`);
+        this.node.text(`${obj.name} {${obj.value}}\n`);
       } else {
         this.node.clear();
         Object.keys(this.rules || {}).forEach(key => {
           const rule = this.rules[key];
-          this.node.txt(`${rule.name} {${rule.value}}\n`);
+          this.node.text(`${rule.name} {${rule.value}}\n`);
         });
       }
     }
@@ -1314,7 +1314,7 @@ function main() {
         const p = new DomNode('p').attr({ timestamp: this.timestamp });
         if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
         // Time field + raid link
-        new DomNode('span').attr({ class: 'timestamp' }).txt(this.time)
+        new DomNode('span').attr({ class: 'timestamp' }).text(this.time)
                            .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
                            .attach('to', p);
         // Extra raid data field
@@ -1322,14 +1322,14 @@ function main() {
         // User field
         new DomNode('span')
           .attr({ username: this.user, class: this.classes.msg.join(' ') })
-          .txt(this.prefix + this.user).attach('to', p);
+          .text(this.prefix + this.user).attach('to', p);
         // IGN field
         if (this.gameName) {
-          new DomNode('span').attr({ class: 'guildname truncate' }).txt(this.gameName).attach('to', p);
+          new DomNode('span').attr({ class: 'guildname truncate' }).text(this.gameName).attach('to', p);
         }
         if (this.message) {
           // Separator field
-          new DomNode('span').attr({ class: 'separator' }).txt(': ').attach('to', p);
+          new DomNode('span').attr({ class: 'separator' }).text(': ').attach('to', p);
           // Message field
           new DomNode('span').attr({ class: 'message hyphenate' }).data(this.message).attach('to', p);
         }
@@ -1377,10 +1377,10 @@ function main() {
         link: new DomNode('a')
           .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(raid) })
           .on('click', DRMng.Raids.joinClick)
-          .txt(`${diff} ${name}`.toUpperCase()),
+          .text(`${diff} ${name}`.toUpperCase()),
         extra: new DomNode('span')
           .attr({ class: 'extraid' })
-          .txt(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') :
+          .text(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') :
                        `AP ${Util.getShortNumK(info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
       };
 
@@ -2062,12 +2062,12 @@ function main() {
         new DomNode('span')
           .attr({ class: 'timestamp' })
           .style({ 'flex-grow': '1' })
-          .txt(d.ts).attach('to', hdr);
+          .text(d.ts).attach('to', hdr);
         // Guild tag
         if (d.tag) {
           new DomNode('span')
             .attr({ class: 'sticker' })
-            .txt(d.tag).attach('to', hdr);
+            .text(d.tag).attach('to', hdr);
         }
 
         hdr.attach('to', p);
@@ -2078,15 +2078,15 @@ function main() {
         // Username
         new DomNode('span')
           .attr({ class: d.userCls, username: d.user, ign: d.ign })
-          .txt((d.pfx || '') + d.user).attach('to', hdr);
+          .text((d.pfx || '') + d.user).attach('to', hdr);
         // IGN
         new DomNode('span')
           .attr({ class: d.ignCls })
-          .txt(d.ign).attach('to', hdr);
+          .text(d.ign).attach('to', hdr);
         // Separator
         new DomNode('span')
           .attr({ class: 'separator' })
-          .txt(': ').attach('to', hdr);
+          .text(': ').attach('to', hdr);
         // Message
         new DomNode('span')
           .attr({ class: 'message hyphenate' })
@@ -2242,9 +2242,9 @@ function main() {
       } else {
         new DomNode('div')
           .attr({ class: 'buttonStripe', id: id })
-          .data(new DomNode('span').txt(room.name))
+          .data(new DomNode('span').text(room.name))
           .data(new DomNode('button')
-            .attr({ class: 'l' }).txt('Del')
+            .attr({ class: 'l' }).text('Del')
             .on('click', () => this.removeChat(id)))
           .attach('to', 'DRMng_privateChat');
       }
@@ -2380,7 +2380,7 @@ function main() {
         new DomNode('li')
           .data(new DomNode('a')
             .attr({ id: 'DRMng_KongSlimHeader', href: '' })
-            .txt(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
+            .text(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
             .on('click', this.handleSlimButtonClick))
           .attach('to', 'nav_welcome_box');
       } else {
@@ -2394,10 +2394,10 @@ function main() {
       const isSlim = !Config.data.kong.kongSlimHeader;
       if (isSlim) {
         document.body.classList.add('slim');
-        new DomNode('#DRMng_KongSlimHeader').txt('Full', true);
+        new DomNode('#DRMng_KongSlimHeader').text('Full', true);
       } else {
         document.body.classList.remove('slim');
-        new DomNode('#DRMng_KongSlimHeader').txt('Slim', true);
+        new DomNode('#DRMng_KongSlimHeader').text('Slim', true);
       }
       Config.data.kong.kongSlimHeader = isSlim;
       return false;
@@ -4064,17 +4064,17 @@ function main() {
         this.makeSbButton = btn => {
           btn = btn || { name: 'X', command: '' };
           return new DomNode('div')
-            .data(new DomNode('span').txt('\uf2f9').on('click', e => {
+            .data(new DomNode('span').text('\uf2f9').on('click', e => {
               const el = e.target.parentNode;
               el.parentNode.insertBefore(el.nextSibling, el);
             }))
-            .data(new DomNode('span').txt('\uf2fc').on('click', e => {
+            .data(new DomNode('span').text('\uf2fc').on('click', e => {
               const el = e.target.parentNode;
               el.parentNode.insertBefore(el, el.previousSibling);
             }))
             .data(new DomNode('input').attr({ type: 'text', value: btn.name, class: 'inp_fld' }))
             .data(new DomNode('input').attr({ type: 'text', value: btn.command, class: 'inp_cmd' }))
-            .data(new DomNode('span').attr({ class: 'red' }).txt('\uf270').on('click', e => {
+            .data(new DomNode('span').attr({ class: 'red' }).text('\uf270').on('click', e => {
               const el = e.target.parentNode;
               el.parentNode.removeChild(el);
             }));
@@ -4084,25 +4084,25 @@ function main() {
           const el = new DomNode('div')
             .attr({ class: 'drmng_config_sb' })
             .data(new DomNode('div')
-              .data(new DomNode('span').txt('\uf2f9').on('click', e => {
+              .data(new DomNode('span').text('\uf2f9').on('click', e => {
                 const el = e.target.parentNode.parentNode;
                 el.parentNode.insertBefore(el.nextSibling, el);
               }))
-              .data(new DomNode('span').txt('\uf2fc').on('click', e => {
+              .data(new DomNode('span').text('\uf2fc').on('click', e => {
                 const el = e.target.parentNode.parentNode;
                 el.parentNode.insertBefore(el, el.previousSibling);
               }))
               .data(
                 new DomNode('input').attr({ type: 'text', value: grp.name, class: 'inp_grp' }))
-              .data(new DomNode('span').attr({ class: 'del_grp red' }).txt('\uf272')
+              .data(new DomNode('span').attr({ class: 'del_grp red' }).text('\uf272')
                                        .on('click', e => {
                                          const el = e.target.parentNode.parentNode;
                                          el.parentNode.removeChild(el);
                                        }))
-              .data(new DomNode('span').attr({ class: 'add_grp' }).txt('\uf277')
+              .data(new DomNode('span').attr({ class: 'add_grp' }).text('\uf277')
                                        .on('click', e => this.makeSbGroup().attach('before',
                                          e.target.parentNode.parentNode)))
-              .data(new DomNode('span').txt('\uf275')
+              .data(new DomNode('span').text('\uf275')
                                        .on('click', e => this.makeSbButton().attach('to',
                                          e.target.parentNode.parentNode)))
             );
@@ -4114,12 +4114,12 @@ function main() {
           /*const grp = new DomNode(`div`)
            .attr({class: `drmng_config_sb`})
            .data(new DomNode(`div`)
-           .data(new DomNode(`span`).txt(`\uf2f9`))
-           .data(new DomNode(`span`).txt(`\uf2fc`))
+           .data(new DomNode(`span`).text(`\uf2f9`))
+           .data(new DomNode(`span`).text(`\uf2fc`))
            .data(new DomNode(`input`).attr({type: `text`, value: data.name, class: `inp_grp`}))
-           .data(new DomNode(`span`).attr({class: `del_grp red`}).txt(`\uf272`)
+           .data(new DomNode(`span`).attr({class: `del_grp red`}).text(`\uf272`)
            .on(`click`, () => this.html.parentNode.removeChild(this.html)))
-           .data(new DomNode(`span`).txt(`\uf275`)
+           .data(new DomNode(`span`).text(`\uf275`)
            .on(`click`, () => this.makeSbButton({name: `X`, command: ``}).attach(`to`, this.html)))
            );
            data.buttons.forEach(btn => grp.data(this.makeSbButton(btn)));*/
@@ -4199,8 +4199,8 @@ function main() {
         // main elem
         const raidElement = new DomNode('div')
           .attr({ id: `DRMng_${r.id}`, class: cls.join(' ') })
-          .data(new DomNode('span').txt(raidInfo ? raidInfo.sName : r.boss.replace(/_/g, ' ')))
-          .data(new DomNode('span').txt(hp))
+          .data(new DomNode('span').text(raidInfo ? raidInfo.sName : r.boss.replace(/_/g, ' ')))
+          .data(new DomNode('span').text(hp))
           .on('mouseenter', DRMng.UI.infoEvent);
 
         const list = new DomNode('#DRMng_RaidList');
@@ -4965,7 +4965,7 @@ function main() {
       setupFilterBox: () => {
         const fst = Config.filterString;
         new DomNode('#DRMng_txtFilter')
-          .attr({ class: fst ? '' : 'default' }).txt(fst || 'Filter raids here', true);
+          .attr({ class: fst ? '' : 'default' }).text(fst || 'Filter raids here', true);
       },
       setupFilterTab: raidData => {
         const flt = Config.filterRaids;
@@ -4991,13 +4991,13 @@ function main() {
             if (flt[k] === undefined) flt[k] = new Array(4).fill(false);
             const el = new DomNode('div')
               .attr({ class: 'buttonStripe', id: `DRMng_filter_${k}` })
-              .data(new DomNode('span').txt(r.fName))
+              .data(new DomNode('span').text(r.fName))
               .on('click', DRMng.UI.applyFilter)
               .attach('to', fltDivs[r.isGuild ? 5 : r.size]);
 
             new Array(4).fill(0).forEach((_, d) => new DomNode('button')
               .attr({ class: `${['n', 'h', 'l', 'nm'][d]} ${flt[k][d] ? 'off' : 'on'}` })
-              .txt(flt[k][d] ? 'Off' : 'On').attach('to', el));
+              .text(flt[k][d] ? 'Off' : 'On').attach('to', el));
           }
         });
       },
@@ -5053,7 +5053,7 @@ function main() {
       setupSidebarButton: button => {
         if (!button || !button.name) return null;
 
-        const btn = new DomNode('button').txt(button.name);
+        const btn = new DomNode('button').text(button.name);
         let fn, th;
         if (button.command) {
           switch (button.action) {
@@ -5914,12 +5914,12 @@ function main() {
         new DomNode('#headerwrap')
           .data(new DomNode('div').attr({ id: 'DRMng_header' })
                                   .data(new DomNode('div').attr({ id: 'DRMng_server' })
-                                                          .txt(Config.data.server)
+                                                          .text(Config.data.server)
                                                           .on('click', DRMng.Engine.changeServer))
                                   .data(new DomNode('div').attr({ id: 'DRMng_status' })
-                                                          .txt('DRMng Loading...'))
+                                                          .text('DRMng Loading...'))
                                   .data(new DomNode('div').attr({ id: 'DRMng_onoff', class: 'hidden' })
-                                                          .data(new DomNode('div').txt('\uf1cc'))
+                                                          .data(new DomNode('div').text('\uf1cc'))
                                                           .on('click', () => {
                                                             clearTimeout(DRMng.UI.hideUITimeout);
                                                             const el = document.getElementById(

@@ -221,7 +221,7 @@ function main() {
         if (overwrite) this.clear();
         this._node.appendChild(document.createTextNode(text));
       } else {
-        Log.warn('{DomNode::txt} Attempted to create text node with non string content');
+        Log.warn('{DomNode::text} Attempted to create text node with non string content:\n', text);
       }
       return this;
     }

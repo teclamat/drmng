@@ -2845,7 +2845,7 @@ function main() {
               'text-align': 'right',
               'width': '30px'
             })
-            .text(data.val > 1000 ? `${data.val / 1000}k` : data.val)
+            .text(data.val > 1000 ? `${data.val / 1000}k` : `${data.val}`)
             .attach('to', row);
 
           const cell = new DomNode('td')

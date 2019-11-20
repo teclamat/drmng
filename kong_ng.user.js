@@ -67,7 +67,9 @@ function main() {
       } else {
         if (color) {
           const temp = [drmngBadge];
-          while (typeof args[0] === 'string') temp.push(args.shift());
+          while (typeof args[0] === 'string') {
+            temp.push(args.shift());
+          }
           args.unshift(temp.join(' '), `color:${color}`);
         } else {
           args.unshift(drmngBadge);
@@ -166,8 +168,9 @@ function main() {
     constructor(element) {
       this._node = null;
       if (typeof element === 'string') {
-        this._node = ((element.charAt(0) === '#') ? document.getElementById(element.slice(1))
-                                                  : document.createElement(element)) || null;
+        this._node =
+          ((element.charAt(0) === '#') ? document.getElementById(element.slice(1)) : document.createElement(element)) ||
+          null;
       } else if (element instanceof Node) {
         this._node = element;
       }
@@ -205,7 +208,9 @@ function main() {
 
     clear() {
       if (!this.empty) {
-        while (this._node.firstChild) this._node.removeChild(this._node.firstChild);
+        while (this._node.firstChild) {
+          this._node.removeChild(this._node.firstChild);
+        }
       }
       return this;
     }
@@ -325,7 +330,10 @@ function main() {
       if (content) {
         if (s.empty) {
           s = new DomNode('style')
-            .attr({ type: 'text/css', id: id })
+            .attr({
+                    type: 'text/css',
+                    id: id
+                  })
             .attach('to', document.head);
         }
         s.text(content, true);
@@ -359,9 +367,9 @@ function main() {
       let value = '';
       if (paramBegin > -1) {
         const paramEnd = query.indexOf('&', paramBegin);
-        value = paramEnd < 0 ?
-                query.slice(paramBegin + parameter.length + 1) :
-                query.slice(paramBegin + parameter.length + 1, paramEnd);
+        value =
+          paramEnd < 0 ? query.slice(paramBegin + parameter.length + 1) : query.slice(paramBegin + parameter.length + 1,
+                                                                                      paramEnd);
       }
       return value;
     }
@@ -390,7 +398,16 @@ function main() {
      * @returns {?raidObject}
      */
     static getRaidFromUrl(url, poster = '') {
-      const raid = { id: '', diff: -1, boss: '', hash: '', sid: -1, pid: -1, createtime: -1, poster: poster };
+      const raid = {
+        id: '',
+        diff: -1,
+        boss: '',
+        hash: '',
+        sid: -1,
+        pid: -1,
+        createtime: -1,
+        poster: poster
+      };
       const reg = /[?&]([^=]+)=([^?&]+)/gui;
       const p = url.replace(/&amp;/gui, '&').replace(/kv_&/gui, '&kv_');
       let cnt = 0, i;
@@ -485,7 +502,15 @@ function main() {
      * @returns {number}
      */
     static romanToArabic(roman) {
-      const lut = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+      const lut = {
+        I: 1,
+        V: 5,
+        X: 10,
+        L: 50,
+        C: 100,
+        D: 500,
+        M: 1000
+      };
       let arabic = 0;
       let i = roman.length;
       while (i--) {
@@ -607,8 +632,7 @@ function main() {
         const pokeBodyPlace = [
           'on the cheek', 'on the navel', 'in the nose', 'in the belly button', 'in the rib cage',
           'in a really ticklish spot', 'square on the forehead', 'with a wet willy in the ear', 'on the arm',
-          'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach',
-          'up the butt'
+          'on the shoulder', 'on the chest', 'on the leg', 'in the face', 'on the neck', 'in the stomach', 'up the butt'
         ];
         return Util.randomFromArray(pokeBodyPlace);
       }
@@ -644,16 +668,16 @@ function main() {
     Hit: class {
       static get StrikeAction() {
         const strikeAction = [
-          'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel',
-          'strike', 'beat'
+          'clobber', 'subdue', 'hit', 'bash', 'pound', 'pelt', 'hammer', 'wallop', 'swat', 'punish', 'pummel', 'strike',
+          'beat'
         ];
         return Util.randomFromArray(strikeAction);
       }
 
       static get LeapingAction() {
         const leapingAction = [
-          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
-          'sprints', 'dashes', 'charges', 'lunges'
+          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes', 'sprints',
+          'dashes', 'charges', 'lunges'
         ];
         return Util.randomFromArray(leapingAction);
       }
@@ -667,14 +691,13 @@ function main() {
 
       static get WrestlingMove() {
         const wrestlingMove = [
-          ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack',
-          ' flying forearm', ' low dropkick', ' jumping thigh kick', ' roundhouse',
-          ' left and right hook combo', ' jab and middle kick combo',
-          ' spinning backfist and shin kick combo', ' delayed backbrain wheel kick',
+          ' haymaker punch', ' kitchen sink to the midsection', ' jumping DDT', ' cross body attack', ' flying forearm',
+          ' low dropkick', ' jumping thigh kick', ' roundhouse', ' left and right hook combo',
+          ' jab and middle kick combo', ' spinning backfist and shin kick combo', ' delayed backbrain wheel kick',
           ' somersault kick to an uppercut combo', ' jab to the face', ' stomping hook punch',
-          ' palm thrust to the solar plexus', ' shin kick', ' side headbutt',
-          ' fast lowerbody roundhouse kick', ' fast upperbody roundhouse kick', 'n uppercut palm strike',
-          'n uppercut to midsection jab combo', ' downward chop'
+          ' palm thrust to the solar plexus', ' shin kick', ' side headbutt', ' fast lowerbody roundhouse kick',
+          ' fast upperbody roundhouse kick', 'n uppercut palm strike', 'n uppercut to midsection jab combo',
+          ' downward chop'
         ];
         return Util.randomFromArray(wrestlingMove);
       }
@@ -699,8 +722,8 @@ function main() {
 
       static get SportsWeapon() {
         const sportsWeapon = [
-          'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball',
-          'barbell', 'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
+          'cricket paddle', 'lacrosse stick', 'hockey stick', 'croquet mallet', 'baseball bat', 'yoga ball', 'barbell',
+          'folding lawn chair', 'caber', 'shot put', 'bowling ball', 'lantern', 'tennis racket'
         ];
         return Util.randomFromArray(sportsWeapon);
       }
@@ -712,11 +735,11 @@ function main() {
 
       static get RandomItemWeapon() {
         const randomItemWeapon = [
-          'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick',
-          'a board of education', 'an unidentified implement of mayhem and destruction',
-          'a rubber ducky *SQUEAK*', 'a rolling pin', 'a tire iron', 'a sock full of oranges',
-          'a slinky, a slink [fun for a girl or a boy]', 'a chinese finger puzzle', 'a whip of wet noodles',
-          'a humungous spicey italian meatstick', 'a giant garlic dill', 'an ACME hammer of pain'
+          'a giant frozen trout', 'an inflatable duck', 'a waffle iron', 'a sponge brick', 'a board of education',
+          'an unidentified implement of mayhem and destruction', 'a rubber ducky *SQUEAK*', 'a rolling pin',
+          'a tire iron', 'a sock full of oranges', 'a slinky, a slink [fun for a girl or a boy]',
+          'a chinese finger puzzle', 'a whip of wet noodles', 'a humungous spicey italian meatstick',
+          'a giant garlic dill', 'an ACME hammer of pain'
         ];
         return Util.randomFromArray(randomItemWeapon);
       }
@@ -732,8 +755,8 @@ function main() {
 
       static get StrikeActionVerb() {
         const strikeActionVerb = [
-          'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats',
-          'punishes', 'pummels', 'strikes', 'assaults', 'beats'
+          'clobbers', 'subdues', 'hits', 'bashes', 'pounds', 'pelts', 'hammers', 'wallops', 'swats', 'punishes',
+          'pummels', 'strikes', 'assaults', 'beats'
         ];
         return Util.randomFromArray(strikeActionVerb);
       }
@@ -761,10 +784,9 @@ function main() {
     Slap: class {
       static get SlapWeapon() {
         const slapWeapon = [
-          'white glove', 'rubber chicken', 'well placed backhand', 'piece of moldy pizza',
-          'big dildo', 'loaf of french bread', 'smile of devious pleasure', 'dead >0))>-<',
-          'left over chicken drumstick', 'limp and slightly dirty french fry', 'brick of moldy cheese',
-          'grilled cheese', 'big dildo'
+          'white glove', 'rubber chicken', 'well placed backhand', 'piece of moldy pizza', 'big dildo',
+          'loaf of french bread', 'smile of devious pleasure', 'dead >0))>-<', 'left over chicken drumstick',
+          'limp and slightly dirty french fry', 'brick of moldy cheese', 'grilled cheese', 'big dildo'
         ];
         return Util.randomFromArray(slapWeapon);
       }
@@ -790,8 +812,8 @@ function main() {
 
       static get LeapingAction() {
         const leapingAction = [
-          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes',
-          'sprints', 'dashes', 'charges', 'lunges'
+          'vaults', 'surges', 'hurdles', 'bounds', 'pounces', 'storms', 'leaps', 'bolts', 'stampedes', 'sprints',
+          'dashes', 'charges', 'lunges'
         ];
         return Util.randomFromArray(leapingAction);
       }
@@ -831,7 +853,10 @@ function main() {
     static add(alias, selector, definitions) {
       if (this.rules === undefined) this.rules = {};
       const replace = Util.hasProperty(this.rules, alias);
-      this.rules[alias] = { name: selector, value: definitions };
+      this.rules[alias] = {
+        name: selector,
+        value: definitions
+      };
       if (replace) {
         this.compile();
       } else {
@@ -929,14 +954,15 @@ function main() {
           i.detach();
           return;
         }
-        if (img && c)
-          i.on('load',
-            () => {
-              setTimeout(() => PrivateChat.getChat(c).scrollToBottom(), 250);
-            })
+        if (img && c) {
+          i.on('load', () => {
+             setTimeout(() => PrivateChat.getChat(c).scrollToBottom(), 250);
+           })
            .attr({ src: img })
            .remove('id');
-        else i.detach();
+        } else {
+          i.detach();
+        }
       }
     }
   }
@@ -1039,19 +1065,34 @@ function main() {
         server: 'Elyssa',
         sortBy: 'hp',
         scriptWidth: 300,
-        visited: { kasan: [], elyssa: [] },
-        dead: { kasan: {}, elyssa: {} },
+        visited: {
+          kasan: [],
+          elyssa: []
+        },
+        dead: {
+          kasan: {},
+          elyssa: {}
+        },
         raidData: {},
         raidKeys: [],
         filterData: {},
         tiersData: {},
-        filterString: { kasan: '', elyssa: '' },
-        filterRaids: { kasan: {}, elyssa: {} },
-        hardFilter: { kasan: [], elyssa: [] },
+        filterString: {
+          kasan: '',
+          elyssa: ''
+        },
+        filterRaids: {
+          kasan: {},
+          elyssa: {}
+        },
+        hardFilter: {
+          kasan: [],
+          elyssa: []
+        },
         checkSums: {
           raidData: '',
           filterData: '',
-          tiersData: '',
+          tiersData: ''
         },
         alliance: {
           sbs: false,
@@ -1145,7 +1186,14 @@ function main() {
 
     static load() {
       this.numTries = 0;
-      this.user = { qualified: false, ID: null, name: null, IGN: null, authToken: null, guild: null };
+      this.user = {
+        qualified: false,
+        ID: null,
+        name: null,
+        IGN: null,
+        authToken: null,
+        guild: null
+      };
       this.knownUsers = {};
       Log.debug('{UserManager} Loading user data');
       setTimeout(() => this.basicData(), 0);
@@ -1180,7 +1228,10 @@ function main() {
      */
     constructor(message, user, props = {}) {
       this.body = new DomNode('div').attr({ class: 'chat-message' });
-      this.classes = { main: [], msg: ['username', 'truncate'] };
+      this.classes = {
+        main: [],
+        msg: ['username', 'truncate']
+      };
       this.prefix = '';
       this.addClass = '';
       this.addStyle = '';
@@ -1223,7 +1274,11 @@ function main() {
     }
 
     set whisper(value) {
-      this._whisper = value.pm || { any: false, sent: false, recv: false };
+      this._whisper = value.pm || {
+        any: false,
+        sent: false,
+        recv: false
+      };
       if (this._whisper.any) {
         this.classes.main.push('whisper');
         if (this._whisper.recv) {
@@ -1321,7 +1376,10 @@ function main() {
         if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
         // User field
         new DomNode('span')
-          .attr({ username: this.user, class: this.classes.msg.join(' ') })
+          .attr({
+                  username: this.user,
+                  class: this.classes.msg.join(' ')
+                })
           .text(this.prefix + this.user).attach('to', p);
         // IGN field
         if (this.gameName) {
@@ -1335,7 +1393,10 @@ function main() {
         }
         p.attach('to', this.body);
       } else {
-        new DomNode('div').attr({ class: 'script' + this.addClass, style: this.addStyle })
+        new DomNode('div').attr({
+                                  class: 'script' + this.addClass,
+                                  style: this.addStyle
+                                })
                           .data(this.message).attach('to', this.body);
       }
 
@@ -1353,14 +1414,10 @@ function main() {
       this._raid = null;
 
       const match = /(^.*?)(http.+?action_type.raidhelp.+?)(\s[\s\S]*$|$)/.exec(link);
-      if (!match) {
-        return;
-      }
+      if (!match) return;
 
       const raid = Util.getRaidFromUrl(match[2], this.user);
-      if (!raid) {
-        return;
-      }
+      if (!raid) return;
 
       const visited = Config.visited.indexOf(parseInt(raid.id)) > -1;
       const dead = Util.hasProperty(Config.dead, raid.id);
@@ -1374,14 +1431,19 @@ function main() {
 
       this._raid = {
         text: (match[1] + match[3]).trim(),
+
         link: new DomNode('a')
-          .attr({ href: match[2].replace(/&amp;/g, '&'), data: JSON.stringify(raid) })
+          .attr({
+                  href: match[2].replace(/&amp;/g, '&'),
+                  data: JSON.stringify(raid)
+                })
           .on('click', DRMng.Raids.joinClick)
           .text(`${diff} ${name}`.toUpperCase()),
+
         extra: new DomNode('span')
           .attr({ class: 'extraid' })
-          .text(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') :
-                       `AP ${Util.getShortNumK(info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
+          .text(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') : `AP ${Util.getShortNumK(
+            info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
       };
 
       if (this.room === 'none' || this.type !== ChatMessage.Type.game) {
@@ -1440,7 +1502,7 @@ function main() {
         count: 0,
         keys: [],
         fields: {},
-        add: function(user) {
+        add: function (user) {
           if (user.usr) {
             const el = {
               html: null,
@@ -1452,7 +1514,6 @@ function main() {
 
             el.html = document.createElement('div');
             el.html.setAttribute('class', 'userlist');
-
 
             let span = document.createElement('span');
             span.setAttribute('class', 'guildtag');
@@ -1471,7 +1532,7 @@ function main() {
 
             this.fields[el.name] = el;
           }
-        },
+        }
       };
       this.active = forceActive;
       this.count = null;
@@ -1512,7 +1573,8 @@ function main() {
     }
 
     get ready() {
-      return (typeof io === 'function') && this.tab && this.chat && UserManager.user.qualified && !DRMng.Raids.bootstrap;
+      return (typeof io === 'function') && this.tab && this.chat && UserManager.user.qualified &&
+             !DRMng.Raids.bootstrap;
     }
 
     configUpdate(conf) {
@@ -1530,17 +1592,20 @@ function main() {
         }
 
         const usr = UserManager.user;
-        const user = { usr: usr.name, ign: usr.IGN, gld: usr.guild };
+        const user = {
+          usr: usr.name,
+          ign: usr.IGN,
+          gld: usr.guild
+        };
 
-        this.client =
-          io.connect(`${DRMng.serverAddress}/${this.conf.channel}`, {
-            query: {
-              user: UserManager.user.name,
-              token: Util.crc32(this.conf.pass)
-            },
-            secure: true,
-            transports: ['websocket']
-          });
+        this.client = io.connect(`${DRMng.serverAddress}/${this.conf.channel}`, {
+          query: {
+            user: UserManager.user.name,
+            token: Util.crc32(this.conf.pass)
+          },
+          secure: true,
+          transports: ['websocket']
+        });
 
         this.client.on('error', err => {
           Log.warn('{PrivateChat} Client error:', err);
@@ -1585,12 +1650,15 @@ function main() {
       // sort userlist
       this.users.keys.sort();
       // clear list
-      while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
+      while (this.users.html.firstChild) {
+        this.users.html.removeChild(this.users.html.firstChild);
+      }
       // fill it up again
       this.users.count = this.users.keys.length;
 
-      for (let i = 0; i < this.users.count; ++i)
+      for (let i = 0; i < this.users.count; ++i) {
         this.users.html.appendChild(this.users.fields[this.users.keys[i]].html);
+      }
 
       this.countUpdate();
     }
@@ -1628,8 +1696,11 @@ function main() {
       this.users.keys = [];
       this.users.count = 0;
       this.users.fields = {};
-      if (this.users.html)
-        while (this.users.html.firstChild) this.users.html.removeChild(this.users.html.firstChild);
+      if (this.users.html) {
+        while (this.users.html.firstChild) {
+          this.users.html.removeChild(this.users.html.firstChild);
+        }
+      }
     }
 
     countUpdate() {
@@ -1648,7 +1719,9 @@ function main() {
       if (roman) guild = roman[1] + Util.romanToArabic(roman[2]);
       const reg = /([A-Z]+|[\w'`´])[\w'`´]*/g;
       let tag = '', part;
-      while ((part = reg.exec(guild))) tag += part[1];
+      while ((part = reg.exec(guild))) {
+        tag += part[1];
+      }
       return tag;
     }
 
@@ -1684,7 +1757,9 @@ function main() {
     }
 
     clear() {
-      while (this.chat.firstChild) this.chat.removeChild(this.chat.firstChild);
+      while (this.chat.firstChild) {
+        this.chat.removeChild(this.chat.firstChild);
+      }
     }
 
     send(msg) {
@@ -1692,9 +1767,16 @@ function main() {
       if (msg && msg !== 'Enter text for chat here') {
         let pm = /^\/w\s(\w+?)\s([\S\s]+)$/.exec(msg);
         if (pm && pm[1] && pm[2]) {
-          this.client.emit('msg', { type: 1, user: pm[1], text: pm[2] });
+          this.client.emit('msg', {
+            type: 1,
+            user: pm[1],
+            text: pm[2]
+          });
         } else if (holodeck.processChatCommand(msg, this.conf.channel)) {
-          this.client.emit('msg', { type: 0, text: msg });
+          this.client.emit('msg', {
+            type: 0,
+            text: msg
+          });
         }
         this.input.value = '';
       }
@@ -1704,7 +1786,9 @@ function main() {
       if (!this.chat) return;
       const elHeight = this.chat.lastChild ? this.chat.lastChild.offsetHeight : 0;
       const chatHeight = this.chat.scrollHeight - this.chat.offsetHeight - this.chat.scrollTop;
-      if (chatHeight <= elHeight || force) this.chat.scrollTop = this.chat.scrollHeight;
+      if (chatHeight <= elHeight || force) {
+        this.chat.scrollTop = this.chat.scrollHeight;
+      }
     }
 
     static initSbsContainer() {
@@ -1714,13 +1798,11 @@ function main() {
             .attr({ id: 'private_chat_sbs' })
             .style({ display: 'none' })
             .on('click', e => this.sbsEvent(e))
-            .attach('to', 'chat_tab_pane')
-            .node;
+            .attach('to', 'chat_tab_pane').node;
 
           this.sbsTabs = new DomNode('div')
             .attr({ id: 'private_chat_sbs_tabs' })
-            .attach('to', this.sbsContainer)
-            .node;
+            .attach('to', this.sbsContainer).node;
 
           this.sbsCreated = true;
           this.sbsActive = Config.data.alliance.sbs || false;
@@ -1739,9 +1821,7 @@ function main() {
       this.tabs = document.getElementById('chat_room_tabs');
       this.tabActions = document.getElementById('chat_actions_container');
       const gr = document.getElementById('guild_room_tab');
-      if (PrivateChat.sbsCreated &&
-        this.tabs && this.tabActions && gr &&
-        this.tabActions.parentNode === this.tabs) {
+      if (PrivateChat.sbsCreated && this.tabs && this.tabActions && gr && this.tabActions.parentNode === this.tabs) {
         this.tab = document.createElement('div');
         this.tab.setAttribute('id', `drmng_${this.conf.channel}_room_tab`);
         this.tab.setAttribute('class', 'chat_room_tab drmng_room_tab');
@@ -1882,7 +1962,6 @@ function main() {
         PrivateChat.container.removeChild(this.body);
       }
 
-
       for (let i = 0, len = Config.data.alliance.rooms.length; i < len; ++i) {
         if (Config.data.alliance.rooms[i].channel === this.conf.channel) {
           Config.data.alliance.rooms.splice(i, 1);
@@ -1925,7 +2004,9 @@ function main() {
           if (data.log.length > 0 && this.chat.childElementCount < 2) {
             this.messageLock = true;
             data.log.forEach(log => this.messageEvent(log, true));
-            while (this.messageBuffer.length) this.messageEvent(this.messageBuffer.shift(), true);
+            while (this.messageBuffer.length) {
+              this.messageEvent(this.messageBuffer.shift(), true);
+            }
             this.messageLock = false;
             setTimeout(() => this.scrollToBottom(true), 1000);
           }
@@ -1973,11 +2054,11 @@ function main() {
         this.serviceMessage(data.txt);
       } else if (!this.messageLock || history) {
         let u = UserManager.user,
-          t = data.type,
-          e = ['username', 'truncate'],
-          f = data.usr.usr === u.name,
-          h = ['', 'From ', 'To ', ''][t],
-          g = [];
+            t = data.type,
+            e = ['username', 'truncate'],
+            f = data.usr.usr === u.name,
+            h = ['', 'From ', 'To ', ''][t],
+            g = [];
 
         e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
         h && g.push('whisper');
@@ -1997,7 +2078,8 @@ function main() {
               link = `<img id="${id}" onclick="window.open(this.src)">`;
               Proxy.lightShot(l[1], id, this.conf.channel);
             } else if ((link = /.+youtube.+watch.+?v=([^&]{11})/.exec(l[1]))) {
-              link = `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
+              link =
+                `<iframe width="480" height="auto" src="https://www.youtube.com/embed/${link[1]}" frameborder="0"></iframe>`;
             } else {
               link = `<a href="${l[1]}" target="_blank">${l[1].replace(/^https?:\/\//, '')}</a>`;
             }
@@ -2007,16 +2089,16 @@ function main() {
             reg.lastIndex += link.length - l[1].length;
           }
           content = PrivateChat.getMessageHTML({
-            mainCls: g.join(' '),
-            ts: new Date(data.ts).format('mmm d, HH:MM'),
-            pfx: h,
-            user: data.usr.usr,
-            userCls: e.join(' '),
-            ign: data.usr.ign || '',
-            ignCls: data.usr.ign ? 'guildname truncate' : '',
-            tag: PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
-            msg: msg
-          });
+                                                 mainCls: g.join(' '),
+                                                 ts: new Date(data.ts).format('mmm d, HH:MM'),
+                                                 pfx: h,
+                                                 user: data.usr.usr,
+                                                 userCls: e.join(' '),
+                                                 ign: data.usr.ign || '',
+                                                 ignCls: data.usr.ign ? 'guildname truncate' : '',
+                                                 tag: PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
+                                                 msg: msg
+                                               });
         }
         const msg = document.createElement('div');
         msg.setAttribute('class', 'chat-message');
@@ -2042,9 +2124,8 @@ function main() {
         const p = new DomNode('div').attr({ class: 'chat-message' });
         new DomNode('div')
           .attr({ class: `service${ri ? ' raidinfo' : ''}` })
-          .style(ri ?
-            { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } :
-            {})
+          .style(
+            ri ? { 'background-image': `url(https://content.5thplanetgames.com/dotd_live/images/bosses/${ri}.jpg)` } : {})
           .data(msg).attach('to', p);
         if (this.chat.appendChild(p.node)) this.scrollToBottom(true);
       }
@@ -2077,7 +2158,11 @@ function main() {
 
         // Username
         new DomNode('span')
-          .attr({ class: d.userCls, username: d.user, ign: d.ign })
+          .attr({
+                  class: d.userCls,
+                  username: d.user,
+                  ign: d.ign
+                })
           .text((d.pfx || '') + d.user).attach('to', hdr);
         // IGN
         new DomNode('span')
@@ -2129,11 +2214,10 @@ function main() {
 
           return `<p class="${pc.join(' ')}">
                                     <span class="header">
-                                        ${g
-                                          ? `<span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>`
-                                          : ''}
+                                        ${g ? `<span class="sticker" style="line-height: 12px;margin-right: 3px;width: 26px;">${g}</span>` : ''}
                                         <span class="timestamp" style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-right: 3px;">${t}</span>
-                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(' ')}</a>
+                                        <a href="${msg[2]}" onclick="${l}" style="font-size: 10px; text-transform: uppercase; flex-shrink: 0;">${n.join(
+            ' ')}</a>
                                     </span>
                                     <span style="display: flex">
                                         <span username="${u}" class="${uc.join(' ')}">${pfx}${u}</span>
@@ -2194,8 +2278,7 @@ function main() {
       const elChannel = document.getElementById('DRMng_allianceChnl');
       const elPasswd = document.getElementById('DRMng_alliancePass');
 
-      if (elChannel.classList.contains('default') ||
-        elPasswd.classList.contains('default')) {
+      if (elChannel.classList.contains('default') || elPasswd.classList.contains('default')) {
         return;
       }
 
@@ -2241,11 +2324,14 @@ function main() {
         el.node.firstChild.textContent = room.name;
       } else {
         new DomNode('div')
-          .attr({ class: 'buttonStripe', id: id })
+          .attr({
+                  class: 'buttonStripe',
+                  id: id
+                })
           .data(new DomNode('span').text(room.name))
           .data(new DomNode('button')
-            .attr({ class: 'l' }).text('Del')
-            .on('click', () => this.removeChat(id)))
+                  .attr({ class: 'l' }).text('Del')
+                  .on('click', () => this.removeChat(id)))
           .attach('to', 'DRMng_privateChat');
       }
     }
@@ -2358,13 +2444,19 @@ function main() {
     static addReloadButton() {
       new DomNode('li')
         .attr({ class: 'spritegame' })
-        .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+        .style({
+                 'background-position': '0 -280px',
+                 'cursor': 'pointer'
+               })
         .html(`<a onclick="DRMng.postGameMessage('gameReload');">Reload Game</a>`, true)
         .attach('to', 'quicklinks');
 
       new DomNode('li')
         .attr({ class: 'spritegame' })
-        .style({ 'background-position': '0 -280px', 'cursor': 'pointer' })
+        .style({
+                 'background-position': '0 -280px',
+                 'cursor': 'pointer'
+               })
         .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
         .attach('to', 'quicklinks');
     }
@@ -2379,9 +2471,12 @@ function main() {
       if (document.getElementById('DRMng_header')) {
         new DomNode('li')
           .data(new DomNode('a')
-            .attr({ id: 'DRMng_KongSlimHeader', href: '' })
-            .text(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
-            .on('click', this.handleSlimButtonClick))
+                  .attr({
+                          id: 'DRMng_KongSlimHeader',
+                          href: ''
+                        })
+                  .text(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
+                  .on('click', this.handleSlimButtonClick))
           .attach('to', 'nav_welcome_box');
       } else {
         setTimeout(() => this.addSlimButton(), 1000);
@@ -2478,7 +2573,7 @@ function main() {
      */
     static modifyChatDialogue() {
       if (ChatDialogue) {
-        ChatDialogue.prototype.displayUnsanitizedMessage = function(a, b, c, d) {
+        ChatDialogue.prototype.displayUnsanitizedMessage = function (a, b, c, d) {
           // ActiveRoom
           const ar = this._holodeck.chatWindow().activeRoom();
           // AllowMutes
@@ -2486,7 +2581,10 @@ function main() {
 
           if (!am || !this._user_manager.isMuted(a)) {
             d.self = this._user_manager.username();
-            d.pm = { sent: d.private || false, recv: d.whisper || false };
+            d.pm = {
+              sent: d.private || false,
+              recv: d.whisper || false
+            };
             d.pm.any = d.pm.sent || d.pm.recv;
 
             const msg = new ChatMessage(b, a, d); // b.a.d message :)
@@ -2496,7 +2594,7 @@ function main() {
           }
         };
         ChatDialogue.prototype.displayMessage = ChatDialogue.prototype.displayUnsanitizedMessage;
-        ChatDialogue.prototype.serviceMessage = function(cont, raidInfo = null) {
+        ChatDialogue.prototype.serviceMessage = function (cont, raidInfo = null) {
           const msg = new ChatMessage(cont, null, { type: ChatMessage.Type.service });
           if (raidInfo) {
             const FPG_CDN_BASE = 'https://content.5thplanetgames.com/dotd_live/images';
@@ -2506,31 +2604,24 @@ function main() {
           this.insert(msg.html, null, null);
           this._messages_count++;
         };
-        ChatDialogue.prototype.receivedPrivateMessage = function(a) {
+        ChatDialogue.prototype.receivedPrivateMessage = function (a) {
           if (a.data.success) {
-            this.displayUnsanitizedMessage(
-              a.data.from,
-              `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
-              { class: 'whisper received_whisper' },
-              { whisper: true }
-            );
+            this.displayUnsanitizedMessage(a.data.from,
+                                           `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
+                                           { class: 'whisper received_whisper' }, { whisper: true });
           } else {
             this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
           }
         };
-        ChatDialogue.prototype.sendPrivateMessage = function(a, b) {
+        ChatDialogue.prototype.sendPrivateMessage = function (a, b) {
           this._user_manager.sendPrivateMessage(a, b);
-          this.displayUnsanitizedMessage(a, b,
-            { class: 'whisper sent_whisper' },
-            { private: true }
-          );
+          this.displayUnsanitizedMessage(a, b, { class: 'whisper sent_whisper' }, { private: true });
         };
         ChatDialogue.prototype.sameTimestamps = (a, b) => Math.trunc(a / 60000) === Math.trunc(b / 60000);
-        ChatDialogue.prototype.insert = function(msg, b, opts) {
+        ChatDialogue.prototype.insert = function (msg, b, opts) {
           const dialogue = this, chat = this._message_window_node;
           const height = chat.getHeight();
-          let doScroll = (height > 0) &&
-            (height + chat.scrollTop + ChatDialogue.SCROLL_FUDGE >= chat.scrollHeight);
+          let doScroll = (height > 0) && (height + chat.scrollTop + ChatDialogue.SCROLL_FUDGE >= chat.scrollHeight);
 
           holodeck.scheduleRender(() => {
             if (opts && opts.timestamp) {
@@ -2549,7 +2640,7 @@ function main() {
             doScroll && dialogue.scrollToBottom();
           });
         };
-        ChatDialogue.prototype.earliestTimestamp = function() {
+        ChatDialogue.prototype.earliestTimestamp = function () {
           const node = this._message_window_node.querySelectorAll('div > p');
           if (node && node.length > 0) {
             return parseInt(node[0].getAttribute('timestamp')) / 1000;
@@ -2557,9 +2648,11 @@ function main() {
             return Math.trunc(new Date().getTime() / 1000);
           }
         };
-        ChatDialogue.prototype.clear = function() {
+        ChatDialogue.prototype.clear = function () {
           const c = this._message_window_node;
-          while (c.lastChild && c.lastChild.nodeName === 'DIV') c.removeChild(c.lastChild);
+          while (c.lastChild && c.lastChild.nodeName === 'DIV') {
+            c.removeChild(c.lastChild);
+          }
           this._messages_count = 0;
         };
         Log.debug('{Kong::ChatDialogue} Patched');
@@ -2583,23 +2676,19 @@ function main() {
      */
     static modifyChatRoom() {
       if (ChatRoom) {
-        ChatRoom.prototype.receivedMessage = function(a) {
+        ChatRoom.prototype.receivedMessage = function (a) {
           this.isActive() || this._unread_message_node.show();
           this.checkUserForModeration(a.data.user.username);
-          this._chat_dialogue.displayUnsanitizedMessage(
-            a.data.user.username, a.data.message, {},
-            {
-              characterName: a.data.user.variables.game_character_name,
-              timestamp: a.data.timestamp,
-              history: a.data.history,
-              room: this._room.name,
-              type: ChatMessage.Type.fromString(this._room.type)
-            }
-          );
+          this._chat_dialogue.displayUnsanitizedMessage(a.data.user.username, a.data.message, {}, {
+            characterName: a.data.user.variables.game_character_name,
+            timestamp: a.data.timestamp,
+            history: a.data.history,
+            room: this._room.name,
+            type: ChatMessage.Type.fromString(this._room.type)
+          });
         };
-        ChatRoom.prototype.show = function() {
-          if (!PrivateChat.sbsActive &&
-            PrivateChat.anyActive()) {
+        ChatRoom.prototype.show = function () {
+          if (!PrivateChat.sbsActive && PrivateChat.anyActive()) {
             PrivateChat.getActive().deactivate();
           }
           this._node.show();
@@ -2609,10 +2698,8 @@ function main() {
           this._unread_message_node.hide();
           this.scrollToBottom();
         };
-        ChatRoom.prototype.isActive = function() {
-          return !(!PrivateChat.sbsActive &&
-            PrivateChat.anyActive()) &&
-            (this === this._chat_window.activeRoom());
+        ChatRoom.prototype.isActive = function () {
+          return !(!PrivateChat.sbsActive && PrivateChat.anyActive()) && (this === this._chat_window.activeRoom());
         };
         Log.debug('{Kong::ChatRoom} Patched');
       } else {
@@ -2637,30 +2724,30 @@ function main() {
      */
     static modifyFayeEvent() {
       if (FayeEventDispatcher) {
-        FayeEventDispatcher.prototype.message = function(a, b) {
+        FayeEventDispatcher.prototype.message = function (a, b) {
           if (this.checkDuplicateMessage(b)) {
             return;
           }
           if (b.kuid === '0') {
             this._holodeckEventDispatcher.fire({
-              type: KonduitEvent.SYSTEM_MESSAGE,
-              data: {
-                data: b.data,
-                timestamp: b.timestamp * 1000,
-                room: a
-              }
-            })
+                                                 type: KonduitEvent.SYSTEM_MESSAGE,
+                                                 data: {
+                                                   data: b.data,
+                                                   timestamp: b.timestamp * 1000,
+                                                   room: a
+                                                 }
+                                               });
           } else {
             this._holodeckEventDispatcher.fire({
-              type: KonduitEvent.ROOM_MESSAGE,
-              data: {
-                history: b.history,
-                message: b.text,
-                timestamp: b.timestamp * 1000,
-                room: a,
-                user: FayeUserTransformer.transformUser(b)
-              }
-            });
+                                                 type: KonduitEvent.ROOM_MESSAGE,
+                                                 data: {
+                                                   history: b.history,
+                                                   message: b.text,
+                                                   timestamp: b.timestamp * 1000,
+                                                   room: a,
+                                                   user: FayeUserTransformer.transformUser(b)
+                                                 }
+                                               });
           }
         };
         Log.debug('{Kong::FayeEventDispatcher} Patched');
@@ -2674,7 +2761,7 @@ function main() {
      */
     static modifyFayeHistory() {
       if (FayeHistoryService) {
-        FayeHistoryService.prototype.fetchHistory = function(a, b, c) {
+        FayeHistoryService.prototype.fetchHistory = function (a, b, c) {
           const self = this;
           this._makeAjaxRequest(a, b, c).then(b => {
             $j.each(b.history, (b, c) => {
@@ -2731,7 +2818,7 @@ function main() {
      */
     static modifyHolodeck() {
       if (Holodeck) {
-        Holodeck.prototype.processChatCommand = function(command, ally) {
+        Holodeck.prototype.processChatCommand = function (command, ally) {
           const cmd = ((command.match(/^\/([^\s]+)/) || [])[1] || '').toLowerCase();
           if (this._chat_commands[cmd]) {
             const chat = ally ? PrivateChat.getChat(ally) : this;
@@ -2759,8 +2846,8 @@ function main() {
       if (chat && input) {
         const command = Util.capitalize(input[1]);
         const gesture = Gestures[command].generate()
-          .replace('@from', UserManager.user.name)
-          .replace('@who', input[2]);
+                                         .replace('@from', UserManager.user.name)
+                                         .replace('@who', input[2]);
         const gestureText = `** ${gesture} **`;
 
         if (chat instanceof Holodeck) {
@@ -2779,38 +2866,182 @@ function main() {
       if (input) {
         let order = 1;
         if (input[2] === 'k') {
-          order = 1000
+          order = 1000;
         } else if (input[2] === 'm') {
-          order = 1000000
+          order = 1000000;
         }
         level = parseInt(input[1]) * order;
       }
 
       const PERC_DROPS = [
-        {val: 1, drop: {color: ['Brown', 'Grey'], perc: [50, 50]}},
-        {val: 4000, drop: {color: ['Brown', 'Grey', 'Green'], perc: [33, 34, 33]}},
-        {val: 6000, drop: {color: ['Grey', 'Green'], perc: [50, 50]}},
-        {val: 10000, drop: {color: ['Grey', 'Green', 'Blue'], perc: [33, 34, 33]}},
-        {val: 14000, drop: {color: ['Green', 'Blue'], perc: [50, 50]}},
-        {val: 16000, drop: {color: ['Green', 'Blue', 'Purple'], perc: [33, 34, 33]}},
-        {val: 18000, drop: {color: ['Blue', 'Purple'], perc: [50, 50]}},
-        {val: 22000, drop: {color: ['Blue', 'Purple', 'Orange'], perc: [33, 34, 33]}},
-        {val: 24000, drop: {color: ['Purple', 'Orange'], perc: [50, 50]}},
-        {val: 30000, drop: {color: ['Orange'], perc: [100]}},
-        {val: 33000, drop: {color: ['Orange', 'Red'], perc: [75, 25]}},
-        {val: 36000, drop: {color: ['Orange', 'Red'], perc: [50, 50]}},
-        {val: 50000, drop: {color: ['Orange', 'Red'], perc: [25, 75]}},
-        {val: 70000, drop: {color: ['Red'], perc: [100]}},
-        {val: 80000, drop: {color: ['Red', 'Bronze'], perc: [75, 25]}},
-        {val: 90000, drop: {color: ['Red', 'Bronze'], perc: [50, 50]}},
-        {val: 100000, drop: {color: ['Red', 'Bronze'], perc: [25, 75]}},
-        {val: 110000, drop: {color: ['Bronze', 'Silver'], perc: [75, 25]}},
-        {val: 120000, drop: {color: ['Bronze', 'Silver'], perc: [50, 50]}},
-        {val: 130000, drop: {color: ['Bronze', 'Silver'], perc: [25, 75]}},
-        {val: 140000, drop: {color: ['Silver'], perc: [100]}},
-        {val: 150000, drop: {color: ['Silver', 'Gold'], perc: [75, 25]}},
-        {val: 160000, drop: {color: ['Silver', 'Gold'], perc: [50, 50]}},
-        {val: 170000, drop: {color: ['Silver', 'Gold'], perc: [25, 75]}}
+        {
+          val: 1,
+          drop: {
+            color: ['Brown', 'Grey'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 4000,
+          drop: {
+            color: ['Brown', 'Grey', 'Green'],
+            perc: [33, 34, 33]
+          }
+        },
+        {
+          val: 6000,
+          drop: {
+            color: ['Grey', 'Green'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 10000,
+          drop: {
+            color: ['Grey', 'Green', 'Blue'],
+            perc: [33, 34, 33]
+          }
+        },
+        {
+          val: 14000,
+          drop: {
+            color: ['Green', 'Blue'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 16000,
+          drop: {
+            color: ['Green', 'Blue', 'Purple'],
+            perc: [33, 34, 33]
+          }
+        },
+        {
+          val: 18000,
+          drop: {
+            color: ['Blue', 'Purple'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 22000,
+          drop: {
+            color: ['Blue', 'Purple', 'Orange'],
+            perc: [33, 34, 33]
+          }
+        },
+        {
+          val: 24000,
+          drop: {
+            color: ['Purple', 'Orange'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 30000,
+          drop: {
+            color: ['Orange'],
+            perc: [100]
+          }
+        },
+        {
+          val: 33000,
+          drop: {
+            color: ['Orange', 'Red'],
+            perc: [75, 25]
+          }
+        },
+        {
+          val: 36000,
+          drop: {
+            color: ['Orange', 'Red'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 50000,
+          drop: {
+            color: ['Orange', 'Red'],
+            perc: [25, 75]
+          }
+        },
+        {
+          val: 70000,
+          drop: {
+            color: ['Red'],
+            perc: [100]
+          }
+        },
+        {
+          val: 80000,
+          drop: {
+            color: ['Red', 'Bronze'],
+            perc: [75, 25]
+          }
+        },
+        {
+          val: 90000,
+          drop: {
+            color: ['Red', 'Bronze'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 100000,
+          drop: {
+            color: ['Red', 'Bronze'],
+            perc: [25, 75]
+          }
+        },
+        {
+          val: 110000,
+          drop: {
+            color: ['Bronze', 'Silver'],
+            perc: [75, 25]
+          }
+        },
+        {
+          val: 120000,
+          drop: {
+            color: ['Bronze', 'Silver'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 130000,
+          drop: {
+            color: ['Bronze', 'Silver'],
+            perc: [25, 75]
+          }
+        },
+        {
+          val: 140000,
+          drop: {
+            color: ['Silver'],
+            perc: [100]
+          }
+        },
+        {
+          val: 150000,
+          drop: {
+            color: ['Silver', 'Gold'],
+            perc: [75, 25]
+          }
+        },
+        {
+          val: 160000,
+          drop: {
+            color: ['Silver', 'Gold'],
+            perc: [50, 50]
+          }
+        },
+        {
+          val: 170000,
+          drop: {
+            color: ['Silver', 'Gold'],
+            perc: [25, 75]
+          }
+        }
       ];
 
       const COLORS = {
@@ -2827,8 +3058,12 @@ function main() {
       };
 
       const table = new DomNode('table')
-        .attr({'cellspacing': '0'})
-        .style({'width': '100%', 'font-weight': '300', 'font-size': '10px'});
+        .attr({ 'cellspacing': '0' })
+        .style({
+                 'width': '100%',
+                 'font-weight': '300',
+                 'font-size': '10px'
+               });
 
       const lastElement = PERC_DROPS.length - 1;
 
@@ -2838,18 +3073,22 @@ function main() {
 
           new DomNode('td')
             .style({
-              'background': '#303030',
-              'border-right': '1px solid #000000',
-              'border-bottom': '1px solid #000000',
-              'padding-right': '5px',
-              'text-align': 'right',
-              'width': '30px'
-            })
+                     'background': '#303030',
+                     'border-right': '1px solid #000000',
+                     'border-bottom': '1px solid #000000',
+                     'padding-right': '5px',
+                     'text-align': 'right',
+                     'width': '30px'
+                   })
             .text(data.val > 1000 ? `${data.val / 1000}k` : `${data.val}`)
             .attach('to', row);
 
           const cell = new DomNode('td')
-            .style({'border-bottom': '1px solid #000000', 'border-right': '1px solid #000000', 'width': '80%'})
+            .style({
+                     'border-bottom': '1px solid #000000',
+                     'border-right': '1px solid #000000',
+                     'width': '80%'
+                   })
             .attach('to', row);
 
           const drop = data.drop;
@@ -2857,10 +3096,10 @@ function main() {
           for (let i = 0; i < drop.color.length; ++i) {
             new DomNode('span')
               .style({
-                'width': `${drop.perc[i]}%`,
-                'background-color': COLORS[drop.color[i]],
-                'display': 'inline-block'
-              })
+                       'width': `${drop.perc[i]}%`,
+                       'background-color': COLORS[drop.color[i]],
+                       'display': 'inline-block'
+                     })
               .text(drop.color[i])
               .attach('to', cell);
           }
@@ -2907,7 +3146,7 @@ function main() {
     }
 
     static handleClearChatCommand(chat, inputText) {
-      if (chat instanceof  Holodeck) {
+      if (chat instanceof Holodeck) {
         chat._active_dialogue.clear();
       } else if (chat instanceof PrivateChat) {
         chat.clear();
@@ -2950,15 +3189,15 @@ function main() {
         const raidData = Config.data.raidData;
         const raidsFound = [];
 
-        Object.entries(raidData).forEach(([linkName,raidData]) => {
+        Object.entries(raidData).forEach(([linkName, raidData]) => {
           const fullName = raidData.fName.toLowerCase();
           const nameMatch = raidArray.some(name => fullName.includes(name) || linkName.includes(name));
           if (nameMatch) raidsFound.push([linkName, raidData.fName]);
         });
 
         if (raidsFound.length > 1) {
-          message = raidsFound.reduce((msg, raid) =>
-            `${msg}<br><span class="DRMng_info_picker ${raid[0]}">${raid[1]} (${raid[0]})</span>`,
+          message = raidsFound.reduce(
+            (msg, raid) => `${msg}<br><span class="DRMng_info_picker ${raid[0]}">${raid[1]} (${raid[0]})</span>`,
             'Multiple results found, pick one:');
         } else if (raidsFound.length === 1) {
           message = DRMng.UI.raidInfo(raidsFound[0][0]);
@@ -3027,8 +3266,7 @@ function main() {
      * Sets kongregate header width to match game frame
      */
     static setHeaderWidth() {
-      document.getElementById('header').style.width =
-        `${document.getElementById('maingame').offsetWidth}px`;
+      document.getElementById('header').style.width = `${document.getElementById('maingame').offsetWidth}px`;
     }
 
     /**
@@ -3076,19 +3314,19 @@ function main() {
       // Open Sans font used by scripts theme
       new DomNode('link')
         .attr({
-          href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
-          rel: 'stylesheet'
-        })
+                href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
+                rel: 'stylesheet'
+              })
         .attach('to', document.head);
 
       // Kong theme
       new DomNode('link')
         .attr({
-          id: 'DRMng_kongCSS',
-          href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css',
-          //href: 'https://mutikt.ml/kong_dark.css',
-          rel: 'stylesheet'
-        })
+                id: 'DRMng_kongCSS',
+                href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css', //href:
+                                                                                     // 'https://mutikt.ml/kong_dark.css',
+                rel: 'stylesheet'
+              })
         .on('load', () => this.setHeaderWidth())
         .attach('to', document.head);
 
@@ -3120,10 +3358,9 @@ function main() {
        */
       static get versionHtml() {
         return `<b>${this.name}</b><br>version: <b>${this.version}</b><br>` +
-          '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
+               '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
       }
-    },
-    // TODO: Remove when new one's ready
+    }, // TODO: Remove when new one's ready
     hResize: {
       ev: null,
       regPanes: [],
@@ -3138,7 +3375,7 @@ function main() {
       right: false,
       redraw: false,
       clicked: null,
-      calc: function(e) {
+      calc: function (e) {
         if (this.pane === null) return false;
         this.rect = this.pane.getBoundingClientRect();
         this.x = e.clientX - this.rect.left;
@@ -3146,7 +3383,7 @@ function main() {
         this.right = this.regRight && this.x > this.rect.width - 7 && this.x < this.rect.width + 7;
         return true;
       },
-      findPane: function(e) {
+      findPane: function (e) {
         let p = e.target, idx;
         while (p && p.nodeName !== 'BODY') {
           idx = this.regPanes.indexOf(p.id);
@@ -3164,11 +3401,11 @@ function main() {
           p = p.parentNode;
         }
       },
-      onMouseDown: function(e) {
+      onMouseDown: function (e) {
         this.findPane(e);
         if (this.calc(e)) this.onDown(e);
       },
-      onDown: function(e) {
+      onDown: function (e) {
         let isResizing = this.left || this.right;
         if (isResizing) e.preventDefault();
         this.clicked = {
@@ -3187,12 +3424,12 @@ function main() {
         this.animate();
       },
       hold: false,
-      resetHold: function() {
+      resetHold: function () {
         this.hold = false;
         //console.log(this);
         if (!(this.right || this.left)) document.body.style.removeProperty('cursor');
       },
-      onMove: function(e) {
+      onMove: function (e) {
         if (this.hold) return;
         if (this.clicked === null) {
           this.findPane(e);
@@ -3201,17 +3438,16 @@ function main() {
         }
         this.onMoveProgress(e);
       },
-      onMoveProgress: function(e) {
+      onMoveProgress: function (e) {
         if (!this.calc(e)) return;
         if (this.right || this.left) document.body.style.cursor = 'ew-resize';
         //if (this.right || this.left) this.pane.style.cursor = `ew-resize`;
         //else this.pane.style.cursor = `default`;
 
-
         this.ev = e;
         this.redraw = true;
       },
-      onUp: function() {
+      onUp: function () {
         document.body.style.removeProperty('cursor');
         if (this.pane) {
           const p = this.pane;
@@ -3219,8 +3455,7 @@ function main() {
           switch (p.id) {
             case 'chat_container':
               w = parseInt(p.style.width.replace('px', ''));
-              Config.data.kong.chatWidth =
-                Config.data.alliance.sbs ? Math.trunc((w - 7) / 2) : w;
+              Config.data.kong.chatWidth = Config.data.alliance.sbs ? Math.trunc((w - 7) / 2) : w;
               Config.save();
               Kong.setHeaderWidth();
               break;
@@ -3236,13 +3471,12 @@ function main() {
         this.clicked = null;
         this.pane = null;
       },
-      animate: function() {
+      animate: function () {
         if (this.clicked) requestAnimationFrame(this.animate.bind(this));
         if (!this.redraw) return;
         this.redraw = false;
         if (this.clicked && this.clicked.isResizing) {
-          if (this.clicked.right)
-            this.pane.style.width = `${Math.max(Math.trunc(this.x), 200)}px`;
+          if (this.clicked.right) this.pane.style.width = `${Math.max(Math.trunc(this.x), 200)}px`;
           const w = Math.max(Math.trunc(this.clicked.cx - this.ev.clientX + this.clicked.w), 200);
           if (this.clicked.left) {
             this.pane.style.width = w + 'px';
@@ -3250,13 +3484,12 @@ function main() {
           if (this.pane.id === 'DRMng_main') Kong.setWrapperWidth(w);
         }
       },
-      init: function() {
+      init: function () {
         document.addEventListener('mousemove', this.onMove.bind(this));
         document.addEventListener('mouseup', this.onUp.bind(this));
         //this.animate();
       }
-    },
-    // TODO: Finish new resizer
+    }, // TODO: Finish new resizer
     Resizer: class {
       constructor() {
         this.ev = null;
@@ -3320,7 +3553,10 @@ function main() {
           }
           r.delay = delay;
           delete r.sid;
-          DRMng.Engine.client.emit('service', { action: 'delayedSub', data: r });
+          DRMng.Engine.client.emit('service', {
+            action: 'delayedSub',
+            data: r
+          });
         } else DRMng.UI.submitResponse(0, 'Paste proper raid link before submitting');
         link.textContent = 'Paste raid link here';
         link.className = 'default';
@@ -3328,7 +3564,7 @@ function main() {
       /**
        * Removes old raids from dead cache
        */
-      cleanDeadCache: function() {
+      cleanDeadCache: function () {
         const dead = Config.dead;
         const deadThr = Date.now() - 129600000; // 3 days old
 
@@ -3346,7 +3582,7 @@ function main() {
        * Format message while joining raids
        * @param {string} [m] Message to show
        */
-      joinMsg: function(m) {
+      joinMsg: function (m) {
         DRMng.UI.displayStatus(m ? m : `Joined ${this.joined} out of ${this.joinLen}`);
       },
       /**
@@ -3360,12 +3596,14 @@ function main() {
           const u = UserManager.user;
           if (u.qualified) {
             const authData = `kongregate_user_id=${u.ID}&kongregate_game_auth_token=${u.authToken}`;
-            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server === 'Elyssa'
-                                                                                         ? '1' : '2')}`;
+            const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server ===
+                                                                                         'Elyssa' ? '1' : '2')}`;
             const data = {
               eventName: `DRMng.joinRaid${multi ? 's' : ''}`,
               url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
-              method: 'GET', ext: r, timeout: 10000
+              method: 'GET',
+              ext: r,
+              timeout: 10000
             };
             DRMng.postMessage(data);
           } else {
@@ -3379,7 +3617,7 @@ function main() {
           DRMng.Raids.joinMsg();
         }
       },
-      prepareJoining: function() {
+      prepareJoining: function () {
         if (this.isJoining) return;
         this.isPreparing = true;
         this.ids = [];
@@ -3387,25 +3625,24 @@ function main() {
         this.joinQueue = [];
         for (i = 0, l = this.all.length; i < l; ++i) {
           name = this.all[i].boss + '_' + this.all[i].diff;
-          if (!this.all[i].visited &&
-            !this.all[i].isFull &&
-            this.filter.indexOf('@' + name) !== -1) {
+          if (!this.all[i].visited && !this.all[i].isFull && this.filter.indexOf('@' + name) !== -1) {
             this.joinQueue.push(this.all[i]);
             this.ids.push(this.all[i].id);
           }
         }
         // chat raids
         let cr = document.querySelectorAll('p.raid:not(.dead):not(.visited) a'),
-          s = Config.data.server.toLowerCase(),
-          f = Config.data.filterRaids[s], r, hf;
+            s  = Config.data.server.toLowerCase(),
+            f  = Config.data.filterRaids[s],
+            r,
+            hf;
         for (i = 0, l = cr.length; i < l; ++i) {
           r = Util.getRaidFromUrl(cr[i].search);
           if (r) {
             hf = f[r.boss] ? !f[r.boss][r.diff - 1] : true;
             if (hf) {
               name = `${r.boss}_${r.diff}`;
-              if (this.ids.indexOf(r.id) === -1 &&
-                this.filter.indexOf('@' + name) !== -1) {
+              if (this.ids.indexOf(r.id) === -1 && this.filter.indexOf('@' + name) !== -1) {
                 this.joinQueue.push(r);
                 this.ids.push(r.id);
               }
@@ -3414,17 +3651,16 @@ function main() {
         }
         this.joinLen = this.joinQueue.length;
         this.isPreparing = false;
-        if (this.joinLen > 0 && this.isAuto) this.joinAll();
-        else DRMng.UI.displayStatus();
+        if (this.joinLen > 0 && this.isAuto) this.joinAll(); else DRMng.UI.displayStatus();
       },
-      pushToQueue: function(r, useFilter = false) {
+      pushToQueue: function (r, useFilter = false) {
         if (this.ids.indexOf(r.id) === -1 && (!useFilter || !r.isFull)) {
           this.joinQueue.push(r);
           this.joinLen++;
           DRMng.UI.displayStatus();
         }
       },
-      switchAutoJoin: function() {
+      switchAutoJoin: function () {
         const button = document.getElementById('DRMng_autoJoin');
         if (this.isAuto) {
           this.isAuto = false;
@@ -3435,7 +3671,7 @@ function main() {
           setTimeout(() => this.joinAll(), 0);
         }
       },
-      joinAll: function() {
+      joinAll: function () {
         if (this.isJoining || !this.joinLen) {
           return;
         } else if (this.isPreparing) {
@@ -3445,8 +3681,9 @@ function main() {
         this.isJoining = true;
         this.joined = 0;
 
-        for (let i = 0, l = Math.min(this.joinLen, 10); i < l; ++i)
+        for (let i = 0, l = Math.min(this.joinLen, 10); i < l; ++i) {
           setTimeout(() => DRMng.Raids.join(this.joinQueue.shift(), true), i);
+        }
       },
       joinClick: e => {
         e.preventDefault();
@@ -3456,7 +3693,7 @@ function main() {
         }
         return false;
       },
-      joinOne: function(r) {
+      joinOne: function (r) {
         if (this.isJoining) {
           setTimeout(() => this.pushToQueue(r), 0);
         } else if (this.isPreparing) {
@@ -3466,7 +3703,7 @@ function main() {
         }
         return false;
       },
-      processJoin: function(id, text) {
+      processJoin: function (id, text) {
         let status = 0;
         if (/successfully (re-)?joined/i.test(text)) {
           setTimeout(() => this.setVisited(id), 0);
@@ -3503,8 +3740,7 @@ function main() {
         const data = JSON.parse(e.data);
         if (data && data.status === 200 && data.responseText && data.url) {
           let status = DRMng.Raids.processJoin(data.ext.id, data.responseText);
-          if (DRMng.Raids.joinLen > 1) DRMng.Raids.joinMsg();
-          else {
+          if (DRMng.Raids.joinLen > 1) DRMng.Raids.joinMsg(); else {
             let name = Config.data.raidData[data.ext.boss];
             name = name ? name.sName : data.ext.boss;
             status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
@@ -3521,9 +3757,15 @@ function main() {
       },
       getDiff: diff => {
         diff = diff ? diff.slice(1) : 0;
-        return isNaN(+diff) ? ({ 'n': 1, 'h': 2, 'l': 3, 'nm': 4, 'nnm': 5 })[diff.toLowerCase()] || 0 : +diff;
+        return isNaN(+diff) ? ({
+          'n': 1,
+          'h': 2,
+          'l': 3,
+          'nm': 4,
+          'nnm': 5
+        })[diff.toLowerCase()] || 0 : +diff;
       },
-      processFilter: function(filterTxt, loading) {
+      processFilter: function (filterTxt, loading) {
         DRMng.Raids.isAuto && DRMng.Raids.switchAutoJoin();
         if (loading) {
           filterTxt = Config.filterString || '';
@@ -3534,7 +3776,16 @@ function main() {
         const parts = filterTxt.split(/\s?\|\s?|\sor\s|\s?,\s?/ig);
         const regChk = /(\w:)?([\w-]+)(:\w{1,5})?/;
         const regZone = /z(\d{1,2})-(\d{1,2})/;
-        const flt = { add: { raid: [], magic: [] }, rem: { raid: [], magic: [] } };
+        const flt = {
+          add: {
+            raid: [],
+            magic: []
+          },
+          rem: {
+            raid: [],
+            magic: []
+          }
+        };
         let mode, raids, diff, reg, i, d, result = [];
         // prepare filters
         parts.forEach(p => {
@@ -3551,9 +3802,7 @@ function main() {
               if (reg) for (i = reg[1]; i <= reg[2]; ++i) {
                 d = Config.data.filterData[`z${i}`];
                 if (d) raids = raids.concat(d);
-              }
-              else raids = p[2] === 'all' ?
-                           Object.keys(Config.data.raidData) : Config.data.filterData[`${p[2]}`];
+              } else raids = p[2] === 'all' ? Object.keys(Config.data.raidData) : Config.data.filterData[`${p[2]}`];
 
               if (raids) {
                 diff = this.getDiff(p[3]);
@@ -3564,43 +3813,42 @@ function main() {
               raids = Config.data.raidData;
               reg = new RegExp(p[2], 'ig');
               diff = this.getDiff(p[3]);
-              Object.keys(raids).forEach(r =>
-                `${r} ${raids[r].sName}`.search(reg) > -1 && flt[mode].raid.push([r, diff]));
+              Object.keys(raids)
+                    .forEach(r => `${r} ${raids[r].sName}`.search(reg) > -1 && flt[mode].raid.push([r, diff]));
               break;
           }
         });
         // merge
         //Log.out(`debug`, `FILTERS`, filters);
         raids = Config.data.raidData;
-        if (flt.add.raid.length > 0)
-          flt.add.raid.forEach(r => {
-            i = raids[r[0]];
-            i = i ? i.hp : [1, 1, 1, 1];
-            if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_4');
-            if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) result.push(r[0] + '_3');
-            if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) result.push(r[0] + '_2');
-            if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_1');
-          });
-        else Object.keys(raids).forEach(r => {
+        if (flt.add.raid.length > 0) flt.add.raid.forEach(r => {
+          i = raids[r[0]];
+          i = i ? i.hp : [1, 1, 1, 1];
+          if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_4');
+          if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) result.push(r[0] + '_3');
+          if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) result.push(r[0] + '_2');
+          if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) result.push(r[0] + '_1');
+        }); else Object.keys(raids).forEach(r => {
           i = raids[r];
           i = i ? i.hp.length : 4;
-          for (d = 1; d <= i; ++d) result.push(r + '_' + d);
+          for (d = 1; d <= i; ++d) {
+            result.push(r + '_' + d);
+          }
         });
 
-        if (flt.rem.raid.length > 0)
-          flt.rem.raid.forEach(r => {
-            i = raids[r[0]];
-            i = i ? i.hp : [1, 1, 1, 1];
-            const arr = [];
-            if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_4');
-            if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) arr.push(r[0] + '_3');
-            if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) arr.push(r[0] + '_2');
-            if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_1');
-            arr.forEach(r => {
-              d = result.indexOf(r);
-              d > -1 && result.splice(d, 1);
-            });
+        if (flt.rem.raid.length > 0) flt.rem.raid.forEach(r => {
+          i = raids[r[0]];
+          i = i ? i.hp : [1, 1, 1, 1];
+          const arr = [];
+          if (i[3] !== undefined && [0, 4, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_4');
+          if (i[2] !== undefined && [0, 3].indexOf(r[1]) !== -1) arr.push(r[0] + '_3');
+          if (i[1] !== undefined && [0, 2].indexOf(r[1]) !== -1) arr.push(r[0] + '_2');
+          if (i[0] !== undefined && [0, 1, 5].indexOf(r[1]) !== -1) arr.push(r[0] + '_1');
+          arr.forEach(r => {
+            d = result.indexOf(r);
+            d > -1 && result.splice(d, 1);
           });
+        });
 
         Log.debug('{Raid::Filter} Add filters ::', flt.add.raid.join(', '));
         Log.debug('{Raid::Filter} Sub filters ::', flt.rem.raid.join(', '));
@@ -3615,9 +3863,11 @@ function main() {
       },
       setChat: (id, cls) => {
         const list = document.getElementsByClassName(id);
-        for (let i = 0, len = list.length; i < len; ++i) list[i].classList.add(cls);
+        for (let i = 0, len = list.length; i < len; ++i) {
+          list[i].classList.add(cls);
+        }
       },
-      setVisited: function(id, drop) {
+      setVisited: function (id, drop) {
         let idx = Config.visited.indexOf(id);
         if (drop && (idx > -1)) {
           Config.visited.splice(idx, 1);
@@ -3634,7 +3884,7 @@ function main() {
         Config.save();
       },
       comp: (a, b) => a.hp - b.hp,
-      _setComp: function(field) {
+      _setComp: function (field) {
         switch (field) {
           case 'id':
             this.comp = (a, b) => parseInt(a.id) - parseInt(b.id);
@@ -3660,7 +3910,7 @@ function main() {
             Config.data.sortBy = field;
         }
       },
-      setComp: function(field) {
+      setComp: function (field) {
         if (this.locked || this.bootstrap) {
           setTimeout(DRMng.Raids.setComp.bind(this, field), 10);
           return;
@@ -3676,17 +3926,19 @@ function main() {
 
         this.locked = false;
       },
-      get: function(id) {
+      get: function (id) {
         return this.all[this.getIdx(id)] || null;
       },
-      getIdx: function(id) {
-        for (let i = 0, len = this.all.length; i < len; ++i) if (this.all[i].id == id) return i;
+      getIdx: function (id) {
+        for (let i = 0, len = this.all.length; i < len; ++i) {
+          if (this.all[i].id == id) return i;
+        }
         return -1;
       },
-      sort: function() {
+      sort: function () {
         this.all.sort(this.comp);
       },
-      insertAll: function(raids) {
+      insertAll: function (raids) {
         if (this.locked) {
           setTimeout(this.insertAll.bind(this, raids), 10);
           return;
@@ -3724,7 +3976,7 @@ function main() {
         setTimeout(this.prepareJoining.bind(this), 0);
         this.bootstrap = false;
       },
-      insert: function(raid) {
+      insert: function (raid) {
         if (this.locked || this.bootstrap) {
           setTimeout(this.insert.bind(this, raid), 10);
           return;
@@ -3743,31 +3995,34 @@ function main() {
             this.count++;
             DRMng.UI.displayStatus();
             if (!raid.visited && !raid.isFull && this.filter.indexOf(`@${raid.boss}_${raid.diff}`) > -1) {
-              if (this.isJoining) setTimeout(this.pushToQueue.bind(this, raid), 0);
-              else setTimeout(this.prepareJoining.bind(this), 0);
+              if (this.isJoining) setTimeout(this.pushToQueue.bind(this, raid), 0); else setTimeout(
+                this.prepareJoining.bind(this), 0);
             }
           }
         }
 
         this.locked = false;
       },
-      setDead: function(id, save) {
+      setDead: function (id, save) {
         if (!this.getDead(id)) {
           Config.dead[id] = new Date().getTime();
           if (save) Config.save();
         }
       },
-      getDead: function(id) {
+      getDead: function (id) {
         return Util.hasProperty(Config.dead, id);
       },
-      remove: function(id, serverNuke) {
+      remove: function (id, serverNuke) {
         if (this.locked || this.bootstrap) {
           setTimeout(this.remove.bind(this, id, serverNuke), 10);
           return;
         }
         this.locked = true;
 
-        serverNuke && DRMng.Engine.client.emit('service', { action: 'raidNuke', data: id });
+        serverNuke && DRMng.Engine.client.emit('service', {
+          action: 'raidNuke',
+          data: id
+        });
 
         this.setDead(id);
 
@@ -3776,8 +4031,8 @@ function main() {
           const r = this.get(id);
           this.all.splice(i, 1);
           this.count--;
-          if (!this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1)
-            setTimeout(this.prepareJoining.bind(this), 10);
+          if (!this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1) setTimeout(
+            this.prepareJoining.bind(this), 10);
         }
         DRMng.UI.removeRaidField(id);
 
@@ -3786,7 +4041,7 @@ function main() {
 
         this.locked = false;
       },
-      update: function(raid, full) {
+      update: function (raid, full) {
         if (this.locked || this.bootstrap) {
           setTimeout(DRMng.Raids.update.bind(this, raid, full), 10);
           return;
@@ -3815,13 +4070,13 @@ function main() {
           DRMng.UI.addRaidField(r, i);
 
           // handle raid becoming full on update
-          if (r.isFull && !this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1)
-            setTimeout(this.prepareJoining.bind(this), 0);
+          if (r.isFull && !this.isJoining && this.filter.indexOf('@' + r.boss + '_' + r.diff) > -1) setTimeout(
+            this.prepareJoining.bind(this), 0);
         }
 
         this.locked = false;
       },
-      location: function(val, start = 0, end) {
+      location: function (val, start = 0, end) {
         const len = this.all.length;
 
         if (len === 0) return -1;
@@ -3835,7 +4090,7 @@ function main() {
         if (c > 0) return this.location(val, pos, end);
         return pos;
       },
-      init: function() {
+      init: function () {
         setTimeout(() => this.cleanDeadCache(), 60000);
         Log.info('{Raids} Module loaded');
       }
@@ -3868,12 +4123,11 @@ function main() {
       init: () => {
         if (typeof io === 'function' && UserManager.user.qualified) {
           DRMng.Engine.client = io
-            .connect(`${DRMng.serverAddress}/${Config.data.server}`,
-              {
-                secure: true,
-                transports: ['websocket'],
-                query: { user: UserManager.user.name }
-              })
+            .connect(`${DRMng.serverAddress}/${Config.data.server}`, {
+              secure: true,
+              transports: ['websocket'],
+              query: { user: UserManager.user.name }
+            })
             .on('error', data => Log.warn('{Engine} Error ::', data))
             .on('msg', DRMng.Engine.handleMessage)
             .on('service', DRMng.Engine.handleService)
@@ -3903,26 +4157,24 @@ function main() {
           case 'raidData':
             if (config.checkSums.raidData !== data.raidDataHash && data.raidDataHash.length > 6) {
               Log.info('{Engine::Service} New raids data. Old hash ' +
-                `<${config.checkSums.raidData}> | New hash <${data.raidDataHash}>`);
+                       `<${config.checkSums.raidData}> | New hash <${data.raidDataHash}>`);
               config.raidData = data.raidData;
               config.checkSums.raidData = data.raidDataHash;
             }
             setTimeout(DRMng.UI.setupFilterTab.bind(DRMng.UI), 0);
             break;
           case 'filterData':
-            if (config.checkSums.filterData !== data.filterDataHash &&
-              data.filterDataHash.length > 6) {
+            if (config.checkSums.filterData !== data.filterDataHash && data.filterDataHash.length > 6) {
               Log.info('{Engine::Service} New keywords data. Old hash ' +
-                `<${config.checkSums.filterData}> | New hash <${data.filterDataHash}>`);
+                       `<${config.checkSums.filterData}> | New hash <${data.filterDataHash}>`);
               config.filterData = data.filterData;
               config.checkSums.filterData = data.filterDataHash;
             }
             break;
           case 'tiersData':
-            if (config.checkSums.tiersData !== d.data.tiersDataHash &&
-              d.data.tiersDataHash.length > 6) {
-              Log.info('{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>',
-                config.checkSums.tiersData, data.tiersDataHash);
+            if (config.checkSums.tiersData !== d.data.tiersDataHash && d.data.tiersDataHash.length > 6) {
+              Log.info('{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>', config.checkSums.tiersData,
+                       data.tiersDataHash);
               config.tiersData = JSON.parse(data.tiersData);
               config.checkSums.tiersData = data.tiersDataHash;
             }
@@ -3953,11 +4205,11 @@ function main() {
     },
     UI: {
       Groups: {},
-      Group: function(alias, title, visible) {
+      Group: function (alias, title, visible) {
         this.fields = [];
         this.html = null;
         this.cont = null;
-        this.setup = function(alias, title, visible) {
+        this.setup = function (alias, title, visible) {
           if (alias && title) {
             visible = visible || false;
             let groupDiv = document.createElement('div');
@@ -3977,7 +4229,7 @@ function main() {
           }
           return this;
         };
-        this.add = function(option) {
+        this.add = function (option) {
           if (option && (option instanceof DRMng.UI.Option || option instanceof DRMng.UI.SidebarConfig)) {
             this.fields.push(option);
             if (this.cont) this.cont.appendChild(option.html);
@@ -3986,7 +4238,7 @@ function main() {
         };
         return this.setup(alias, title, visible);
       },
-      Option: function() {
+      Option: function () {
         this.html = null;
         this.conf = null;
         this.cbFn = null;
@@ -3994,7 +4246,7 @@ function main() {
         this.field = '';
         this.type = '';
         let _title = '', _desc = '';
-        this.setup = function(alias, title, type = 'bool', value) {
+        this.setup = function (alias, title, type = 'bool', value) {
           if (alias !== null) {
             const defaults = {
               bool: false,
@@ -4014,22 +4266,22 @@ function main() {
           }
           return this;
         };
-        this.getConf = function() {
+        this.getConf = function () {
           return this.conf[this.field];
         };
-        this.flipConf = function() {
+        this.flipConf = function () {
           this.conf[this.field] = !this.conf[this.field];
           Config.save();
         };
-        this.desc = function(desc) {
+        this.desc = function (desc) {
           if (desc) _desc = desc;
           return this;
         };
-        this.event = function(callback) {
+        this.event = function (callback) {
           if (callback && typeof callback === 'function') this.cbFn = callback;
           return this;
         };
-        this.make = function(group, skipCb = false, name = 'Apply') {
+        this.make = function (group, skipCb = false, name = 'Apply') {
 
           let optionDiv = document.createElement('div');
           optionDiv.setAttribute('class', 'buttonStripe');
@@ -4048,7 +4300,7 @@ function main() {
             button.textContent = name;
           }
           button.setAttribute('style', 'border-left-color: #3a3a3a;');
-          button.addEventListener('click', function(e) {
+          button.addEventListener('click', function (e) {
             if (this.type === 'bool') {
               this.flipConf();
               e.target.setAttribute('class', this.getConf() ? 'n' : 'l');
@@ -4066,8 +4318,8 @@ function main() {
           if (_desc) {
             let descField = document.createElement('div');
             descField.setAttribute('style', 'border-top: 1px solid #404040; background-color:' +
-              ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
-              ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
+                                            ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
+                                            ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
             descField.innerHTML = '' + _desc;
             optionDiv.appendChild(descField);
           }
@@ -4079,7 +4331,10 @@ function main() {
           return this;
         };
         this.makeSbButton = btn => {
-          btn = btn || { name: 'X', command: '' };
+          btn = btn || {
+            name: 'X',
+            command: ''
+          };
           return new DomNode('div')
             .data(new DomNode('span').text('\uf2f9').on('click', e => {
               const el = e.target.parentNode;
@@ -4089,8 +4344,16 @@ function main() {
               const el = e.target.parentNode;
               el.parentNode.insertBefore(el, el.previousSibling);
             }))
-            .data(new DomNode('input').attr({ type: 'text', value: btn.name, class: 'inp_fld' }))
-            .data(new DomNode('input').attr({ type: 'text', value: btn.command, class: 'inp_cmd' }))
+            .data(new DomNode('input').attr({
+                                              type: 'text',
+                                              value: btn.name,
+                                              class: 'inp_fld'
+                                            }))
+            .data(new DomNode('input').attr({
+                                              type: 'text',
+                                              value: btn.command,
+                                              class: 'inp_cmd'
+                                            }))
             .data(new DomNode('span').attr({ class: 'red' }).text('\uf270').on('click', e => {
               const el = e.target.parentNode;
               el.parentNode.removeChild(el);
@@ -4101,33 +4364,35 @@ function main() {
           const el = new DomNode('div')
             .attr({ class: 'drmng_config_sb' })
             .data(new DomNode('div')
-              .data(new DomNode('span').text('\uf2f9').on('click', e => {
-                const el = e.target.parentNode.parentNode;
-                el.parentNode.insertBefore(el.nextSibling, el);
-              }))
-              .data(new DomNode('span').text('\uf2fc').on('click', e => {
-                const el = e.target.parentNode.parentNode;
-                el.parentNode.insertBefore(el, el.previousSibling);
-              }))
-              .data(
-                new DomNode('input').attr({ type: 'text', value: grp.name, class: 'inp_grp' }))
-              .data(new DomNode('span').attr({ class: 'del_grp red' }).text('\uf272')
-                                       .on('click', e => {
-                                         const el = e.target.parentNode.parentNode;
-                                         el.parentNode.removeChild(el);
-                                       }))
-              .data(new DomNode('span').attr({ class: 'add_grp' }).text('\uf277')
-                                       .on('click', e => this.makeSbGroup().attach('before',
-                                         e.target.parentNode.parentNode)))
-              .data(new DomNode('span').text('\uf275')
-                                       .on('click', e => this.makeSbButton().attach('to',
-                                         e.target.parentNode.parentNode)))
-            );
-          if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn)));
-          else el.data(this.makeSbButton());
+                    .data(new DomNode('span').text('\uf2f9').on('click', e => {
+                      const el = e.target.parentNode.parentNode;
+                      el.parentNode.insertBefore(el.nextSibling, el);
+                    }))
+                    .data(new DomNode('span').text('\uf2fc').on('click', e => {
+                      const el = e.target.parentNode.parentNode;
+                      el.parentNode.insertBefore(el, el.previousSibling);
+                    }))
+                    .data(new DomNode('input').attr({
+                                                      type: 'text',
+                                                      value: grp.name,
+                                                      class: 'inp_grp'
+                                                    }))
+                    .data(new DomNode('span').attr({ class: 'del_grp red' }).text('\uf272')
+                                             .on('click', e => {
+                                               const el = e.target.parentNode.parentNode;
+                                               el.parentNode.removeChild(el);
+                                             }))
+                    .data(new DomNode('span').attr({ class: 'add_grp' }).text('\uf277')
+                                             .on('click', e => this.makeSbGroup()
+                                                                   .attach('before', e.target.parentNode.parentNode)))
+                    .data(new DomNode('span').text('\uf275')
+                                             .on('click', e => this.makeSbButton()
+                                                                   .attach('to', e.target.parentNode.parentNode))));
+          if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn))); else el.data(
+            this.makeSbButton());
           return el;
         };
-        this.makeSb = function(group, data) {
+        this.makeSb = function (group, data) {
           /*const grp = new DomNode(`div`)
            .attr({class: `drmng_config_sb`})
            .data(new DomNode(`div`)
@@ -4153,43 +4418,69 @@ function main() {
             this.conf = {
               groups: [
                 {
-                  name: 'Info', hidden: false,
+                  name: 'Info',
+                  hidden: false,
                   buttons: [
-                    { name: 'Emall', action: 'chat', command: '/raid elite mall' },
-                    { name: 'Cecil', action: 'chat', command: '/raid elite cecil' },
-                    { name: 'Mang', action: 'chat', command: '/raid elite mangler' }
+                    {
+                      name: 'Emall',
+                      action: 'chat',
+                      command: '/raid elite mall'
+                    },
+                    {
+                      name: 'Cecil',
+                      action: 'chat',
+                      command: '/raid elite cecil'
+                    },
+                    {
+                      name: 'Mang',
+                      action: 'chat',
+                      command: '/raid elite mangler'
+                    }
                   ]
-                },
-                {
-                  name: 'Sheet', hidden: true,
+                }, {
+                  name: 'Sheet',
+                  hidden: true,
                   buttons: [
                     {
-                      name: 'Proc', action: 'www',
+                      name: 'Proc',
+                      action: 'www',
                       command: 'https://docs.google.com/spreadsheets/d/1YTbJ0wgJUygdmix6a8BzLThrHhDINX943aadjboOTj8'
-                    },
-                    {
-                      name: 'Magic', action: 'www',
+                    }, {
+                      name: 'Magic',
+                      action: 'www',
                       command: 'https://docs.google.com/spreadsheets/d/1O0eVSnzlACP9XJDq0VN4kN51ESUusec3-gD4dKPHRNU'
-                    },
-                    {
-                      name: 'TiersI', action: 'www',
+                    }, {
+                      name: 'TiersI',
+                      action: 'www',
                       command: 'https://docs.google.com/spreadsheets/d/10a8qCq5zgyR-kAOq-kuKuttADfU16aVWxgTCf9Eu4b8'
-                    },
-                    {
-                      name: 'TiersII', action: 'www',
+                    }, {
+                      name: 'TiersII',
+                      action: 'www',
                       command: 'https://docs.google.com/spreadsheets/d/1Zgv90jaHZCSEvpYdG5BF42djCEcgPxjEdCwosQRTbIQ'
-                    },
-                    {
-                      name: 'Keyki', action: 'www',
+                    }, {
+                      name: 'Keyki',
+                      action: 'www',
                       command: 'https://docs.google.com/spreadsheets/d/1ownIOYtDgha_5RwmVM_RfHIwk16WeMZJry5wz9-YNTI'
                     }
                   ]
                 }
               ],
               buttons: [
-                { name: 'Join', action: 'func', command: 'DRMng.Raids.joinAll' },
-                { name: 'Kill', action: 'chat', command: '/kill' },
-                { name: 'Server', action: 'func', command: 'DRMng.Engine.changeServer' }
+                {
+                  name: 'Join',
+                  action: 'func',
+                  command: 'DRMng.Raids.joinAll'
+                },
+                {
+                  name: 'Kill',
+                  action: 'chat',
+                  command: '/kill'
+                },
+                {
+                  name: 'Server',
+                  action: 'func',
+                  command: 'DRMng.Engine.changeServer'
+                }
               ]
             };
             Config.data.sidebar.data = this.conf;
@@ -4200,10 +4491,13 @@ function main() {
 
         make(group) {
           this.conf.groups.forEach(grp => new DRMng.UI.Option().makeSb(group, grp));
-          new DRMng.UI.Option().makeSb(group, { name: 'Buttons', buttons: this.conf.buttons });
+          new DRMng.UI.Option().makeSb(group, {
+            name: 'Buttons',
+            buttons: this.conf.buttons
+          });
         }
       },
-      addRaidField: function(r, idx) {
+      addRaidField: function (r, idx) {
         const raidInfo = Config.data.raidData[r.boss];
         // classes
         const cls = ['drm_' + r.boss + '_' + r.diff];
@@ -4215,7 +4509,10 @@ function main() {
 
         // main elem
         const raidElement = new DomNode('div')
-          .attr({ id: `DRMng_${r.id}`, class: cls.join(' ') })
+          .attr({
+                  id: `DRMng_${r.id}`,
+                  class: cls.join(' ')
+                })
           .data(new DomNode('span').text(raidInfo ? raidInfo.sName : r.boss.replace(/_/g, ' ')))
           .data(new DomNode('span').text(hp))
           .on('mouseenter', DRMng.UI.infoEvent);
@@ -4241,21 +4538,21 @@ function main() {
         new DomNode('#DRMng_RaidList').clear();
       },
       statusTimer: null,
-      displayStatus: function(msg) {
+      displayStatus: function (msg) {
         const status = document.getElementById('DRMng_status');
         if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
-          if (DRMng.Raids.joinLen > 0)
-            status.textContent = DRMng.Raids.count + ' raids, ' + DRMng.Raids.joinLen + ' selected';
-          else status.textContent = DRMng.Raids.count + ' raids in list';
+          if (DRMng.Raids.joinLen > 0) status.textContent =
+            DRMng.Raids.count + ' raids, ' + DRMng.Raids.joinLen + ' selected'; else status.textContent =
+            DRMng.Raids.count + ' raids in list';
           this.statusTimer = null;
         } else if (msg) {
           status.innerText = msg;
-          if (this.statusTimer) this.statusTimer.restart();
-          else this.statusTimer = new Timer(DRMng.UI.displayStatus.bind(this), 4000);
+          if (this.statusTimer) this.statusTimer.restart(); else this.statusTimer =
+            new Timer(DRMng.UI.displayStatus.bind(this), 4000);
         }
       },
       submitResponseTimeout: 0,
-      submitResponse: function(mode, msg) {
+      submitResponse: function (mode, msg) {
         clearTimeout(this.submitResponseTimeout);
         let respDiv = document.getElementById('DRMng_submitResponse');
         msg = msg || 'Unidentified event occurred';
@@ -4274,11 +4571,11 @@ function main() {
           respDiv.innerHTML = msg;
           respDiv.className += mode;
         }
-        this.submitResponseTimeout = setTimeout(function() {
+        this.submitResponseTimeout = setTimeout(function () {
           document.getElementById('DRMng_submitResponse').className = 'textField';
         }, 60000);
       },
-      createCSS: function() {
+      createCSS: function () {
         let content = `\
                 @font-face {\
                     font-family: 'Material-Design';\
@@ -4988,17 +5285,16 @@ function main() {
         const flt = Config.filterRaids;
         const raids = raidData || Config.data.raidData;
         const fltDivs = [
-          document.getElementById('DRMng_filterSmall'),
-          document.getElementById('DRMng_filterMedium'),
-          document.getElementById('DRMng_filterLarge'),
-          document.getElementById('DRMng_filterEpic'),
-          document.getElementById('DRMng_filterColossal'),
-          document.getElementById('DRMng_filterGuild'),
+          document.getElementById('DRMng_filterSmall'), document.getElementById('DRMng_filterMedium'),
+          document.getElementById('DRMng_filterLarge'), document.getElementById('DRMng_filterEpic'),
+          document.getElementById('DRMng_filterColossal'), document.getElementById('DRMng_filterGuild'),
           document.getElementById('DRMng_filterGigantic')
         ];
         fltDivs.forEach(div => {
           if (div) {
-            while (div.firstChild) div.removeChild(div.firstChild);
+            while (div.firstChild) {
+              div.removeChild(div.firstChild);
+            }
           }
         });
 
@@ -5007,7 +5303,10 @@ function main() {
           if (!r.isEvent || r.isGuild) {
             if (flt[k] === undefined) flt[k] = new Array(4).fill(false);
             const el = new DomNode('div')
-              .attr({ class: 'buttonStripe', id: `DRMng_filter_${k}` })
+              .attr({
+                      class: 'buttonStripe',
+                      id: `DRMng_filter_${k}`
+                    })
               .data(new DomNode('span').text(r.fName))
               .on('click', DRMng.UI.applyFilter)
               .attach('to', fltDivs[r.isGuild ? 5 : r.size]);
@@ -5018,7 +5317,7 @@ function main() {
           }
         });
       },
-      applyDiffFilter: function(id) {
+      applyDiffFilter: function (id) {
         let mode = id && id.split('_');
         if (mode[0] === 'DRMngFilter') {
           let diff = parseInt(mode[2]);
@@ -5029,14 +5328,16 @@ function main() {
             let server = Config.data.server.toLowerCase();
             let flt = Config.data.filterRaids[server];
             let fk = Object.keys(flt);
-            for (let i = 0, len = fk.length; i < len; ++i) flt[fk[i]][diff] = mode;
+            for (let i = 0, len = fk.length; i < len; ++i) {
+              flt[fk[i]][diff] = mode;
+            }
             Config.save();
             DRMng.UI.setupFilterTab();
             document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
           }
         }
       },
-      applyFilter: function(e) {
+      applyFilter: function (e) {
         let el = e.target;
         if (el.tagName !== 'SPAN' && el.tagName !== 'BUTTON') el = el.children[0];
         let server = Config.data.server.toLowerCase();
@@ -5048,14 +5349,23 @@ function main() {
 
         if (spanHit) {
           let flts = 0;
-          for (i = 0; i < 4; ++i) if (flt[i]) flts += 1 << i;
+          for (i = 0; i < 4; ++i) {
+            if (flt[i]) flts += 1 << i;
+          }
           diff = (flts !== 15 && flts !== 0) ? flts : 15;
-        } else diff = { n: 1, h: 2, l: 4, nm: 8 }[el.className.split(' ')[0]];
+        } else diff = {
+          n: 1,
+          h: 2,
+          l: 4,
+          nm: 8
+        }[el.className.split(' ')[0]];
 
-        for (i = 0; i < 4; ++i) if (diff & (1 << i)) {
-          flt[i] = !flt[i];
-          btns[i].innerText = flt[i] ? 'Off' : 'On';
-          btns[i].className = btns[i].className.split(' ')[0] + ' ' + btns[i].innerText.toLowerCase();
+        for (i = 0; i < 4; ++i) {
+          if (diff & (1 << i)) {
+            flt[i] = !flt[i];
+            btns[i].innerText = flt[i] ? 'Off' : 'On';
+            btns[i].className = btns[i].className.split(' ')[0] + ' ' + btns[i].innerText.toLowerCase();
+          }
         }
 
         document.getElementById('DRMng_filterApply').parentNode.removeAttribute('style');
@@ -5080,8 +5390,7 @@ function main() {
               btn.on('click', (fn[0].split('.').reduce((a, v) => a[v], window)).bind(th, ...fn.slice(1)));
               break;
             case 'chat':
-              btn.on('click', () =>
-                holodeck.processChatCommand(button.command, PrivateChat.getActive(true)));
+              btn.on('click', () => holodeck.processChatCommand(button.command, PrivateChat.getActive(true)));
               break;
             case 'www':
               btn.on('click', () => window.open(button.command));
@@ -5090,11 +5399,10 @@ function main() {
         }
         return btn.node;
       },
-      setupSidebar: function() {
+      setupSidebar: function () {
         let left = true;
         let sb = document.getElementById('DRMng_Sidebar');
-        if (sb) new DomNode(sb).clear();
-        else sb = new DomNode('div').attr({ id: 'DRMng_Sidebar' }).node;
+        if (sb) new DomNode(sb).clear(); else sb = new DomNode('div').attr({ id: 'DRMng_Sidebar' }).node;
         const scData = Config.data.sidebar.data;
 
         // sidebar buttons routine
@@ -5119,11 +5427,12 @@ function main() {
         }
 
         let parent = document.querySelector('#chat_container_cell');
-        if (left) parent.insertBefore(sb, parent.children[0]);
-        else parent.appendChild(sb);
+        if (left) parent.insertBefore(sb, parent.children[0]); else parent.appendChild(sb);
         let labels = document.querySelectorAll('#DRMng_Sidebar > div.label');
         let labLen = labels.length;
-        for (let i = 0; i < labLen; ++i) labels[i].addEventListener('click', this.sidebarLabelOpen);
+        for (let i = 0; i < labLen; ++i) {
+          labels[i].addEventListener('click', this.sidebarLabelOpen);
+        }
         let grpButtLen = document.querySelectorAll('#DRMng_Sidebar > div > button').length;
         let staButtLen = document.querySelectorAll('#DRMng_Sidebar > button').length;
         let sbLen = labLen * 26 + grpButtLen * 23 + staButtLen * 23;
@@ -5144,7 +5453,7 @@ function main() {
           }
         }
       },
-      loadDefaults: function() {
+      loadDefaults: function () {
         let val;
 
         // Chat width
@@ -5171,7 +5480,7 @@ function main() {
         // Private Chats
         Config.data.alliance.rooms.forEach(room => PrivateChat.addOption(room));
       },
-      loadOptions: function() {
+      loadOptions: function () {
         let group, opt;
 
         group = new this.Group('kongui', 'Kongregate', true);
@@ -5179,7 +5488,7 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_stickyHeader', 'Sticky header', 'bool', true)
            .desc('Makes top header always visible on screen.')
-           .event(function() {
+           .event(function () {
              if (this.conf[this.field]) {
                new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
                Css.del(this.field);
@@ -5195,40 +5504,35 @@ function main() {
         opt = new this.Option();
         opt.setup('kongui_hideToolbar', 'Hide game toolbar', 'bool', false)
            .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, 'table.game_table > tbody > tr:first-child', 'display: none');
-             else Css.del(this.field);
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, 'table.game_table > tbody > tr:first-child',
+                                                'display: none'); else Css.del(this.field);
            })
            .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideFrame', 'Hide game frame', 'bool', false)
            .desc('Hides 7px wide frame around game window.')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, 'div#maingame', 'padding: 0');
-             else Css.del(this.field);
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, 'div#maingame', 'padding: 0'); else Css.del(this.field);
            })
            .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideGameDetails', 'Hide game details', 'bool', false)
            .desc('Hides game details part located just below game window.')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, 'div.game_details_outer', 'display: none');
-             else Css.del(this.field);
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, 'div.game_details_outer', 'display: none'); else Css.del(
+               this.field);
            })
            .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideForum', 'Hide forum area', 'bool', true)
            .desc('Hides forum part located below game window.')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, '#below_fold_content div.game_page_wrap', 'display: none');
-             else Css.del(this.field);
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, '#below_fold_content div.game_page_wrap',
+                                                'display: none'); else Css.del(this.field);
            })
            .make(group);
 
@@ -5239,23 +5543,21 @@ function main() {
 
         opt = new this.Option();
         opt.setup('drmui_disableTransitions', 'Disable transitions', 'bool', false)
-           .desc('Disables animated transitions for various UI elements to improve performance on' +
-             ' low-end hardware.')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
-                 ' div#DRMng_info *', 'transition: initial !important');
-             else Css.del(this.field);
+           .desc(
+             'Disables animated transitions for various UI elements to improve performance on' + ' low-end hardware.')
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+                                                            ' div#DRMng_info *',
+                                                'transition: initial !important'); else Css.del(this.field);
            })
            .make(group);
 
         opt = new this.Option();
         opt.setup('drmui_hideSideBar', 'Hide sidebar', 'bool', false)
            .desc('Hides sidebar which is located between game window and kongregate chat.')
-           .event(function() {
-             if (this.conf[this.field])
-               Css.add(this.field, 'div#DRMng_Sidebar', 'display: none');
-             else Css.del(this.field);
+           .event(function () {
+             if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_Sidebar', 'display: none'); else Css.del(
+               this.field);
            })
            .make(group);
 
@@ -5267,7 +5569,7 @@ function main() {
         opt = new this.Option();
         opt.setup('alliance_sbs', 'Side by side', 'bool', false)
            .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
-             ' (doubles width taken by chat area).')
+                 ' (doubles width taken by chat area).')
            .event(() => PrivateChat.moveChats())
            .make(group, true);
 
@@ -5279,7 +5581,7 @@ function main() {
         opt = new this.Option();
         opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
            .desc('Disables World Chat located next to game window.')
-           .event(function() {
+           .event(function () {
              DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
              Kong.hideWorldChat();
            })
@@ -5294,7 +5596,7 @@ function main() {
         opt = new this.Option();
         opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
            .desc('Hides World Chat (without disabling it completely).')
-           .event(function() {
+           .event(function () {
              DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
              Kong.hideWorldChat();
            })
@@ -5305,18 +5607,28 @@ function main() {
         new this.Option()
           .setup('sidebar_apply', 'Apply changes', 'action')
           .desc('Applies sidebar layout changes as defined below.')
-          .event(function() {
+          .event(function () {
             const sb = document.getElementsByClassName('drmng_config_sb');
-            const dat = { groups: [], buttons: [] };
+            const dat = {
+              groups: [],
+              buttons: []
+            };
             for (let i = 0; i < sb.length; ++i) {
               const inp = Array.from(sb[i].querySelectorAll('input'));
-              const grp = { name: inp.shift().value, hidden: i > 0, buttons: [] };
+              const grp = {
+                name: inp.shift().value,
+                hidden: i > 0,
+                buttons: []
+              };
               while (inp.length) {
-                const btn = { name: inp.shift().value, command: inp.shift().value, action: 'func' };
-                if (btn.command.indexOf('/') === 0) btn.action = 'chat';
-                else if (btn.command.indexOf('http') === 0) btn.action = 'www';
-                if (i < sb.length - 1) grp.buttons.push(btn);
-                else dat.buttons.push(btn);
+                const btn = {
+                  name: inp.shift().value,
+                  command: inp.shift().value,
+                  action: 'func'
+                };
+                if (btn.command.indexOf('/') === 0) btn.action = 'chat'; else if (btn.command.indexOf('http') ===
+                                                                                  0) btn.action = 'www';
+                if (i < sb.length - 1) grp.buttons.push(btn); else dat.buttons.push(btn);
               }
               if (i < sb.length - 1) dat.groups.push(grp);
             }
@@ -5384,7 +5696,7 @@ function main() {
         // Save all changes made to config file due to introducing new options
         Config.save();
       },
-      raidInfo: function(boss) {
+      raidInfo: function (boss) {
         let txt = '';
         if (boss) {
           let r = Config.data.raidData[boss];
@@ -5396,70 +5708,57 @@ function main() {
             const Diff = [0, 1, 2, 3];
 
             txt += '<table class="raidinfo"><tr><td></td><td>N</td><td>H</td><td>L</td><td>NM</td></tr>';
-            txt += Diff.reduce((acc, d) => acc + '<td>' +
-              (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000, 4) : '&mdash;') + '</td>',
+            txt += Diff.reduce(
+              (acc, d) => acc + '<td>' + (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000, 4) : '&mdash;') + '</td>',
               '<tr><td>HP</td>') + '</tr>';
-            txt += Diff.reduce((acc, d) => acc + '<td>' +
-              (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : '&mdash;') +
-              '</td>', '<tr><td>FS</td>') + '</tr>';
+            txt += Diff.reduce(
+              (acc, d) => acc + '<td>' + (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                   '</td>', '<tr><td>FS</td>') + '</tr>';
             txt += '<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>' + '<td>' +
-              (r.hp[3] ? Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : '&mdash;') +
-              '</td></tr>';
+                   (r.hp[3] ? Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : '&mdash;') + '</td></tr>';
             if (t.nonTiered && t.nonTiered.raids.indexOf(boss) !== -1) {
               rt = t.nonTiered.ratio[r.size][3];
-              txt += '<tr><td>OS</td>' +
-                '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td></tr>';
+              txt += '<tr><td>OS</td>' + '<td>' +
+                     (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                     '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                     '</td>' + '<td>' +
+                     (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                     '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                     '</td></tr>';
               rt = t.nonTiered.ratio[r.size][6];
-              txt += '<tr><td>MS</td>' +
-                '<td>' + (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td>' +
-                '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) :
-                          '&mdash;') + '</td></tr>';
+              txt += '<tr><td>MS</td>' + '<td>' +
+                     (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                     '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                     '</td>' + '<td>' +
+                     (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                     '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                     '</td></tr>';
             }
             txt += '</table>';
 
             if (t.tiers && t.tiers[boss]) {
               t = t.tiers[boss];
               rt = t.ratio[3];
-              txt += '<table class="raidinfo"><tr><td></td><td>Tier</td><td>Stats</td><td>dmg/SP</td><td>dmg/E</td></tr>';
+              txt +=
+                '<table class="raidinfo"><tr><td></td><td>Tier</td><td>Stats</td><td>dmg/SP</td><td>dmg/E</td></tr>';
               // Stats OS
-              if (t.spOS >= 0) txt += '<tr><td>Stats OS</td><td>' +
-                Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + '</td>' +
-                '<td>' + Util.toShortNumber(t.sp[t.spOS]) + '</td>' +
-                '<td>' + (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) +
-                '</td>' +
-                '<td>' + (t.hasCURE && t.e ?
-                          (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) :
-                          '&mdash;') + '</td>';
+              if (t.spOS >= 0) txt +=
+                '<tr><td>Stats OS</td><td>' + Util.getShortNumK(t.tiers[t.spOS] * rt * 1000, 4) + '</td>' + '<td>' +
+                Util.toShortNumber(t.sp[t.spOS]) + '</td>' + '<td>' +
+                (t.tiers[t.spOS] * rt / t.sp[t.spOS]).toPrecision(4) + '</td>' + '<td>' +
+                (t.hasCURE && t.e ? (t.tiers[t.spOS] * rt / t.e[t.spOS]).toPrecision(4) : '&mdash;') + '</td>';
               // Epics OS
-              if (t.eOS >= 0) txt += '<tr><td>Epics OS</td><td>' +
-                Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' +
-                '<td>' + Util.toShortNumber(t.sp[t.eOS]) + '</td>' +
-                '<td>' + (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) +
-                '</td>' +
-                '<td>' + (t.hasCURE && t.e ?
-                          (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) :
-                          '&mdash;') + '</td>';
+              if (t.eOS >= 0) txt +=
+                '<tr><td>Epics OS</td><td>' + Util.getShortNumK(t.tiers[t.eOS] * rt * 1000, 4) + '</td>' + '<td>' +
+                Util.toShortNumber(t.sp[t.eOS]) + '</td>' + '<td>' +
+                (t.tiers[t.eOS] * rt / t.sp[t.eOS]).toPrecision(4) + '</td>' + '<td>' +
+                (t.hasCURE && t.e ? (t.tiers[t.eOS] * rt / t.e[t.eOS]).toPrecision(4) : '&mdash;') + '</td>';
               // Max Tier
               let idx = t.tiers.length - 1;
-              txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) +
-                '</td>' +
-                '<td>' + Util.toShortNumber(t.sp[idx]) + '</td>' +
-                '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) + '</td>' +
-                '<td>' +
-                (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
-                '</td>';
+              txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) + '</td>' + '<td>' +
+                     Util.toShortNumber(t.sp[idx]) + '</td>' + '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) +
+                     '</td>' + '<td>' + (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
+                     '</td>';
               txt += '</table>';
             }
           }
@@ -5471,26 +5770,34 @@ function main() {
       fillInfo: id => {
         // Get info div and clear its content
         const ifo = document.getElementById('DRMng_info');
-        while (ifo.firstChild) ifo.removeChild(ifo.firstChild);
+        while (ifo.firstChild) {
+          ifo.removeChild(ifo.firstChild);
+        }
 
         const rd = DRMng.Raids.get(id);
         const ri = Config.data.raidData[rd.boss];
         const hpMax = ri ? ri.hp[rd.diff - 1] * 1000 : Infinity;
         const data = {
-          nam: rd.boss.replace(/_/g, ' '), mag: '', rac: '', sta: 'Healthy', ptm: 1.0, hpi: '?', tmi: '?'
+          nam: rd.boss.replace(/_/g, ' '),
+          mag: '',
+          rac: '',
+          sta: 'Healthy',
+          ptm: 1.0,
+          hpi: '?',
+          tmi: '?'
         };
 
         if (ri) {
           // Name
           data.nam = ri.fName;
           // Magic
-          data.mag = JSON.parse(rd.magic).reduce(
-            (a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`, '');
+          data.mag = JSON.parse(rd.magic)
+                         .reduce((a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`,
+                                 '');
           //data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
           //    `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
           // Race
-          if (ri.race.length > 0)
-            data.rac = 'Race: ' + ri.race.map(v => v.replace(/ /g, '&nbsp;')).join(', ');
+          if (ri.race.length > 0) data.rac = 'Race: ' + ri.race.map(v => v.replace(/ /g, '&nbsp;')).join(', ');
           // Timer
           if (!ri.isEvent) {
             data.ptm = 1.0 - ((new Date().getTime() - rd.createtime) / (3600000 * ri.timer));
@@ -5500,28 +5807,28 @@ function main() {
         }
 
         // Status
-        data.sta += rd.isFull ? `, Full (${rd.participants})` :
-                    `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ''}`;
+        data.sta +=
+          rd.isFull ? `, Full (${rd.participants})` : `, ${rd.participants}${ri ? ` / ${ri.maxPlayers}` : ''}`;
         data.sta += rd.visited ? ', Visited' : '';
 
         // Health text
         data.hpi = `health ${Util.getShortNumK(hpMax * rd.hp, 3)} / ` +
-          `${Util.getShortNumK(hpMax, 3)} (${Math.ceil(rd.hp * 100)}%)`;
+                   `${Util.getShortNumK(hpMax, 3)} (${Math.ceil(rd.hp * 100)}%)`;
 
         // Time text
         data.tmi = `timer ${ri ? `${Math.round(data.ptm * ri.timer)}h / ${ri.timer}h ` : ''}` +
-          `(${Math.ceil(data.ptm * 100)}%)`;
+                   `(${Math.ceil(data.ptm * 100)}%)`;
 
         // Generate info field
         ifo.className = ['', 'n', 'h', 'l', 'nm'][rd.diff];
         ifo.innerHTML = `<div><span class="title">${data.nam}</span>${data.mag}</div><div>${data.rac}</div>` +
-          `<div class="status">Status: ${data.sta}</div>` +
-          `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
-          `<progress class="hp" id="DRMng_progHP" value="${rd.hp}"></progress></div>` +
-          `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
-          `<progress class="time" id="DRMng_progTime" value="${data.ptm}"></progress></div>`;
+                        `<div class="status">Status: ${data.sta}</div>` +
+                        `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
+                        `<progress class="hp" id="DRMng_progHP" value="${rd.hp}"></progress></div>` +
+                        `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
+                        `<progress class="time" id="DRMng_progTime" value="${data.ptm}"></progress></div>`;
       },
-      infoEvent: function(e) {
+      infoEvent: function (e) {
         clearTimeout(DRMng.UI.fillInfoTimeout);
         if (DRMng.hResize.clicked) return;
 
@@ -5581,7 +5888,7 @@ function main() {
           setTimeout(DRMng.UI.addListenerToChat, 250);
         }
       },
-      attachListeners: function() {
+      attachListeners: function () {
         // Chat global listener
         setTimeout(DRMng.UI.addListenerToChat, 1000);
 
@@ -5634,8 +5941,8 @@ function main() {
         });
 
         // Info box hiding
-        new DomNode('#DRMng_RaidList').on('mouseleave', () =>
-          document.getElementById('DRMng_info').style.display = 'none');
+        new DomNode('#DRMng_RaidList').on('mouseleave',
+                                          () => document.getElementById('DRMng_info').style.display = 'none');
 
         // raids filtering field
         new DomNode('#DRMng_txtFilter')
@@ -5665,18 +5972,14 @@ function main() {
 
         // filter groups rollovers
         [
-          document.getElementById('DRMng_filterSmall'),
-          document.getElementById('DRMng_filterMedium'),
-          document.getElementById('DRMng_filterLarge'),
-          document.getElementById('DRMng_filterEpic'),
-          document.getElementById('DRMng_filterColossal'),
-          document.getElementById('DRMng_filterGuild'),
+          document.getElementById('DRMng_filterSmall'), document.getElementById('DRMng_filterMedium'),
+          document.getElementById('DRMng_filterLarge'), document.getElementById('DRMng_filterEpic'),
+          document.getElementById('DRMng_filterColossal'), document.getElementById('DRMng_filterGuild'),
           document.getElementById('DRMng_filterGigantic')
         ].forEach(div => {
           if (div) {
             div.parentNode.addEventListener('transitionend', e => {
-              if (e.target.className.indexOf('hide') !== -1)
-                e.target.children[1].style.display = 'none';
+              if (e.target.className.indexOf('hide') !== -1) e.target.children[1].style.display = 'none';
             }, false);
           }
         });
@@ -5772,7 +6075,7 @@ function main() {
         document.getElementById('DRMng_main')
                 .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
       },
-      roll: function(elem) {
+      roll: function (elem) {
         const gr = elem ? elem.parentNode : null;
         if (gr) {
           const group = gr.getAttribute('group');
@@ -5796,7 +6099,7 @@ function main() {
           }
         }
       },
-      init: function() {
+      init: function () {
         // create stylesheet
         this.createCSS();
 
@@ -5935,12 +6238,14 @@ function main() {
                                                           .on('click', DRMng.Engine.changeServer))
                                   .data(new DomNode('div').attr({ id: 'DRMng_status' })
                                                           .text('DRMng Loading...'))
-                                  .data(new DomNode('div').attr({ id: 'DRMng_onoff', class: 'hidden' })
+                                  .data(new DomNode('div').attr({
+                                                                  id: 'DRMng_onoff',
+                                                                  class: 'hidden'
+                                                                })
                                                           .data(new DomNode('div').text('\uf1cc'))
                                                           .on('click', () => {
                                                             clearTimeout(DRMng.UI.hideUITimeout);
-                                                            const el = document.getElementById(
-                                                              'DRMng_main');
+                                                            const el = document.getElementById('DRMng_main');
                                                             if (el.className === 'hidden') {
                                                               el.removeAttribute('class');
                                                               new DomNode('#DRMng_onoff').remove('class');
@@ -5962,17 +6267,15 @@ function main() {
         this.loadOptions();
       }
     },
-    postMessage: function(data) {
-      document.dispatchEvent(
-        new MessageEvent('DRMng.xhrReq', {
-          origin: `${document.location.protocol}//${document.location.hostname}`,
-          lastEventId: 0,
-          source: window,
-          data: JSON.stringify(data)
-        })
-      );
+    postMessage: function (data) {
+      document.dispatchEvent(new MessageEvent('DRMng.xhrReq', {
+        origin: `${document.location.protocol}//${document.location.hostname}`,
+        lastEventId: 0,
+        source: window,
+        data: JSON.stringify(data)
+      }));
     },
-    postGameMessage: function(type, data = '') {
+    postGameMessage: function (type, data = '') {
       const game = document.getElementById('gameiframe');
       if (game) {
         type = `DRMng.${type}`;
@@ -5981,7 +6284,7 @@ function main() {
         game.contentWindow.postMessage(type, 'https://dotd-web1.5thplanetgames.com');
       }
     },
-    init: function() {
+    init: function () {
 
       // load localStorage
       Config.load();
@@ -6014,9 +6317,10 @@ function main() {
   // include socket.io engine
   new DomNode('script')
     .attr({
-      type: 'text/javascript', async: '',
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
-    })
+            type: 'text/javascript',
+            async: '',
+            src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
+          })
     .attach('to', document.head);
 
   DRMng.init();
@@ -6097,10 +6401,9 @@ function load() {
         flashvars: Object.keys(vars).reduce((a, v) => `${a}&${v}=${encodeURIComponent(vars[v])}`, '')
       };
     },
-    createSwf: function(data, id, width, height) {
+    createSwf: function (data, id, width, height) {
       const swf = document.getElementById(id);
-      if (swf) swf.setAttribute('data', data);
-      else {
+      if (swf) swf.setAttribute('data', data); else {
         const div = document.createElement('div');
         const obj = document.createElement('object');
         const param = this.getParamObject();
@@ -6125,7 +6428,7 @@ function load() {
         obj.style.visibility = 'visible';
       }
     },
-    applyChatSettings: function() {
+    applyChatSettings: function () {
       const swfDiv = document.getElementById('swfdiv');
       const chatDiv = document.getElementById('chatdiv');
       if (this.config.removeWChat) {
@@ -6135,37 +6438,31 @@ function load() {
           remDiv.parentNode.removeChild(remDiv);
         }
       } else if (this.config.leftWChat && !this.config.hideWChat) {
-        if (chatDiv) chatDiv.parentNode.style.left = '0';
-        else {
+        if (chatDiv) chatDiv.parentNode.style.left = '0'; else {
           setTimeout(this.reloadChat.bind(this), 0);
           return;
         }
         if (swfDiv) swfDiv.parentNode.style.left = '265px';
       } else {
-        if (chatDiv) chatDiv.parentNode.style.left = '760px';
-        else {
+        if (chatDiv) chatDiv.parentNode.style.left = '760px'; else {
           setTimeout(this.reloadChat.bind(this), 0);
           return;
         }
         if (swfDiv) swfDiv.parentNode.style.left = '0';
       }
     },
-    reloadChat: function() {
-      if (this.config.version.chat)
-        this.createSwf(
-          'https://content.5thplanetgames.com/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf',
-          'chatdiv', '265', '690'
-        );
+    reloadChat: function () {
+      if (this.config.version.chat) this.createSwf(
+        'https://content.5thplanetgames.com/dotd_live/chat/' + this.config.version.chat + '/chatclient.swf', 'chatdiv',
+        '265', '690');
       setTimeout(this.applyChatSettings.bind(this), 100);
     },
-    reloadGame: function() {
-      if (this.config.version.game)
-        this.createSwf(
-          'https://content.5thplanetgames.com/dotd_live/swf/' + this.config.version.game + '/dotd.swf',
-          'swfdiv', '760', '690'
-        );
+    reloadGame: function () {
+      if (this.config.version.game) this.createSwf(
+        'https://content.5thplanetgames.com/dotd_live/swf/' + this.config.version.game + '/dotd.swf', 'swfdiv', '760',
+        '690');
     },
-    init: function() {
+    init: function () {
       const swfDiv = document.getElementById('swfdiv');
       const chatDiv = document.getElementById('chatdiv');
       this.load();
@@ -6180,14 +6477,11 @@ function load() {
           this.config.user.auth = data.kongregate_game_auth_token;
           this.config.user.version = data.kongregate_game_version;
         }
-        console.log('%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>',
-          'color: #108030', this.config.version.game, this.config.version.chat,
-          this.config.user.name, this.config.user.id
-        );
+        console.log('%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>', 'color: #108030',
+                    this.config.version.game, this.config.version.chat, this.config.user.name, this.config.user.id);
         this.save();
         this.applyChatSettings();
-      } else if (this.counter++ < 5) setTimeout(this.init.bind(this), 200);
-      else {
+      } else if (this.counter++ < 5) setTimeout(this.init.bind(this), 200); else {
         this.reloadGame();
         this.reloadChat();
         console.warn('[DRMng] Game is probably in maintenance mode, generated missing data to fire up chat');
@@ -6232,7 +6526,7 @@ if (window.location.host === 'www.kongregate.com') {
   if (window.top === window.self) {
     document.addEventListener('DRMng.xhrReq', param => {
       const p = JSON.parse(param.data);
-      p.callback = function(e, r) {
+      p.callback = function (e, r) {
         delete this.onload;
         delete this.onerror;
         delete this.ontimeout;

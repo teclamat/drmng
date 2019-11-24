@@ -331,9 +331,9 @@ function main() {
         if (s.empty) {
           s = new DomNode('style')
             .attr({
-                    type: 'text/css',
-                    id: id
-                  })
+              type: 'text/css',
+              id: id
+            })
             .attach('to', document.head);
         }
         s.text(content, true);
@@ -369,7 +369,7 @@ function main() {
         const paramEnd = query.indexOf('&', paramBegin);
         value =
           paramEnd < 0 ? query.slice(paramBegin + parameter.length + 1) : query.slice(paramBegin + parameter.length + 1,
-                                                                                      paramEnd);
+            paramEnd);
       }
       return value;
     }
@@ -956,10 +956,10 @@ function main() {
         }
         if (img && c) {
           i.on('load', () => {
-             setTimeout(() => PrivateChat.getChat(c).scrollToBottom(), 250);
-           })
-           .attr({ src: img })
-           .remove('id');
+            setTimeout(() => PrivateChat.getChat(c).scrollToBottom(), 250);
+          })
+            .attr({ src: img })
+            .remove('id');
         } else {
           i.detach();
         }
@@ -1370,16 +1370,16 @@ function main() {
         if (this.classes.main.length > 0) p.attr({ class: this.classes.main.join(' ') });
         // Time field + raid link
         new DomNode('span').attr({ class: 'timestamp' }).text(this.time)
-                           .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
-                           .attach('to', p);
+          .data(this.raid ? new DomNode('span').data(this.raid.link) : null)
+          .attach('to', p);
         // Extra raid data field
         if (this.raid && this.raid.extra) this.raid.extra.attach('to', p);
         // User field
         new DomNode('span')
           .attr({
-                  username: this.user,
-                  class: this.classes.msg.join(' ')
-                })
+            username: this.user,
+            class: this.classes.msg.join(' ')
+          })
           .text(this.prefix + this.user).attach('to', p);
         // IGN field
         if (this.gameName) {
@@ -1394,10 +1394,10 @@ function main() {
         p.attach('to', this.body);
       } else {
         new DomNode('div').attr({
-                                  class: 'script' + this.addClass,
-                                  style: this.addStyle
-                                })
-                          .data(this.message).attach('to', this.body);
+          class: 'script' + this.addClass,
+          style: this.addStyle
+        })
+          .data(this.message).attach('to', this.body);
       }
 
       return this.body.node;
@@ -1434,16 +1434,16 @@ function main() {
 
         link: new DomNode('a')
           .attr({
-                  href: match[2].replace(/&amp;/g, '&'),
-                  data: JSON.stringify(raid)
-                })
+            href: match[2].replace(/&amp;/g, '&'),
+            data: JSON.stringify(raid)
+          })
           .on('click', DRMng.Raids.joinClick)
           .text(`${diff} ${name}`.toUpperCase()),
 
         extra: new DomNode('span')
           .attr({ class: 'extraid' })
-          .text(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') : `AP ${Util.getShortNumK(
-            info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
+          .text(info ? (info.isEvent ? (info.isGuild ? 'Guild ER' : 'WR/ER') :
+            `AP ${Util.getShortNumK(info.hp[raid.diff - 1] * 1000 / info.maxPlayers / 2)}`) : '')
       };
 
       if (this.room === 'none' || this.type !== ChatMessage.Type.game) {
@@ -1574,7 +1574,7 @@ function main() {
 
     get ready() {
       return (typeof io === 'function') && this.tab && this.chat && UserManager.user.qualified &&
-             !DRMng.Raids.bootstrap;
+        !DRMng.Raids.bootstrap;
     }
 
     configUpdate(conf) {
@@ -2054,11 +2054,11 @@ function main() {
         this.serviceMessage(data.txt);
       } else if (!this.messageLock || history) {
         let u = UserManager.user,
-            t = data.type,
-            e = ['username', 'truncate'],
-            f = data.usr.usr === u.name,
-            h = ['', 'From ', 'To ', ''][t],
-            g = [];
+          t = data.type,
+          e = ['username', 'truncate'],
+          f = data.usr.usr === u.name,
+          h = ['', 'From ', 'To ', ''][t],
+          g = [];
 
         e.push('chat_message_window' + (c ? '_undecorated' : '') + '_username');
         h && g.push('whisper');
@@ -2089,16 +2089,16 @@ function main() {
             reg.lastIndex += link.length - l[1].length;
           }
           content = PrivateChat.getMessageHTML({
-                                                 mainCls: g.join(' '),
-                                                 ts: new Date(data.ts).format('mmm d, HH:MM'),
-                                                 pfx: h,
-                                                 user: data.usr.usr,
-                                                 userCls: e.join(' '),
-                                                 ign: data.usr.ign || '',
-                                                 ignCls: data.usr.ign ? 'guildname truncate' : '',
-                                                 tag: PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
-                                                 msg: msg
-                                               });
+            mainCls: g.join(' '),
+            ts: new Date(data.ts).format('mmm d, HH:MM'),
+            pfx: h,
+            user: data.usr.usr,
+            userCls: e.join(' '),
+            ign: data.usr.ign || '',
+            ignCls: data.usr.ign ? 'guildname truncate' : '',
+            tag: PrivateChat.getGuildTag(t === 2 ? u.guild : data.usr.gld),
+            msg: msg
+          });
         }
         const msg = document.createElement('div');
         msg.setAttribute('class', 'chat-message');
@@ -2159,10 +2159,10 @@ function main() {
         // Username
         new DomNode('span')
           .attr({
-                  class: d.userCls,
-                  username: d.user,
-                  ign: d.ign
-                })
+            class: d.userCls,
+            username: d.user,
+            ign: d.ign
+          })
           .text((d.pfx || '') + d.user).attach('to', hdr);
         // IGN
         new DomNode('span')
@@ -2325,13 +2325,13 @@ function main() {
       } else {
         new DomNode('div')
           .attr({
-                  class: 'buttonStripe',
-                  id: id
-                })
+            class: 'buttonStripe',
+            id: id
+          })
           .data(new DomNode('span').text(room.name))
           .data(new DomNode('button')
-                  .attr({ class: 'l' }).text('Del')
-                  .on('click', () => this.removeChat(id)))
+            .attr({ class: 'l' }).text('Del')
+            .on('click', () => this.removeChat(id)))
           .attach('to', 'DRMng_privateChat');
       }
     }
@@ -2445,18 +2445,18 @@ function main() {
       new DomNode('li')
         .attr({ class: 'spritegame' })
         .style({
-                 'background-position': '0 -280px',
-                 'cursor': 'pointer'
-               })
+          'background-position': '0 -280px',
+          'cursor': 'pointer'
+        })
         .html(`<a onclick="DRMng.postGameMessage('gameReload');">Reload Game</a>`, true)
         .attach('to', 'quicklinks');
 
       new DomNode('li')
         .attr({ class: 'spritegame' })
         .style({
-                 'background-position': '0 -280px',
-                 'cursor': 'pointer'
-               })
+          'background-position': '0 -280px',
+          'cursor': 'pointer'
+        })
         .html(`<a onclick="DRMng.postGameMessage('chatReload');">Reload Chat</a>`, true)
         .attach('to', 'quicklinks');
     }
@@ -2471,12 +2471,12 @@ function main() {
       if (document.getElementById('DRMng_header')) {
         new DomNode('li')
           .data(new DomNode('a')
-                  .attr({
-                          id: 'DRMng_KongSlimHeader',
-                          href: ''
-                        })
-                  .text(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
-                  .on('click', this.handleSlimButtonClick))
+            .attr({
+              id: 'DRMng_KongSlimHeader',
+              href: ''
+            })
+            .text(Config.data.kong.kongSlimHeader ? 'Full' : 'Slim')
+            .on('click', this.handleSlimButtonClick))
           .attach('to', 'nav_welcome_box');
       } else {
         setTimeout(() => this.addSlimButton(), 1000);
@@ -2607,8 +2607,8 @@ function main() {
         ChatDialogue.prototype.receivedPrivateMessage = function (a) {
           if (a.data.success) {
             this.displayUnsanitizedMessage(a.data.from,
-                                           `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
-                                           { class: 'whisper received_whisper' }, { whisper: true });
+              `${a.data.message} &nbsp;<a class="reply_link" onclick="holodeck.insertPrivateMessagePrefixFor('${a.data.from}');return false;" href="#">(reply)</a>`,
+              { class: 'whisper received_whisper' }, { whisper: true });
           } else {
             this.serviceMessage(`${a.data.to} cannot be reached. Please try again later.`);
           }
@@ -2626,7 +2626,7 @@ function main() {
           holodeck.scheduleRender(() => {
             if (opts && opts.timestamp) {
               const newer = Array.from(chat.querySelectorAll('div > p'))
-                                 .filter(node => node.getAttribute('timestamp') > opts.timestamp);
+                .filter(node => node.getAttribute('timestamp') > opts.timestamp);
 
               if (newer.length > 0) {
                 chat.insertBefore(msg, newer[0].parentNode);
@@ -2730,24 +2730,24 @@ function main() {
           }
           if (b.kuid === '0') {
             this._holodeckEventDispatcher.fire({
-                                                 type: KonduitEvent.SYSTEM_MESSAGE,
-                                                 data: {
-                                                   data: b.data,
-                                                   timestamp: b.timestamp * 1000,
-                                                   room: a
-                                                 }
-                                               });
+              type: KonduitEvent.SYSTEM_MESSAGE,
+              data: {
+                data: b.data,
+                timestamp: b.timestamp * 1000,
+                room: a
+              }
+            });
           } else {
             this._holodeckEventDispatcher.fire({
-                                                 type: KonduitEvent.ROOM_MESSAGE,
-                                                 data: {
-                                                   history: b.history,
-                                                   message: b.text,
-                                                   timestamp: b.timestamp * 1000,
-                                                   room: a,
-                                                   user: FayeUserTransformer.transformUser(b)
-                                                 }
-                                               });
+              type: KonduitEvent.ROOM_MESSAGE,
+              data: {
+                history: b.history,
+                message: b.text,
+                timestamp: b.timestamp * 1000,
+                room: a,
+                user: FayeUserTransformer.transformUser(b)
+              }
+            });
           }
         };
         Log.debug('{Kong::FayeEventDispatcher} Patched');
@@ -2846,8 +2846,8 @@ function main() {
       if (chat && input) {
         const command = Util.capitalize(input[1]);
         const gesture = Gestures[command].generate()
-                                         .replace('@from', UserManager.user.name)
-                                         .replace('@who', input[2]);
+          .replace('@from', UserManager.user.name)
+          .replace('@who', input[2]);
         const gestureText = `** ${gesture} **`;
 
         if (chat instanceof Holodeck) {
@@ -2874,174 +2874,30 @@ function main() {
       }
 
       const PERC_DROPS = [
-        {
-          val: 1,
-          drop: {
-            color: ['Brown', 'Grey'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 4000,
-          drop: {
-            color: ['Brown', 'Grey', 'Green'],
-            perc: [33, 34, 33]
-          }
-        },
-        {
-          val: 6000,
-          drop: {
-            color: ['Grey', 'Green'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 10000,
-          drop: {
-            color: ['Grey', 'Green', 'Blue'],
-            perc: [33, 34, 33]
-          }
-        },
-        {
-          val: 14000,
-          drop: {
-            color: ['Green', 'Blue'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 16000,
-          drop: {
-            color: ['Green', 'Blue', 'Purple'],
-            perc: [33, 34, 33]
-          }
-        },
-        {
-          val: 18000,
-          drop: {
-            color: ['Blue', 'Purple'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 22000,
-          drop: {
-            color: ['Blue', 'Purple', 'Orange'],
-            perc: [33, 34, 33]
-          }
-        },
-        {
-          val: 24000,
-          drop: {
-            color: ['Purple', 'Orange'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 30000,
-          drop: {
-            color: ['Orange'],
-            perc: [100]
-          }
-        },
-        {
-          val: 33000,
-          drop: {
-            color: ['Orange', 'Red'],
-            perc: [75, 25]
-          }
-        },
-        {
-          val: 36000,
-          drop: {
-            color: ['Orange', 'Red'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 50000,
-          drop: {
-            color: ['Orange', 'Red'],
-            perc: [25, 75]
-          }
-        },
-        {
-          val: 70000,
-          drop: {
-            color: ['Red'],
-            perc: [100]
-          }
-        },
-        {
-          val: 80000,
-          drop: {
-            color: ['Red', 'Bronze'],
-            perc: [75, 25]
-          }
-        },
-        {
-          val: 90000,
-          drop: {
-            color: ['Red', 'Bronze'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 100000,
-          drop: {
-            color: ['Red', 'Bronze'],
-            perc: [25, 75]
-          }
-        },
-        {
-          val: 110000,
-          drop: {
-            color: ['Bronze', 'Silver'],
-            perc: [75, 25]
-          }
-        },
-        {
-          val: 120000,
-          drop: {
-            color: ['Bronze', 'Silver'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 130000,
-          drop: {
-            color: ['Bronze', 'Silver'],
-            perc: [25, 75]
-          }
-        },
-        {
-          val: 140000,
-          drop: {
-            color: ['Silver'],
-            perc: [100]
-          }
-        },
-        {
-          val: 150000,
-          drop: {
-            color: ['Silver', 'Gold'],
-            perc: [75, 25]
-          }
-        },
-        {
-          val: 160000,
-          drop: {
-            color: ['Silver', 'Gold'],
-            perc: [50, 50]
-          }
-        },
-        {
-          val: 170000,
-          drop: {
-            color: ['Silver', 'Gold'],
-            perc: [25, 75]
-          }
-        }
+        { val: 1, drop: { color: ['Brown', 'Grey'], perc: [50, 50] } },
+        { val: 4000, drop: { color: ['Brown', 'Grey', 'Green'], perc: [33, 34, 33] } },
+        { val: 6000, drop: { color: ['Grey', 'Green'], perc: [50, 50] } },
+        { val: 10000, drop: { color: ['Grey', 'Green', 'Blue'], perc: [33, 34, 33] } },
+        { val: 14000, drop: { color: ['Green', 'Blue'], perc: [50, 50] } },
+        { val: 16000, drop: { color: ['Green', 'Blue', 'Purple'], perc: [33, 34, 33] } },
+        { val: 18000, drop: { color: ['Blue', 'Purple'], perc: [50, 50] } },
+        { val: 22000, drop: { color: ['Blue', 'Purple', 'Orange'], perc: [33, 34, 33] } },
+        { val: 24000, drop: { color: ['Purple', 'Orange'], perc: [50, 50] } },
+        { val: 30000, drop: { color: ['Orange'], perc: [100] } },
+        { val: 33000, drop: { color: ['Orange', 'Red'], perc: [75, 25] } },
+        { val: 36000, drop: { color: ['Orange', 'Red'], perc: [50, 50] } },
+        { val: 50000, drop: { color: ['Orange', 'Red'], perc: [25, 75] } },
+        { val: 70000, drop: { color: ['Red'], perc: [100] } },
+        { val: 80000, drop: { color: ['Red', 'Bronze'], perc: [75, 25] } },
+        { val: 90000, drop: { color: ['Red', 'Bronze'], perc: [50, 50] } },
+        { val: 100000, drop: { color: ['Red', 'Bronze'], perc: [25, 75] } },
+        { val: 110000, drop: { color: ['Bronze', 'Silver'], perc: [75, 25] } },
+        { val: 120000, drop: { color: ['Bronze', 'Silver'], perc: [50, 50] } },
+        { val: 130000, drop: { color: ['Bronze', 'Silver'], perc: [25, 75] } },
+        { val: 140000, drop: { color: ['Silver'], perc: [100] } },
+        { val: 150000, drop: { color: ['Silver', 'Gold'], perc: [75, 25] } },
+        { val: 160000, drop: { color: ['Silver', 'Gold'], perc: [50, 50] } },
+        { val: 170000, drop: { color: ['Silver', 'Gold'], perc: [25, 75] } }
       ];
 
       const COLORS = {
@@ -3059,11 +2915,7 @@ function main() {
 
       const table = new DomNode('table')
         .attr({ 'cellspacing': '0' })
-        .style({
-                 'width': '100%',
-                 'font-weight': '300',
-                 'font-size': '10px'
-               });
+        .style({ 'width': '100%', 'font-weight': '300', 'font-size': '10px' });
 
       const lastElement = PERC_DROPS.length - 1;
 
@@ -3073,22 +2925,18 @@ function main() {
 
           new DomNode('td')
             .style({
-                     'background': '#303030',
-                     'border-right': '1px solid #000000',
-                     'border-bottom': '1px solid #000000',
-                     'padding-right': '5px',
-                     'text-align': 'right',
-                     'width': '30px'
-                   })
+              'background': '#303030',
+              'border-right': '1px solid #000000',
+              'border-bottom': '1px solid #000000',
+              'padding-right': '5px',
+              'text-align': 'right',
+              'width': '30px'
+            })
             .text(data.val > 1000 ? `${data.val / 1000}k` : `${data.val}`)
             .attach('to', row);
 
           const cell = new DomNode('td')
-            .style({
-                     'border-bottom': '1px solid #000000',
-                     'border-right': '1px solid #000000',
-                     'width': '80%'
-                   })
+            .style({ 'border-bottom': '1px solid #000000', 'border-right': '1px solid #000000', 'width': '80%' })
             .attach('to', row);
 
           const drop = data.drop;
@@ -3096,10 +2944,10 @@ function main() {
           for (let i = 0; i < drop.color.length; ++i) {
             new DomNode('span')
               .style({
-                       'width': `${drop.perc[i]}%`,
-                       'background-color': COLORS[drop.color[i]],
-                       'display': 'inline-block'
-                     })
+                'width': `${drop.perc[i]}%`,
+                'background-color': COLORS[drop.color[i]],
+                'display': 'inline-block'
+              })
               .text(drop.color[i])
               .attach('to', cell);
           }
@@ -3196,8 +3044,8 @@ function main() {
         });
 
         if (raidsFound.length > 1) {
-          message = raidsFound.reduce(
-            (msg, raid) => `${msg}<br><span class="DRMng_info_picker ${raid[0]}">${raid[1]} (${raid[0]})</span>`,
+          message = raidsFound.reduce((msg, raid) =>
+            `${msg}<br><span class="DRMng_info_picker ${raid[0]}">${raid[1]} (${raid[0]})</span>`,
             'Multiple results found, pick one:');
         } else if (raidsFound.length === 1) {
           message = DRMng.UI.raidInfo(raidsFound[0][0]);
@@ -3314,19 +3162,19 @@ function main() {
       // Open Sans font used by scripts theme
       new DomNode('link')
         .attr({
-                href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
-                rel: 'stylesheet'
-              })
+          href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
+          rel: 'stylesheet'
+        })
         .attach('to', document.head);
 
       // Kong theme
       new DomNode('link')
         .attr({
-                id: 'DRMng_kongCSS',
-                href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css', //href:
-                                                                                     // 'https://mutikt.ml/kong_dark.css',
-                rel: 'stylesheet'
-              })
+          id: 'DRMng_kongCSS',
+          href: 'https://cdn.jsdelivr.net/gh/mutik/drmng@2.2.1/kong_dark.css', //href:
+          // 'https://mutikt.ml/kong_dark.css',
+          rel: 'stylesheet'
+        })
         .on('load', () => this.setHeaderWidth())
         .attach('to', document.head);
 
@@ -3358,7 +3206,7 @@ function main() {
        */
       static get versionHtml() {
         return `<b>${this.name}</b><br>version: <b>${this.version}</b><br>` +
-               '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
+          '<a href="https://cdn.jsdelivr.net/gh/mutik/drmng@2/kong_ng.user.js">click me to update</a>';
       }
     }, // TODO: Remove when new one's ready
     hResize: {
@@ -3597,7 +3445,7 @@ function main() {
           if (u.qualified) {
             const authData = `kongregate_user_id=${u.ID}&kongregate_game_auth_token=${u.authToken}`;
             const raidData = `&kv_raid_id=${r.id}&kv_hash=${r.hash}&serverid=${r.sid || (Config.server ===
-                                                                                         'Elyssa' ? '1' : '2')}`;
+              'Elyssa' ? '1' : '2')}`;
             const data = {
               eventName: `DRMng.joinRaid${multi ? 's' : ''}`,
               url: `https://dotd-web1.5thplanetgames.com/kong/raidjoin.php?${authData}${raidData}`,
@@ -3632,10 +3480,10 @@ function main() {
         }
         // chat raids
         let cr = document.querySelectorAll('p.raid:not(.dead):not(.visited) a'),
-            s  = Config.data.server.toLowerCase(),
-            f  = Config.data.filterRaids[s],
-            r,
-            hf;
+          s = Config.data.server.toLowerCase(),
+          f = Config.data.filterRaids[s],
+          r,
+          hf;
         for (i = 0, l = cr.length; i < l; ++i) {
           r = Util.getRaidFromUrl(cr[i].search);
           if (r) {
@@ -3732,6 +3580,7 @@ function main() {
           status = ['Unknown', 'Success', 'Dead', 'Already in', 'Wrong Guild', 'Invalid'][status];
           name = name ? name.sName : data.ext.boss;
           DRMng.Raids.joinMsg(`Joining ${name} :: ${status}`);
+          Config.save();
           setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 0);
         }
       },
@@ -3752,6 +3601,7 @@ function main() {
           setTimeout(DRMng.Raids.join.bind(DRMng.Raids, r, true), 0);
         } else if (DRMng.Raids.joined === DRMng.Raids.joinLen) {
           DRMng.Raids.isJoining = false;
+          Config.save();
           setTimeout(DRMng.Raids.prepareJoining.bind(DRMng.Raids), 0);
         }
       },
@@ -3814,7 +3664,7 @@ function main() {
               reg = new RegExp(p[2], 'ig');
               diff = this.getDiff(p[3]);
               Object.keys(raids)
-                    .forEach(r => `${r} ${raids[r].sName}`.search(reg) > -1 && flt[mode].raid.push([r, diff]));
+                .forEach(r => `${r} ${raids[r].sName}`.search(reg) > -1 && flt[mode].raid.push([r, diff]));
               break;
           }
         });
@@ -4146,7 +3996,7 @@ function main() {
           setTimeout(DRMng.Engine.init, 1000);
         }
       },
-      handleMessage: msg => Log.info(`{Engine::Message} ${msg.txt}`),
+      handleMessage: message => Log.info(`{Engine::Message} ${message.txt}`),
       handleService: d => {
         if (!d) return;
         const config = Config.data;
@@ -4157,7 +4007,7 @@ function main() {
           case 'raidData':
             if (config.checkSums.raidData !== data.raidDataHash && data.raidDataHash.length > 6) {
               Log.info('{Engine::Service} New raids data. Old hash ' +
-                       `<${config.checkSums.raidData}> | New hash <${data.raidDataHash}>`);
+                `<${config.checkSums.raidData}> | New hash <${data.raidDataHash}>`);
               config.raidData = data.raidData;
               config.checkSums.raidData = data.raidDataHash;
             }
@@ -4166,7 +4016,7 @@ function main() {
           case 'filterData':
             if (config.checkSums.filterData !== data.filterDataHash && data.filterDataHash.length > 6) {
               Log.info('{Engine::Service} New keywords data. Old hash ' +
-                       `<${config.checkSums.filterData}> | New hash <${data.filterDataHash}>`);
+                `<${config.checkSums.filterData}> | New hash <${data.filterDataHash}>`);
               config.filterData = data.filterData;
               config.checkSums.filterData = data.filterDataHash;
             }
@@ -4174,7 +4024,7 @@ function main() {
           case 'tiersData':
             if (config.checkSums.tiersData !== d.data.tiersDataHash && d.data.tiersDataHash.length > 6) {
               Log.info('{Engine::Service} New tiers data. Old hash <%s> | New hash <%s>', config.checkSums.tiersData,
-                       data.tiersDataHash);
+                data.tiersDataHash);
               config.tiersData = JSON.parse(data.tiersData);
               config.checkSums.tiersData = data.tiersDataHash;
             }
@@ -4318,8 +4168,8 @@ function main() {
           if (_desc) {
             let descField = document.createElement('div');
             descField.setAttribute('style', 'border-top: 1px solid #404040; background-color:' +
-                                            ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
-                                            ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
+              ' #505050; padding: 3px 6px; border-left: 0; font-size: 10px; font-style:' +
+              ' italic; max-height: 45px; overflow: hidden; color: #fff; font-weight: 300;');
             descField.innerHTML = '' + _desc;
             optionDiv.appendChild(descField);
           }
@@ -4345,15 +4195,15 @@ function main() {
               el.parentNode.insertBefore(el, el.previousSibling);
             }))
             .data(new DomNode('input').attr({
-                                              type: 'text',
-                                              value: btn.name,
-                                              class: 'inp_fld'
-                                            }))
+              type: 'text',
+              value: btn.name,
+              class: 'inp_fld'
+            }))
             .data(new DomNode('input').attr({
-                                              type: 'text',
-                                              value: btn.command,
-                                              class: 'inp_cmd'
-                                            }))
+              type: 'text',
+              value: btn.command,
+              class: 'inp_cmd'
+            }))
             .data(new DomNode('span').attr({ class: 'red' }).text('\uf270').on('click', e => {
               const el = e.target.parentNode;
               el.parentNode.removeChild(el);
@@ -4364,30 +4214,30 @@ function main() {
           const el = new DomNode('div')
             .attr({ class: 'drmng_config_sb' })
             .data(new DomNode('div')
-                    .data(new DomNode('span').text('\uf2f9').on('click', e => {
-                      const el = e.target.parentNode.parentNode;
-                      el.parentNode.insertBefore(el.nextSibling, el);
-                    }))
-                    .data(new DomNode('span').text('\uf2fc').on('click', e => {
-                      const el = e.target.parentNode.parentNode;
-                      el.parentNode.insertBefore(el, el.previousSibling);
-                    }))
-                    .data(new DomNode('input').attr({
-                                                      type: 'text',
-                                                      value: grp.name,
-                                                      class: 'inp_grp'
-                                                    }))
-                    .data(new DomNode('span').attr({ class: 'del_grp red' }).text('\uf272')
-                                             .on('click', e => {
-                                               const el = e.target.parentNode.parentNode;
-                                               el.parentNode.removeChild(el);
-                                             }))
-                    .data(new DomNode('span').attr({ class: 'add_grp' }).text('\uf277')
-                                             .on('click', e => this.makeSbGroup()
-                                                                   .attach('before', e.target.parentNode.parentNode)))
-                    .data(new DomNode('span').text('\uf275')
-                                             .on('click', e => this.makeSbButton()
-                                                                   .attach('to', e.target.parentNode.parentNode))));
+              .data(new DomNode('span').text('\uf2f9').on('click', e => {
+                const el = e.target.parentNode.parentNode;
+                el.parentNode.insertBefore(el.nextSibling, el);
+              }))
+              .data(new DomNode('span').text('\uf2fc').on('click', e => {
+                const el = e.target.parentNode.parentNode;
+                el.parentNode.insertBefore(el, el.previousSibling);
+              }))
+              .data(new DomNode('input').attr({
+                type: 'text',
+                value: grp.name,
+                class: 'inp_grp'
+              }))
+              .data(new DomNode('span').attr({ class: 'del_grp red' }).text('\uf272')
+                .on('click', e => {
+                  const el = e.target.parentNode.parentNode;
+                  el.parentNode.removeChild(el);
+                }))
+              .data(new DomNode('span').attr({ class: 'add_grp' }).text('\uf277')
+                .on('click', e => this.makeSbGroup()
+                  .attach('before', e.target.parentNode.parentNode)))
+              .data(new DomNode('span').text('\uf275')
+                .on('click', e => this.makeSbButton()
+                  .attach('to', e.target.parentNode.parentNode))));
           if (grp.buttons) grp.buttons.forEach(btn => el.data(this.makeSbButton(btn))); else el.data(
             this.makeSbButton());
           return el;
@@ -4510,9 +4360,9 @@ function main() {
         // main elem
         const raidElement = new DomNode('div')
           .attr({
-                  id: `DRMng_${r.id}`,
-                  class: cls.join(' ')
-                })
+            id: `DRMng_${r.id}`,
+            class: cls.join(' ')
+          })
           .data(new DomNode('span').text(raidInfo ? raidInfo.sName : r.boss.replace(/_/g, ' ')))
           .data(new DomNode('span').text(hp))
           .on('mouseenter', DRMng.UI.infoEvent);
@@ -4543,7 +4393,7 @@ function main() {
         if (!msg && (!this.statusTimer || this.statusTimer.timeLeft <= 0)) {
           if (DRMng.Raids.joinLen > 0) status.textContent =
             DRMng.Raids.count + ' raids, ' + DRMng.Raids.joinLen + ' selected'; else status.textContent =
-            DRMng.Raids.count + ' raids in list';
+              DRMng.Raids.count + ' raids in list';
           this.statusTimer = null;
         } else if (msg) {
           status.innerText = msg;
@@ -5304,9 +5154,9 @@ function main() {
             if (flt[k] === undefined) flt[k] = new Array(4).fill(false);
             const el = new DomNode('div')
               .attr({
-                      class: 'buttonStripe',
-                      id: `DRMng_filter_${k}`
-                    })
+                class: 'buttonStripe',
+                id: `DRMng_filter_${k}`
+              })
               .data(new DomNode('span').text(r.fName))
               .on('click', DRMng.UI.applyFilter)
               .attach('to', fltDivs[r.isGuild ? 5 : r.size]);
@@ -5374,7 +5224,7 @@ function main() {
       },
       sidebarLabelOpen: e => {
         document.querySelectorAll('#DRMng_Sidebar > div.label:not(.hidden)')
-                .forEach(lbl => lbl.className += ' hidden');
+          .forEach(lbl => lbl.className += ' hidden');
         e.target.className = 'label';
       },
       setupSidebarButton: button => {
@@ -5487,54 +5337,54 @@ function main() {
 
         opt = new this.Option();
         opt.setup('kongui_stickyHeader', 'Sticky header', 'bool', true)
-           .desc('Makes top header always visible on screen.')
-           .event(function () {
-             if (this.conf[this.field]) {
-               new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
-               Css.del(this.field);
-               Css.del(this.field + 'b');
-             } else {
-               new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
-               Css.add(this.field, 'div#headerwrap', 'width: 100% !important');
-               Css.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
-             }
-           })
-           .make(group);
+          .desc('Makes top header always visible on screen.')
+          .event(function () {
+            if (this.conf[this.field]) {
+              new DomNode('#headerwrap').detach().attach('before', 'primarywrap');
+              Css.del(this.field);
+              Css.del(this.field + 'b');
+            } else {
+              new DomNode('#headerwrap').detach().attach('before', 'tr8n_language_selector_trigger');
+              Css.add(this.field, 'div#headerwrap', 'width: 100% !important');
+              Css.add(this.field + 'b', 'div#primarywrap', 'height: 100% !important');
+            }
+          })
+          .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideToolbar', 'Hide game toolbar', 'bool', false)
-           .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, 'table.game_table > tbody > tr:first-child',
-                                                'display: none'); else Css.del(this.field);
-           })
-           .make(group);
+          .desc('Hides toolbar located above game window (cinematic mode, rating, etc).')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, 'table.game_table > tbody > tr:first-child',
+              'display: none'); else Css.del(this.field);
+          })
+          .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideFrame', 'Hide game frame', 'bool', false)
-           .desc('Hides 7px wide frame around game window.')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, 'div#maingame', 'padding: 0'); else Css.del(this.field);
-           })
-           .make(group);
+          .desc('Hides 7px wide frame around game window.')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, 'div#maingame', 'padding: 0'); else Css.del(this.field);
+          })
+          .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideGameDetails', 'Hide game details', 'bool', false)
-           .desc('Hides game details part located just below game window.')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, 'div.game_details_outer', 'display: none'); else Css.del(
-               this.field);
-           })
-           .make(group);
+          .desc('Hides game details part located just below game window.')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, 'div.game_details_outer', 'display: none'); else Css.del(
+              this.field);
+          })
+          .make(group);
 
         opt = new this.Option();
         opt.setup('kongui_hideForum', 'Hide forum area', 'bool', true)
-           .desc('Hides forum part located below game window.')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, '#below_fold_content div.game_page_wrap',
-                                                'display: none'); else Css.del(this.field);
-           })
-           .make(group);
+          .desc('Hides forum part located below game window.')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, '#below_fold_content div.game_page_wrap',
+              'display: none'); else Css.del(this.field);
+          })
+          .make(group);
 
         /**
          * RaidsManager UI
@@ -5543,23 +5393,23 @@ function main() {
 
         opt = new this.Option();
         opt.setup('drmui_disableTransitions', 'Disable transitions', 'bool', false)
-           .desc(
-             'Disables animated transitions for various UI elements to improve performance on' + ' low-end hardware.')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
-                                                            ' div#DRMng_info *',
-                                                'transition: initial !important'); else Css.del(this.field);
-           })
-           .make(group);
+          .desc(
+            'Disables animated transitions for various UI elements to improve performance on' + ' low-end hardware.')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_main, div#DRMng_main *, div#DRMng_info,' +
+              ' div#DRMng_info *',
+              'transition: initial !important'); else Css.del(this.field);
+          })
+          .make(group);
 
         opt = new this.Option();
         opt.setup('drmui_hideSideBar', 'Hide sidebar', 'bool', false)
-           .desc('Hides sidebar which is located between game window and kongregate chat.')
-           .event(function () {
-             if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_Sidebar', 'display: none'); else Css.del(
-               this.field);
-           })
-           .make(group);
+          .desc('Hides sidebar which is located between game window and kongregate chat.')
+          .event(function () {
+            if (this.conf[this.field]) Css.add(this.field, 'div#DRMng_Sidebar', 'display: none'); else Css.del(
+              this.field);
+          })
+          .make(group);
 
         /**
          * Alliance UI
@@ -5568,10 +5418,10 @@ function main() {
 
         opt = new this.Option();
         opt.setup('alliance_sbs', 'Side by side', 'bool', false)
-           .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
-                 ' (doubles width taken by chat area).')
-           .event(() => PrivateChat.moveChats())
-           .make(group, true);
+          .desc('Makes alliance chat visible all the time along with regular kongregate chats' +
+            ' (doubles width taken by chat area).')
+          .event(() => PrivateChat.moveChats())
+          .make(group, true);
 
         /**
          * Game frame UI
@@ -5580,27 +5430,27 @@ function main() {
 
         opt = new this.Option();
         opt.setup('gameFrame_removeWChat', 'Disable World Chat', 'bool', false)
-           .desc('Disables World Chat located next to game window.')
-           .event(function () {
-             DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-             Kong.hideWorldChat();
-           })
-           .make(group, true);
+          .desc('Disables World Chat located next to game window.')
+          .event(function () {
+            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
+            Kong.hideWorldChat();
+          })
+          .make(group, true);
 
         opt = new this.Option();
         opt.setup('gameFrame_leftWChat', 'World Chat on left side', 'bool', false)
-           .desc('Moves World Chat to the left side of game window.')
-           .event(DRMng.postGameMessage.bind(this, 'chatSettings', Config.data.gameFrame))
-           .make(group, true);
+          .desc('Moves World Chat to the left side of game window.')
+          .event(DRMng.postGameMessage.bind(this, 'chatSettings', Config.data.gameFrame))
+          .make(group, true);
 
         opt = new this.Option();
         opt.setup('gameFrame_hideWChat', 'Hide World Chat', 'bool', false)
-           .desc('Hides World Chat (without disabling it completely).')
-           .event(function () {
-             DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
-             Kong.hideWorldChat();
-           })
-           .make(group, true);
+          .desc('Hides World Chat (without disabling it completely).')
+          .event(function () {
+            DRMng.postGameMessage('chatSettings', Config.data.gameFrame);
+            Kong.hideWorldChat();
+          })
+          .make(group, true);
 
         group = new this.Group('sidebar', 'Sidebar');
 
@@ -5627,7 +5477,7 @@ function main() {
                   action: 'func'
                 };
                 if (btn.command.indexOf('/') === 0) btn.action = 'chat'; else if (btn.command.indexOf('http') ===
-                                                                                  0) btn.action = 'www';
+                  0) btn.action = 'www';
                 if (i < sb.length - 1) grp.buttons.push(btn); else dat.buttons.push(btn);
               }
               if (i < sb.length - 1) dat.groups.push(grp);
@@ -5713,26 +5563,26 @@ function main() {
               '<tr><td>HP</td>') + '</tr>';
             txt += Diff.reduce(
               (acc, d) => acc + '<td>' + (r.hp[d] ? Util.getShortNumK(r.hp[d] * 1000 / r.maxPlayers, 4) : '&mdash;') +
-                   '</td>', '<tr><td>FS</td>') + '</tr>';
+                '</td>', '<tr><td>FS</td>') + '</tr>';
             txt += '<tr><td>AP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>' + '<td>' +
-                   (r.hp[3] ? Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : '&mdash;') + '</td></tr>';
+              (r.hp[3] ? Util.getShortNumK(r.hp[3] * 1000 / r.maxPlayers / 2, 4) : '&mdash;') + '</td></tr>';
             if (t.nonTiered && t.nonTiered.raids.indexOf(boss) !== -1) {
               rt = t.nonTiered.ratio[r.size][3];
               txt += '<tr><td>OS</td>' + '<td>' +
-                     (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
-                     '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
-                     '</td>' + '<td>' +
-                     (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
-                     '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
-                     '</td></tr>';
+                (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                '</td>' + '<td>' +
+                (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                '</td></tr>';
               rt = t.nonTiered.ratio[r.size][6];
               txt += '<tr><td>MS</td>' + '<td>' +
-                     (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
-                     '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
-                     '</td>' + '<td>' +
-                     (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
-                     '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
-                     '</td></tr>';
+                (r.hp[0] ? Util.getShortNumK(r.hp[0] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                '<td>' + (r.hp[1] ? Util.getShortNumK(r.hp[1] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                '</td>' + '<td>' +
+                (r.hp[2] ? Util.getShortNumK(r.hp[2] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') + '</td>' +
+                '<td>' + (r.hp[3] ? Util.getShortNumK(r.hp[3] * rt * 1000 / r.maxPlayers, 4) : '&mdash;') +
+                '</td></tr>';
             }
             txt += '</table>';
 
@@ -5756,9 +5606,9 @@ function main() {
               // Max Tier
               let idx = t.tiers.length - 1;
               txt += '<tr><td>Max Tier</td><td>' + Util.getShortNumK(t.tiers[idx] * rt * 1000, 4) + '</td>' + '<td>' +
-                     Util.toShortNumber(t.sp[idx]) + '</td>' + '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) +
-                     '</td>' + '<td>' + (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
-                     '</td>';
+                Util.toShortNumber(t.sp[idx]) + '</td>' + '<td>' + (t.tiers[idx] * rt / t.sp[idx]).toPrecision(4) +
+                '</td>' + '<td>' + (t.hasCURE && t.e ? (t.tiers[idx] * rt / t.e[idx]).toPrecision(4) : '&mdash;') +
+                '</td>';
               txt += '</table>';
             }
           }
@@ -5792,8 +5642,8 @@ function main() {
           data.nam = ri.fName;
           // Magic
           data.mag = JSON.parse(rd.magic)
-                         .reduce((a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`,
-                                 '');
+            .reduce((a, v) => `${a}<div class="magic" style="background-position: 0 -${v * 16}px"></div>`,
+              '');
           //data.mag = new Array(ri.numMagics).fill(0).reduce((a,_,i) =>
           //    `${a}<div class="magic" style="background-position: 0 -${rd[`m`+(i+1)]*16}px"></div>`,``);
           // Race
@@ -5813,20 +5663,20 @@ function main() {
 
         // Health text
         data.hpi = `health ${Util.getShortNumK(hpMax * rd.hp, 3)} / ` +
-                   `${Util.getShortNumK(hpMax, 3)} (${Math.ceil(rd.hp * 100)}%)`;
+          `${Util.getShortNumK(hpMax, 3)} (${Math.ceil(rd.hp * 100)}%)`;
 
         // Time text
         data.tmi = `timer ${ri ? `${Math.round(data.ptm * ri.timer)}h / ${ri.timer}h ` : ''}` +
-                   `(${Math.ceil(data.ptm * 100)}%)`;
+          `(${Math.ceil(data.ptm * 100)}%)`;
 
         // Generate info field
         ifo.className = ['', 'n', 'h', 'l', 'nm'][rd.diff];
         ifo.innerHTML = `<div><span class="title">${data.nam}</span>${data.mag}</div><div>${data.rac}</div>` +
-                        `<div class="status">Status: ${data.sta}</div>` +
-                        `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
-                        `<progress class="hp" id="DRMng_progHP" value="${rd.hp}"></progress></div>` +
-                        `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
-                        `<progress class="time" id="DRMng_progTime" value="${data.ptm}"></progress></div>`;
+          `<div class="status">Status: ${data.sta}</div>` +
+          `<div style="text-align: center; margin-top: 1px;"><label for="DRMng_progHP">${data.hpi}</label>` +
+          `<progress class="hp" id="DRMng_progHP" value="${rd.hp}"></progress></div>` +
+          `<div style="text-align: center; margin-top: 2px"><label for="DRMng_progTime">${data.tmi}</label>` +
+          `<progress class="time" id="DRMng_progTime" value="${data.ptm}"></progress></div>`;
       },
       infoEvent: function (e) {
         clearTimeout(DRMng.UI.fillInfoTimeout);
@@ -5942,7 +5792,7 @@ function main() {
 
         // Info box hiding
         new DomNode('#DRMng_RaidList').on('mouseleave',
-                                          () => document.getElementById('DRMng_info').style.display = 'none');
+          () => document.getElementById('DRMng_info').style.display = 'none');
 
         // raids filtering field
         new DomNode('#DRMng_txtFilter')
@@ -6069,11 +5919,11 @@ function main() {
         DRMng.hResize.regPanes.push('chat_container');
         DRMng.hResize.regSide.push(0);
         document.getElementById('chat_container')
-                .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+          .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
         DRMng.hResize.regPanes.push('DRMng_main');
         DRMng.hResize.regSide.push(1);
         document.getElementById('DRMng_main')
-                .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
+          .addEventListener('mousedown', DRMng.hResize.onMouseDown.bind(DRMng.hResize));
       },
       roll: function (elem) {
         const gr = elem ? elem.parentNode : null;
@@ -6225,7 +6075,7 @@ function main() {
                             <div class="" id="DRMng_Options"></div>\
                         </div>\
                     </div>`)
-                          .attach('to', document.body);
+          .attach('to', document.body);
 
         // Info dialog
         new DomNode('div').attr({ id: 'DRMng_info' }).attach('to', document.body);
@@ -6233,29 +6083,29 @@ function main() {
         // Status bar
         new DomNode('#headerwrap')
           .data(new DomNode('div').attr({ id: 'DRMng_header' })
-                                  .data(new DomNode('div').attr({ id: 'DRMng_server' })
-                                                          .text(Config.data.server)
-                                                          .on('click', DRMng.Engine.changeServer))
-                                  .data(new DomNode('div').attr({ id: 'DRMng_status' })
-                                                          .text('DRMng Loading...'))
-                                  .data(new DomNode('div').attr({
-                                                                  id: 'DRMng_onoff',
-                                                                  class: 'hidden'
-                                                                })
-                                                          .data(new DomNode('div').text('\uf1cc'))
-                                                          .on('click', () => {
-                                                            clearTimeout(DRMng.UI.hideUITimeout);
-                                                            const el = document.getElementById('DRMng_main');
-                                                            if (el.className === 'hidden') {
-                                                              el.removeAttribute('class');
-                                                              new DomNode('#DRMng_onoff').remove('class');
-                                                              Kong.setWrapperWidth(Config.data.scriptWidth);
-                                                            } else {
-                                                              el.className = 'hidden';
-                                                              new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
-                                                              Kong.setWrapperWidth();
-                                                            }
-                                                          })));
+            .data(new DomNode('div').attr({ id: 'DRMng_server' })
+              .text(Config.data.server)
+              .on('click', DRMng.Engine.changeServer))
+            .data(new DomNode('div').attr({ id: 'DRMng_status' })
+              .text('DRMng Loading...'))
+            .data(new DomNode('div').attr({
+              id: 'DRMng_onoff',
+              class: 'hidden'
+            })
+              .data(new DomNode('div').text('\uf1cc'))
+              .on('click', () => {
+                clearTimeout(DRMng.UI.hideUITimeout);
+                const el = document.getElementById('DRMng_main');
+                if (el.className === 'hidden') {
+                  el.removeAttribute('class');
+                  new DomNode('#DRMng_onoff').remove('class');
+                  Kong.setWrapperWidth(Config.data.scriptWidth);
+                } else {
+                  el.className = 'hidden';
+                  new DomNode('#DRMng_onoff').attr({ class: 'hidden' });
+                  Kong.setWrapperWidth();
+                }
+              })));
 
         // load default values
         this.loadDefaults();
@@ -6317,10 +6167,10 @@ function main() {
   // include socket.io engine
   new DomNode('script')
     .attr({
-            type: 'text/javascript',
-            async: '',
-            src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
-          })
+      type: 'text/javascript',
+      async: '',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'
+    })
     .attach('to', document.head);
 
   DRMng.init();
@@ -6478,7 +6328,7 @@ function load() {
           this.config.user.version = data.kongregate_game_version;
         }
         console.log('%c[DRMng] {GameFrame} Loaded <game:%s> <chat:%s> <user:%s> <id:%s>', 'color: #108030',
-                    this.config.version.game, this.config.version.chat, this.config.user.name, this.config.user.id);
+          this.config.version.game, this.config.version.chat, this.config.user.name, this.config.user.id);
         this.save();
         this.applyChatSettings();
       } else if (this.counter++ < 5) setTimeout(this.init.bind(this), 200); else {

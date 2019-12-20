@@ -4639,7 +4639,7 @@ function main() {
                     background: #333;\
                 }\
                 #DRMng_RaidList > div.visited {\
-                    display: none;\
+                    display: none !important;\
                 }\
                 #DRMng_RaidList > div > span:first-child {\
                     margin-left: 6px;\

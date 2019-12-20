@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/mutik/drmng/issues"
   },
-  "homepage": "https://github.com/mutik/drmng#readme"
+  "homepage": "https://github.com/mutik/drmng#readme",
+  "jshintConfig": {
+    "esversion": 6
+  }
 }

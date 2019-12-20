@@ -4638,6 +4638,9 @@ function main() {
                     color: #f0f0f0;\
                     background: #333;\
                 }\
+                #DRMng_RaidList > div.visited {\
+                    display: none;\
+                }\
                 #DRMng_RaidList > div > span:first-child {\
                     margin-left: 6px;\
                     margin-right: 3px;\

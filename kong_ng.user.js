@@ -1603,8 +1603,7 @@ function main() {
             user: UserManager.user.name,
             token: Util.crc32(this.conf.pass)
           },
-          secure: true,
-          transports: ['websocket']
+          secure: true
         });
 
         this.client.on('error', err => {
@@ -3185,7 +3184,7 @@ function main() {
   window.Kong = Kong;
 
   window.DRMng = {
-    serverAddress: 'wss://mutikt.ml:3000',
+    serverAddress: 'mutikt.ml:3000',
     About: class {
       /**
        * @type {string}
@@ -3975,7 +3974,6 @@ function main() {
           DRMng.Engine.client = io
             .connect(`${DRMng.serverAddress}/${Config.data.server}`, {
               secure: true,
-              transports: ['websocket'],
               query: { user: UserManager.user.name }
             })
             .on('error', data => Log.warn('{Engine} Error ::', data))

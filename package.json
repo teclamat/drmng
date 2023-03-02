@@ -5,7 +5,7 @@
   "main": "update_magic.js",
   "dependencies": {
     "adm-zip": "^0.4.11",
-    "jimp": "^0.2.28",
+    "jimp": "^0.22.7",
     "request": "^2.87.0"
   },
   "devDependencies": {},
